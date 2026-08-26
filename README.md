@@ -1,31 +1,33 @@
-# ~/.agents — центральный хаб скиллов
+# ~/.agents — central agent-skills hub
 
-Все skills для AI-агентов (Cursor, Codex, Claude Code, Hermes, и др.) живут здесь, в одном месте.
-Эта папка — рабочий каталог на диске **и** публичное зеркало: [github.com/dlgrv/agents](https://github.com/dlgrv/agents).
+All skills for AI agents (Cursor, Codex, Claude Code, Hermes, etc.) live here, in one place.
+This folder is both the on-disk working directory **and** a public mirror:
+[github.com/dlgrv/agents](https://github.com/dlgrv/agents).
 
-## Добавить skills в проект
+## Add skills to a project
 
 ```bash
 ln -sfn ~/.agents <project>/.agents
 ```
 
-Симлинк на весь каталог `~/.agents` — в проекте появится всё его содержимое (skills, README и т.д.), и оно всегда актуально.
+Symlink the whole `~/.agents` directory — the project gets all its contents
+(skills, README, etc.) and stays always up to date.
 
-## Почему симлинк на весь каталог
+## Why symlink the whole directory
 
-- **Один источник правды**: обновил что-то в хабе — сразу актуально во всех проектах.
-- Cursor надёжно читает `.agents/skills/` только внутри проекта, глобальные пользовательские skills у него работают нестабильно.
-- Ноль команд синхронизации, ноль cron'ов, ноль расходящихся копий.
+- **Single source of truth**: update something in the hub — it's instantly current in every project.
+- Cursor reliably reads `.agents/skills/` only inside a project; global user skills are unstable for it.
+- Zero sync commands, zero cron jobs, zero diverging copies.
 
-## Структура и происхождение скиллов
+## Structure and skill provenance
 
-Скиллы — **third-party**, взяты с GitHub. Чтобы сохранить атрибуцию и лёгкое обновление,
-каждый оригинал лежит как **git submodule** в `_vendor/<repo>/`, а в `skills/` стоит
-**symlink** на нужную подпапку внутри него:
+The skills are **third-party**, taken from GitHub. To preserve attribution and easy
+updates, each original lives as a **git submodule** under `_vendor/<repo>/`, and `skills/`
+holds a **symlink** to the relevant subfolder inside it:
 
 ```
 ~/.agents
-├── _vendor/                     ← субмодули (кликабельны на GitHub → оригинал)
+├── _vendor/                     ← submodules (clickable on GitHub → origin)
 │   ├── multica-ai__andrej-karpathy-skills/
 │   ├── mattpocock__skills/
 │   ├── cursor__plugins/
@@ -37,36 +39,36 @@ ln -sfn ~/.agents <project>/.agents
 │   ├── thermo-nuclear-code-quality-review → cursor__plugins/cursor-team-kit/skills/thermo-nuclear-code-quality-review
 │   ├── shadcn                          → shadcn-ui__ui/skills/shadcn
 │   └── plan-eng-review                 → garrytan__gstack/plan-eng-review
-├── README.md                    ← этот файл
-└── LICENSE                      ← MIT (только для моих файлов; субмодули сохраняют свои лицензии)
+├── README.md                    ← this file
+└── LICENSE                      ← MIT (for my files only; submodules keep their own licenses)
 ```
 
 | Skill | Upstream | License (upstream) |
 |---|---|---|
 | karpathy-guidelines | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | MIT |
-| improve-codebase-architecture | [mattpocock/skills](https://github.com/mattpocock/skills) | см. upstream |
-| thermo-nuclear-code-quality-review | [cursor/plugins](https://github.com/cursor/plugins) | см. upstream |
-| shadcn | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | см. upstream |
-| plan-eng-review | [garrytan/gstack](https://github.com/garrytan/gstack) | см. upstream |
+| improve-codebase-architecture | [mattpocock/skills](https://github.com/mattpocock/skills) | see upstream |
+| thermo-nuclear-code-quality-review | [cursor/plugins](https://github.com/cursor/plugins) | see upstream |
+| shadcn | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | see upstream |
+| plan-eng-review | [garrytan/gstack](https://github.com/garrytan/gstack) | see upstream |
 
-## Обновление (pull актуального)
+## Update (pull the latest)
 
 ```bash
 cd ~/.agents
-git pull                                   # superproject (README, .gitmodules, мои файлы)
-git submodule update --init --recursive     # после клона на новой машине — подтянуть субмодули
-git submodule update --remote --recursive   # обновить third-party до их свежих версий
+git pull                                   # superproject (README, .gitmodules, my files)
+git submodule update --init --recursive     # after a fresh clone on a new machine
+git submodule update --remote --recursive   # refresh third-party to their latest versions
 ```
 
-Субмодули «пинируют» конкретный коммит оригинала; «последний» появляется только после `--remote`.
+Submodules **pin a specific commit** of the original; "latest" only appears after `--remote`.
 
-## Как добавить новый third-party skill
+## Add a new third-party skill
 
 1. `git submodule add <url> _vendor/<repo>`
 2. `ln -s ../_vendor/<repo>/<skill-path> skills/<name>`
-3. `git add skills/<name> _vendor/<repo>` и закоммить.
+3. `git add skills/<name> _vendor/<repo>` and commit.
 
-## Свои материалы
+## Your own materials
 
-Будущие собственные файлы (промпты, `AGENTS.md`, `CLAUDE.md`, заметки) кладутся как
-обычные файлы репо — без субмодулей. Каталог растёт горизонтально, переделок не требует.
+Future personal files (prompts, `AGENTS.md`, `CLAUDE.md`, notes) go in as regular repo
+files — no submodules. The catalog grows horizontally without rework.
