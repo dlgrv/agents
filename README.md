@@ -72,3 +72,21 @@ Submodules **pin a specific commit** of the original; "latest" only appears afte
 
 Future personal files (prompts, `AGENTS.md`, `CLAUDE.md`, notes) go in as regular repo
 files — no submodules. The catalog grows horizontally without rework.
+
+## Backup (survive upstream deletion)
+
+The `_vendor/*` submodules only store a **pointer** (gitlink + commit SHA), not the
+files. If an upstream repo is deleted from GitHub, a fresh clone or
+`git submodule update --remote` can lose the skill contents.
+
+To keep a real copy inside this repo, run the snapshot script — it copies the unpacked
+skill files (without nested `.git`) into `_vendored_snapshot/<name>/`, which IS committed
+to `dlgrv/agents`:
+
+```bash
+bash scripts/snapshot.sh
+git add -A && git commit -m "snapshot: $(date +%F)" && git push
+```
+
+`_vendored_snapshot/` is **restore-only** — agents keep reading `skills/*` (symlinks into
+`_vendor`). Run the snapshot whenever you update submodules or want a fresh safety copy.

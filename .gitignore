@@ -1,0 +1,6 @@
+# Never commit nested git metadata from vendored snapshots
+_vendored_snapshot/**/.git
+
+# OS / editor noise
+.DS_Store
+*.swp
