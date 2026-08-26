@@ -16,3 +16,6 @@
 	path = _vendor/garrytan__gstack
 	url = git@github.com:garrytan/gstack.git
 	branch = main
+[submodule "_vendor/taste-skill__taste-skill"]
+	path = _vendor/taste-skill__taste-skill
+	url = git@github.com:Leonxlnx/taste-skill.git

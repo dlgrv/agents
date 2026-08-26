@@ -38,7 +38,8 @@ holds a **symlink** to the relevant subfolder inside it:
 │   ├── improve-codebase-architecture  → mattpocock__skills/skills/engineering/improve-codebase-architecture
 │   ├── thermo-nuclear-code-quality-review → cursor__plugins/cursor-team-kit/skills/thermo-nuclear-code-quality-review
 │   ├── shadcn                          → shadcn-ui__ui/skills/shadcn
-│   └── plan-eng-review                 → garrytan__gstack/plan-eng-review
+│   ├── plan-eng-review                 → garrytan__gstack/plan-eng-review
+│   └── taste-skill                    → taste-skill__taste-skill/skills/taste-skill
 ├── README.md                    ← this file
 └── LICENSE                      ← MIT (for my files only; submodules keep their own licenses)
 ```
@@ -50,6 +51,7 @@ holds a **symlink** to the relevant subfolder inside it:
 | thermo-nuclear-code-quality-review | [cursor/plugins](https://github.com/cursor/plugins) | see upstream |
 | shadcn | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | see upstream |
 | plan-eng-review | [garrytan/gstack](https://github.com/garrytan/gstack) | see upstream |
+| taste-skill | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | see upstream |
 
 ## Update (pull the latest)
 
