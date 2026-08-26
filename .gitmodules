@@ -1,0 +1,18 @@
+[submodule "_vendor/multica-ai__andrej-karpathy-skills"]
+	path = _vendor/multica-ai__andrej-karpathy-skills
+	url = git@github.com:multica-ai/andrej-karpathy-skills.git
+	branch = main
+[submodule "_vendor/mattpocock__skills"]
+	path = _vendor/mattpocock__skills
+	url = git@github.com:mattpocock/skills.git
+	branch = main
+[submodule "_vendor/cursor__plugins"]
+	path = _vendor/cursor__plugins
+	url = git@github.com:cursor/plugins.git
+[submodule "_vendor/shadcn-ui__ui"]
+	path = _vendor/shadcn-ui__ui
+	url = git@github.com:shadcn-ui/ui.git
+[submodule "_vendor/garrytan__gstack"]
+	path = _vendor/garrytan__gstack
+	url = git@github.com:garrytan/gstack.git
+	branch = main
