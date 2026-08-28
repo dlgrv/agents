@@ -39,7 +39,11 @@ holds a **symlink** to the relevant subfolder inside it:
 │   ├── thermo-nuclear-code-quality-review → cursor__plugins/cursor-team-kit/skills/thermo-nuclear-code-quality-review
 │   ├── shadcn                          → shadcn-ui__ui/skills/shadcn
 │   ├── plan-eng-review                 → garrytan__gstack/plan-eng-review
-│   └── taste-skill                    → taste-skill__taste-skill/skills/taste-skill
+│   ├── taste-skill                     → taste-skill__taste-skill/skills/taste-skill
+│   ├── hallmark                        → Nutlope__hallmark/skills/hallmark
+│   ├── anti-slop                       → rand__cc-polymath/skills/anti-slop
+│   ├── (14 × superpowers skills)       → obra__superpowers/skills/<name>
+│   └── (18 × caveman skills)           → JuliusBrussee__caveman/skills/<name>
 ├── README.md                    ← this file
 └── LICENSE                      ← MIT (for my files only; submodules keep their own licenses)
 ```
@@ -52,6 +56,10 @@ holds a **symlink** to the relevant subfolder inside it:
 | shadcn | [shadcn-ui/ui](https://github.com/shadcn-ui/ui) | see upstream |
 | plan-eng-review | [garrytan/gstack](https://github.com/garrytan/gstack) | see upstream |
 | taste-skill | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | see upstream |
+| hallmark | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) | MIT |
+| anti-slop | [rand/cc-polymath](https://github.com/rand/cc-polymath) (skills/anti-slop) | MIT |
+| superpowers (14 skills) | [obra/superpowers](https://github.com/obra/superpowers) | MIT |
+| caveman (18 skills) | [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | MIT (skills); repo engine is BSL-1.1 |
 
 ## Update (pull the latest)
 

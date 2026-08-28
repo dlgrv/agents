@@ -19,3 +19,15 @@
 [submodule "_vendor/taste-skill__taste-skill"]
 	path = _vendor/taste-skill__taste-skill
 	url = git@github.com:Leonxlnx/taste-skill.git
+[submodule "_vendor/Nutlope__hallmark"]
+	path = _vendor/Nutlope__hallmark
+	url = https://github.com/Nutlope/hallmark.git
+[submodule "_vendor/rand__cc-polymath"]
+	path = _vendor/rand__cc-polymath
+	url = https://github.com/rand/cc-polymath.git
+[submodule "_vendor/obra__superpowers"]
+	path = _vendor/obra__superpowers
+	url = https://github.com/obra/superpowers.git
+[submodule "_vendor/JuliusBrussee__caveman"]
+	path = _vendor/JuliusBrussee__caveman
+	url = https://github.com/JuliusBrussee/caveman.git
