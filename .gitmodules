@@ -16,9 +16,6 @@
 	path = _vendor/garrytan__gstack
 	url = git@github.com:garrytan/gstack.git
 	branch = main
-[submodule "_vendor/taste-skill__taste-skill"]
-	path = _vendor/taste-skill__taste-skill
-	url = git@github.com:Leonxlnx/taste-skill.git
 [submodule "_vendor/Nutlope__hallmark"]
 	path = _vendor/Nutlope__hallmark
 	url = https://github.com/Nutlope/hallmark.git
@@ -28,9 +25,6 @@
 [submodule "_vendor/obra__superpowers"]
 	path = _vendor/obra__superpowers
 	url = https://github.com/obra/superpowers.git
-[submodule "_vendor/JuliusBrussee__caveman"]
-	path = _vendor/JuliusBrussee__caveman
-	url = https://github.com/JuliusBrussee/caveman.git
 [submodule "_vendor/Nanako0129__sepia"]
 	path = _vendor/Nanako0129__sepia
 	url = https://github.com/Nanako0129/sepia.git
