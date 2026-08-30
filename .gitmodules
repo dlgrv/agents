@@ -31,3 +31,6 @@
 [submodule "_vendor/JuliusBrussee__caveman"]
 	path = _vendor/JuliusBrussee__caveman
 	url = https://github.com/JuliusBrussee/caveman.git
+[submodule "_vendor/Nanako0129__sepia"]
+	path = _vendor/Nanako0129__sepia
+	url = https://github.com/Nanako0129/sepia.git
