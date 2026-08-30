@@ -21,6 +21,7 @@ PAIRS="karpathy-guidelines|_vendor/multica-ai__andrej-karpathy-skills/skills/kar
 improve-codebase-architecture|_vendor/mattpocock__skills/skills/engineering/improve-codebase-architecture
 thermo-nuclear-code-quality-review|_vendor/cursor__plugins/cursor-team-kit/skills/thermo-nuclear-code-quality-review
 shadcn|_vendor/shadcn-ui__ui/skills/shadcn
+sepia|_vendor/Nanako0129__sepia/skills/sepia
 plan-eng-review|_vendor/garrytan__gstack/plan-eng-review
 taste-skill|_vendor/taste-skill__taste-skill/skills/taste-skill
 hallmark|_vendor/Nutlope__hallmark/skills/hallmark
