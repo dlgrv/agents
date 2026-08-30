@@ -23,7 +23,6 @@ thermo-nuclear-code-quality-review|_vendor/cursor__plugins/cursor-team-kit/skill
 shadcn|_vendor/shadcn-ui__ui/skills/shadcn
 sepia|_vendor/Nanako0129__sepia/skills/sepia
 plan-eng-review|_vendor/garrytan__gstack/plan-eng-review
-taste-skill|_vendor/taste-skill__taste-skill/skills/taste-skill
 hallmark|_vendor/Nutlope__hallmark/skills/hallmark
 anti-slop|_vendor/rand__cc-polymath/skills/anti-slop
 brainstorming|_vendor/obra__superpowers/skills/brainstorming
@@ -39,25 +38,7 @@ using-git-worktrees|_vendor/obra__superpowers/skills/using-git-worktrees
 using-superpowers|_vendor/obra__superpowers/skills/using-superpowers
 verification-before-completion|_vendor/obra__superpowers/skills/verification-before-completion
 writing-plans|_vendor/obra__superpowers/skills/writing-plans
-writing-skills|_vendor/obra__superpowers/skills/writing-skills
-caveman|_vendor/JuliusBrussee__caveman/skills/caveman
-caveman-commit|_vendor/JuliusBrussee__caveman/skills/caveman-commit
-caveman-compress|_vendor/JuliusBrussee__caveman/skills/caveman-compress
-caveman-discover|_vendor/JuliusBrussee__caveman/skills/caveman-discover
-caveman-evidence-review|_vendor/JuliusBrussee__caveman/skills/caveman-evidence-review
-caveman-explore|_vendor/JuliusBrussee__caveman/skills/caveman-explore
-caveman-help|_vendor/JuliusBrussee__caveman/skills/caveman-help
-caveman-learn|_vendor/JuliusBrussee__caveman/skills/caveman-learn
-caveman-manage|_vendor/JuliusBrussee__caveman/skills/caveman-manage
-caveman-optimize|_vendor/JuliusBrussee__caveman/skills/caveman-optimize
-caveman-review|_vendor/JuliusBrussee__caveman/skills/caveman-review
-caveman-setup|_vendor/JuliusBrussee__caveman/skills/caveman-setup
-caveman-stats|_vendor/JuliusBrussee__caveman/skills/caveman-stats
-investigate-first|_vendor/JuliusBrussee__caveman/skills/investigate-first
-lean-build|_vendor/JuliusBrussee__caveman/skills/lean-build
-safe-refactor|_vendor/JuliusBrussee__caveman/skills/safe-refactor
-surgical-patch|_vendor/JuliusBrussee__caveman/skills/surgical-patch
-verify-and-stop|_vendor/JuliusBrussee__caveman/skills/verify-and-stop"
+writing-skills|_vendor/obra__superpowers/skills/writing-skills"
 
 echo "$PAIRS" | while IFS='|' read -r name src; do
   [ -z "$name" ] && continue
