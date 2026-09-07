@@ -38,7 +38,13 @@ using-git-worktrees|_vendor/obra__superpowers/skills/using-git-worktrees
 using-superpowers|_vendor/obra__superpowers/skills/using-superpowers
 verification-before-completion|_vendor/obra__superpowers/skills/verification-before-completion
 writing-plans|_vendor/obra__superpowers/skills/writing-plans
-writing-skills|_vendor/obra__superpowers/skills/writing-skills"
+writing-skills|_vendor/obra__superpowers/skills/writing-skills
+anthropic-frontend-design|_vendor/anthropics__skills/skills/frontend-design
+design-taste-frontend|_vendor/Leonxlnx__taste-skill/skills/taste-skill
+high-end-visual-design|_vendor/Leonxlnx__taste-skill/skills/soft-skill
+redesign-existing-projects|_vendor/Leonxlnx__taste-skill/skills/redesign-skill
+image-to-code|_vendor/Leonxlnx__taste-skill/skills/image-to-code-skill
+omo-frontend|skills/omo-frontend"
 
 echo "$PAIRS" | while IFS='|' read -r name src; do
   [ -z "$name" ] && continue

@@ -28,3 +28,12 @@
 [submodule "_vendor/Nanako0129__sepia"]
 	path = _vendor/Nanako0129__sepia
 	url = https://github.com/Nanako0129/sepia.git
+[submodule "_vendor/anthropics__skills"]
+	path = _vendor/anthropics__skills
+	url = https://github.com/anthropics/skills
+[submodule "_vendor/Leonxlnx__taste-skill"]
+	path = _vendor/Leonxlnx__taste-skill
+	url = https://github.com/Leonxlnx/taste-skill
+[submodule "_vendor/code-yeongyu__oh-my-openagent"]
+	path = _vendor/code-yeongyu__oh-my-openagent
+	url = https://github.com/code-yeongyu/oh-my-openagent

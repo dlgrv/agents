@@ -43,6 +43,12 @@ holds a **symlink** to the relevant subfolder inside it:
 │   ├── sepia                           → Nanako0129__sepia/skills/sepia
 │   ├── hallmark                        → Nutlope__hallmark/skills/hallmark
 │   ├── anti-slop                       → rand__cc-polymath/skills/anti-slop
+│   ├── anthropic-frontend-design       → anthropics__skills/skills/frontend-design
+│   ├── design-taste-frontend           → Leonxlnx__taste-skill/skills/taste-skill
+│   ├── high-end-visual-design          → Leonxlnx__taste-skill/skills/soft-skill
+│   ├── redesign-existing-projects      → Leonxlnx__taste-skill/skills/redesign-skill
+│   ├── image-to-code                   → Leonxlnx__taste-skill/skills/image-to-code-skill
+│   ├── omo-frontend                    → (local build, see below)
 │   └── (14 × superpowers skills)       → obra__superpowers/skills/<name>
 ├── README.md                    ← this file
 └── LICENSE                      ← MIT (for my files only; submodules keep their own licenses)
@@ -59,6 +65,12 @@ holds a **symlink** to the relevant subfolder inside it:
 | hallmark | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) | MIT |
 | anti-slop | [rand/cc-polymath](https://github.com/rand/cc-polymath) (skills/anti-slop) | MIT |
 | superpowers (14 skills) | [obra/superpowers](https://github.com/obra/superpowers) | MIT |
+| anthropic-frontend-design | [anthropics/skills](https://github.com/anthropics/skills) (skills/frontend-design) | see upstream |
+| design-taste-frontend | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (skills/taste-skill) | see upstream |
+| high-end-visual-design | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (skills/soft-skill) | see upstream |
+| redesign-existing-projects | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (skills/redesign-skill) | see upstream |
+| image-to-code | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) (skills/image-to-code-skill) | see upstream |
+| omo-frontend (local build) | [code-yeongyu/oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) — SKILL.md из `packages/skills-loader-core/.../frontend`, references из `packages/shared-skills/skills/frontend/references` (design/designpowers/perfection), Layer A taste-файлы — симлинки на скиллы taste-skill; брендовые Layer B (Open Design) в репо не закоммичены — стоят заглушки | see upstream |
 
 ## Update (pull the latest)
 
