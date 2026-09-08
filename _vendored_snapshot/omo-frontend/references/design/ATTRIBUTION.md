@@ -1,1 +1,0 @@
-# ATTRIBUTION: скилл omo-frontend собран из code-yeongyu/oh-my-openagent (базовый SKILL.md, references design/designpowers/perfection) + Leonxlnx/taste-skill (Layer A: design-taste-frontend, soft-skill, image-to-code, redesign-skill) + anthropics/skills (anthropic-frontend-design).

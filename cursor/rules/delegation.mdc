@@ -1,0 +1,14 @@
+---
+description: Token-saving delegation policy — route bulky I/O to cheap subagents instead of loading file contents into the main context
+alwaysApply: true
+---
+
+# Delegate bulk work, keep the main context lean
+
+Reading files and writing boilerplate is I/O, not thinking. Keep it out of this conversation:
+
+- **Before reading 3+ files, or any file over ~350 lines**: delegate to the `bulk-reader` subagent with the question and file paths. Read directly only what you need verbatim (small files, exact ranges).
+- **Tests/config/stubs that mirror existing patterns**: delegate to the `boilerplate-writer` subagent with the spec + reference file paths. Do not draft boilerplate in the main thread.
+- **Never paste large file contents into your answers or plans** — reference `path:line` instead.
+- When a task is trivial (a single small file, a one-line answer), skip delegation — overhead is not worth it.
+- After a delegated answer, verify anything load-bearing (types, signatures) with a targeted `path:line` read before acting on it.
