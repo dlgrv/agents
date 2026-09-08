@@ -107,18 +107,16 @@ Own subagents in the common Claude-Code format (md + YAML frontmatter). Cursor a
 Claude Code both read this format; each is wired to the single source with symlinks:
 
 ```
-~/.agents/subagents/
+~/.agents/subagents/          ← symlinked WHOLE into ~/.cursor/agents and ~/.claude/agents
 ├── bulk-reader.md          ← reads files, returns only a summary; composer-2.5, readonly
 └── boilerplate-writer.md   ← tests/config/stubs by pattern; composer-2.5
 ```
 
 ```bash
-# Cursor (user scope, all projects)
-ln -sfn ~/.agents/subagents/bulk-reader.md        ~/.cursor/agents/bulk-reader.md
-ln -sfn ~/.agents/subagents/boilerplate-writer.md ~/.cursor/agents/boilerplate-writer.md
-# Claude Code (user scope, all projects)
-ln -sfn ~/.agents/subagents/bulk-reader.md        ~/.claude/agents/bulk-reader.md
-ln -sfn ~/.agents/subagents/boilerplate-writer.md ~/.claude/agents/boilerplate-writer.md
+# Cursor (user scope, all projects — whole-dir symlink)
+ln -sfn ~/.agents/subagents ~/.cursor/agents
+# Claude Code (user scope, all projects — whole-dir symlink)
+ln -sfn ~/.agents/subagents ~/.claude/agents
 ```
 
 Pattern: token-saving delegation (inspired by Spotify's shunt / Portal AiKA modes) —
@@ -133,8 +131,10 @@ route 3+ file reads / 350+ line files to the subagents above. There is no cross-
 standard for global rules, so this stays Cursor-only:
 
 ```bash
-# user scope (unverified pick-up by Cursor — see note below)
-mkdir -p ~/.cursor/rules && ln -sfn ~/.agents/cursor/rules/delegation.mdc ~/.cursor/rules/delegation.mdc
+# whole-directory symlinks (one command per app; new files appear automatically)
+ln -sfn ~/.agents/subagents       ~/.cursor/agents   # same dir doubles as ~/.claude/agents
+ln -sfn ~/.agents/subagents       ~/.claude/agents
+ln -sfn ~/.agents/cursor/rules    ~/.cursor/rules
 # per project (documented rules location, guaranteed effect)
 mkdir -p <project>/.cursor/rules && ln -sfn ~/.agents/cursor/rules/delegation.mdc <project>/.cursor/rules/delegation.mdc
 ```
