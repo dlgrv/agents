@@ -133,7 +133,10 @@ route 3+ file reads / 350+ line files to the subagents above. There is no cross-
 standard for global rules, so this stays Cursor-only:
 
 ```bash
+# user scope (unverified pick-up by Cursor — see note below)
 mkdir -p ~/.cursor/rules && ln -sfn ~/.agents/cursor/rules/delegation.mdc ~/.cursor/rules/delegation.mdc
+# per project (documented rules location, guaranteed effect)
+mkdir -p <project>/.cursor/rules && ln -sfn ~/.agents/cursor/rules/delegation.mdc <project>/.cursor/rules/delegation.mdc
 ```
 
 `~/.cursor/rules/` is not an officially documented rules source — for a guaranteed
