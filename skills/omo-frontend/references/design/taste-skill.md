@@ -1,1 +1,1 @@
-/Users/dlgrv/.agents/skills/design-taste-frontend/SKILL.md
+../../../design-taste-frontend/SKILL.md

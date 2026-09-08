@@ -1,1 +1,1 @@
-/Users/dlgrv/.agents/skills/image-to-code/SKILL.md
+../../../image-to-code/SKILL.md

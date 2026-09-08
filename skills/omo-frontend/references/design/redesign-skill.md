@@ -1,1 +1,1 @@
-/Users/dlgrv/.agents/skills/redesign-existing-projects/SKILL.md
+../../../redesign-existing-projects/SKILL.md
