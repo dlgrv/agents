@@ -39,6 +39,8 @@ machine, and keeps the repo at a few MB.
 │   ├── sepia/                         ← from Nanako0129/sepia
 │   ├── hallmark/                      ← from Nutlope/hallmark
 │   ├── anti-slop/                     ← from rand/cc-polymath
+│   ├── no-ai-slop/                    ← from petergyang/no-ai-slop
+│   ├── i-have-adhd/                   ← from ayghri/i-have-adhd
 │   ├── anthropic-frontend-design/     ← from anthropics/skills
 │   ├── design-taste-frontend/, high-end-visual-design/,
 │   │   redesign-existing-projects/, image-to-code/  ← from Leonxlnx/taste-skill
@@ -69,6 +71,8 @@ subfolders, each pinned to the upstream commit it was copied from.
 | sepia | [Nanako0129/sepia](https://github.com/Nanako0129/sepia) `skills/sepia` | MIT | `4c8d782` |
 | hallmark | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) `skills/hallmark` | MIT | `13ac0ec` |
 | anti-slop | [rand/cc-polymath](https://github.com/rand/cc-polymath) `skills/anti-slop` | MIT | `baa2df1` |
+| no-ai-slop | [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) `skills/no-ai-slop` | MIT | `000650b` |
+| i-have-adhd | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) `skills/i-have-adhd` | MIT | `4092de0` |
 | superpowers (14 skills) | [obra/superpowers](https://github.com/obra/superpowers) `skills/<name>` | MIT | `b36e082` |
 | anthropic-frontend-design | [anthropics/skills](https://github.com/anthropics/skills) `skills/frontend-design` | see upstream | `41bbe19` |
 | design-taste-frontend | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) `skills/taste-skill` | see upstream | `ccbc156` |
