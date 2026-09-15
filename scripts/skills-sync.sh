@@ -1,4 +1,5 @@
 #!/bin/bash
+# skills-sync — bidirectional skills sync between this machine and dlgrv/agents (hermes/ subtree)
 set -uo pipefail
 if [ -d /root/github/agents ]; then HUB=/root/github/agents; else HUB="${HUB_DIR:-$HOME/.agents}"; fi
 if [ -d /root/.hermes ]; then SKILLS="/root/.hermes/skills"; else SKILLS="${SKILLS_DIR:-$HOME/.hermes/skills}"; fi
