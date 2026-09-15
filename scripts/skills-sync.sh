@@ -3,7 +3,7 @@ set -uo pipefail
 if [ -d /root/github/agents ]; then HUB=/root/github/agents; else HUB="${HUB_DIR:-$HOME/.agents}"; fi
 if [ -d /root/.hermes ]; then SKILLS="/root/.hermes/skills"; else SKILLS="${SKILLS_DIR:-$HOME/.hermes/skills}"; fi
 HOSTNAME_TAG="$(hostname -s)"
-LOG="/root/.hermes/logs/skills-sync.log"
+LOG="$HOME/.hermes/logs/skills-sync.log"
 [ -d "$HOME/.hermes/logs" ] || LOG="$HUB/skills-sync.log"
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') [$HOSTNAME_TAG] $*" >> "$LOG"; }
 cd "$HUB" || { log "FATAL: hub dir $HUB missing"; exit 1; }
