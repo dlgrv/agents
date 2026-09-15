@@ -10,3 +10,4 @@ hermes/.hub/
 hermes/.sync-state*
 hermes/.usage.json
 hermes/.usage.json.lock
+_vendor/
