@@ -181,13 +181,14 @@ paths/names) so one hub file serves every project.
 
 `hermes/` in the hub mirrors the live Hermes skills dir: on every machine the live
 `~/.hermes/skills` is a symlink into a hub clone, so editing a skill IS a git edit;
-a script publishes/pulls every 15 min.
+a script publishes/pulls every hour (user picked hourly over the original 15-min —
+skill edits don't need sub-hour propagation).
 
 - Layout: Mac `~/.hermes/skills` → `~/.agents/hermes`; server `/root/.hermes/skills`
   → `/root/github/agents/hermes` (both hub clones; server SSH: `hermes-vm-ts`).
 - `scripts/skills-sync.sh` (lives in the hub): 1) `git pull --rebase --autostash`
-  2) rsync live skills into the repo 3) commit+push only if changed. Runs via cron
-  `*/15` (server) + launchd `ai.dlgrv.skills-sync` (Mac).
+  2) rsync live skills into the repo 3) commit+push only if changed. Runs via cron `0 * * * *` (server, hourly) + launchd
+ `ai.dlgrv.skills-sync` with `StartInterval` 3600 (Mac).
 - Derive ALL paths from `$HOME` — one script serves two machines; a hardcoded
   `/root` path makes the Mac run log to a nonexistent file and lose history.
 - Detect changes with `git status --porcelain` + explicit adds — `git add -A`
