@@ -1,6 +1,6 @@
 ---
 name: agent-skills-hub
-description: "Own agent-config hub (~/.agents): inlined third-party skills with attribution, subagents + Cursor rules with whole-dir symlinks into app config dirs; PR-based workflow."
+description: "Own agent-config hub (~/.agents): inlined third-party skills with attribution, subagents + Cursor rules with whole-dir symlinks into app config dirs; PR-based workflow for manual edits; two-way live-skills sync (hermes/ mirror) to all machines."
 version: 1.2.0
 author: dlgrv
 license: MIT
@@ -97,6 +97,9 @@ gh pr merge <N> --merge --delete-branch
 Keep `main` untouched until the PR is merged. After merge, `git checkout main && git pull`
 to sync the local hub; the working symlinks are unaffected.
 
+Carve-out: **auto-sync commits go straight to `main`** (see sync section below) —
+cron/launchd automation cannot open PRs. The PR mandate covers MANUAL hub edits.
+
 ## Backup against upstream deletion → ARCHITECTURE: inline real copies (PR #6)
 
 **2026-09-08, PR #6: the submodule bridge (`_vendor/` + symlinks +
@@ -173,3 +176,28 @@ for subagents). For guaranteed rule enforcement, symlink the .mdc into each
 project's `.cursor/rules/` — the user picked per-project wiring (option 2) over
 the undocumented global path. Rule files should be project-agnostic (no hardcoded
 paths/names) so one hub file serves every project.
+
+## Two-way live-skills sync (hermes/ mirror)
+
+`hermes/` in the hub mirrors the live Hermes skills dir: on every machine the live
+`~/.hermes/skills` is a symlink into a hub clone, so editing a skill IS a git edit;
+a script publishes/pulls every 15 min.
+
+- Layout: Mac `~/.hermes/skills` → `~/.agents/hermes`; server `/root/.hermes/skills`
+  → `/root/github/agents/hermes` (both hub clones; server SSH: `hermes-vm-ts`).
+- `scripts/skills-sync.sh` (lives in the hub): 1) `git pull --rebase --autostash`
+  2) rsync live skills into the repo 3) commit+push only if changed. Runs via cron
+  `*/15` (server) + launchd `ai.dlgrv.skills-sync` (Mac).
+- Derive ALL paths from `$HOME` — one script serves two machines; a hardcoded
+  `/root` path makes the Mac run log to a nonexistent file and lose history.
+- Detect changes with `git status --porcelain` + explicit adds — `git add -A`
+  patterns missed newly created (untracked) skills here.
+- rsync-exclude Hermes service files (`.usage.json` etc.) or every sync cycle
+  produces noise commits.
+- Rebase conflict: abort and leave the repo for manual fix — cron must never
+  force-push.
+- E2E = real edit to a tracked file on machine A → sync → verify content on
+  machine B → clean up → sync again. Exit 0 on one machine proves only half the
+  loop.
+- vercel-labs/skills (`npx skills add <repo> -a hermes-agent`, 30k+ ★) is for
+  INSTALLING third-party skills; machine-to-machine sync needs only this git hub.
