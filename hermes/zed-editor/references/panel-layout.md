@@ -25,3 +25,4 @@ Key fact: `agent.sidebar_side` does NOT move the Threads Sidebar. They dock inde
 "threads_sidebar": { "dock": "right" },
 "project_panel": { "dock": "left" }
 ```
+- e2e sync test 13:54
