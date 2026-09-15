@@ -1,3 +1,10 @@
 # OS / editor noise
 .DS_Store
 *.swp
+
+# Hermes internal state (not skills)
+hermes/.bundled_manifest
+hermes/.curator_ledger.jsonl
+hermes/.curator_state
+hermes/.hub/
+hermes/.sync-state*
