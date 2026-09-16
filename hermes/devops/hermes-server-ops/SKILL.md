@@ -108,3 +108,12 @@ padding — the user rejects «запас на вырост» (same stance as vp
 - Migration validation: Always verify session count and skills count match the old server BEFORE declaring migration complete. If session count drops, the state.db transfer failed.
 - SSH key rotation: When user migrates their key (e.g. from ~/.ssh/id_rsa to ~/.ssh/hermes), ensure the old key is removed from new server's authorized_keys to prevent confusion during future debugging.
 - Gateway restart requirement: Any config change that affects Telegram (reactions, compression, etc.) requires `systemctl --user restart hermes-gateway` — agent-level restarts are insufficient and will be blocked.
+## Honcho stack (updated 2026-09-16)
+- Stack runs as docker project `honcho-local` (profile `local`); DATA volumes: old project was `local` (local_pgdata) — data restored into `honcho-local_pgdata` from /root/honcho-backup-2026-09-16.sql
+- `honcho start` re-renders docker-compose.yml from TEMPLATE in site-packages honcho_cli/local/templates/ — env keys do NOT override hardcoded environment (compose environment > env_file). Hardening (passwords, ports removal) must be patched IN THE TEMPLATE; backups: /root/compose-template-backup.yml
+- managed_env (env.py) originally forced AUTH_USE_AUTH=false on every render — patched to respect existing .env value
+- .env keys: API_BIND=100.93.178.88, POSTGRES_PASSWORD, REDIS_PASSWORD, AUTH_JWT_SECRET (extra keys survive render)
+- pg_hba: host all all all scram-sha-256 (was trust); ALTER USER postgres applied
+- JWT BUG in honcho image: generate_jwt.py writes exp as ISO-string, but pyjwt decode requires int exp → "Invalid JWT"; and int exp → app parse_datetime_iso 500. WORKAROUND: token WITHOUT exp claim (w-scoped, no expiry) — verified 200. Token lives in /root/.hermes/honcho.json apiKey + /tmp/newtok2
+- Ports 5432/6379 NOT published anymore (internal only); API only on tailnet IP; noauth API → 401 verified
+- ufw: 22/tcp opened publicly on user request (2026-09-16); fail2ban sshd jail active
