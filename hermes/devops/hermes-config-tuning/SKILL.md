@@ -29,6 +29,13 @@ never hand-edit config.yaml (a stray indent corrupts it and breaks the live gate
 - **`hermes config set KEY <yaml>` accepts complex values.** Inline flow-style
   YAML works: `hermes config set providers.foo.models "[{id: m1},{id: m2}]"`.
   No need to hand-edit the file for model lists.
+- **String-list values need per-element quotes.** `hermes config set
+  x.args '[-y, @scope/pkg]'` stores a plain STRING (warning: "looks like a
+  list/mapping but is not valid YAML/JSON") that isinstance-gated readers
+  silently ignore — e.g. an MCP server would launch without its args.
+  Quote each element: '["-y", "@scope/pkg"]' → real YAML list. Confirm
+  with `hermes config get` that items render on their own lines, not the
+  CLI's success line.
 - **Venv path is `~/.hermes/hermes-agent/venv/bin/python3`** (NOT `.venv`).
   System python lacks PyYAML — use the venv python for any yaml inspection:
   `~/.hermes/hermes-agent/venv/bin/python3 -c "import yaml; ..."`
@@ -148,6 +155,21 @@ never hand-edit config.yaml (a stray indent corrupts it and breaks the live gate
   one decimal). API keeps using the clean `id`; the price shows in the
   picker. `/model` aliases stay clean too (`kimi3`), prices live only in
   the display `name`.
+
+## MCP servers (mcp_servers.*)
+
+- Add a stdio server via CLI only: `hermes config set
+  mcp_servers.<name>.command npx`, `.args '["-y", "<pkg>"]'` (per-element
+  quotes — see CLI facts), `.enabled true`.
+- Verify the package BEFORE restarting Hermes: pipe one JSON-RPC initialize
+  into it and require a result line —
+  `(echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"t","version":"1"}}}'; sleep 4) | npx -y <pkg> 2>/tmp/err.log | head -c 600`.
+  Catches a wrong package name/version in seconds and reveals the server's
+  own instructions (domain rules like "fetch identifiers before use").
+- **`mcp_servers.*` edits apply on Hermes restart, not mid-session** — new
+  tools stay invisible to tool_search until then; verify after restart
+  before promising them. For one-off urgent work while waiting, drive the
+  native app directly (Calendar → see apple-calendar skill).
 
 ## Display settings for minimal noise
 
