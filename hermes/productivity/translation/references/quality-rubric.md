@@ -16,6 +16,7 @@ Severity multipliers: critical = 25, major = 5, minor = 1.
 
 ## Hard rules — automatic fail regardless of score
 
+0. Living-text readability: the translation reads as if originally written in the target language — that is the PRIMARY criterion; a formally passing score with stiff, calque-ridden text is still a fail.
 1. Any number, DOI, URL, or citation altered or lost.
 2. Any HR/RR/OR/CI value or confidence interval wrong.
 3. Machine-tag comments not byte-identical.
