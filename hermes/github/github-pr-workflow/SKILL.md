@@ -361,35 +361,24 @@ When you lack write access to the upstream repo, your PR comes from a **fork**
 (cross-repo: `dlgrv:branch -> NousResearch:main`). The fork is the PR's *head
 repo* — if it disappears, the PR auto-closes.
 
-### NEVER delete the fork before the PR merges
+### Never Delete a Fork Before Merging
 
-Deleting the head repo (fork) closes the open PR. The diff survives (still
-viewable as a closed PR, and any linked-issue reference keeps working), but
-your live contribution is gone and you must re-open. Delete the fork only
-**after** the PR is merged/squashed.
+**CRITICAL:** Deleting the head repo (fork) auto-closes the open PR. The diff survives (still viewable as a closed PR, and any linked-issue reference keeps working), but your live contribution is gone and you must re-open. Delete the fork only **after** the PR is merged/squashed.
 
-This bit in the 2026-08-26 session: the user deleted `dlgrv/hermes-agent` before
-merge, which auto-closed PR #95761. Recovery worked because the code had been
-preserved off-fork:
-1. **Local backup branch** — before deleting anything, `git branch backup/<name> <branch>` so the commits survive locally even after the remote vanishes.
-2. **Recreate the fork** — `gh repo fork NousResearch/hermes-agent --clone=false` (re-points `origin`).
-3. **Push the backup branch** under the original name — `git push -u origin backup/<name>:feat/<name>`.
-4. **Open a new PR** referencing the old number in the body ("re-submission of #NNNN, fork was deleted before merge; code identical from local backup").
+**Recovery if you accidentally delete the fork:**  
+1. **Local backup branch** — before deleting anything, `git branch backup/<name> <branch>` so the commits survive locally even after the remote vanishes.  
+2. **Recreate the fork** — `gh repo fork NousResearch/hermes-agent --clone=false` (re-points `origin`).  
+3. **Push the backup branch** under the original name — `git push -u origin backup/<name>:feat/<name>`.  
+4. **Open a new PR** referencing the old number in the body ("re-submission of #NNNN, fork was deleted before merge; code identical from local backup").  
 5. Optional **off-site backup**: `git diff upstream/main...<branch> > /tmp/x.patch` then `gh gist create --public` — keeps the diff readable even if the local disk is lost. Attach the gist link to the issue as a permanent reference.
 
 ### An issue is NOT tied to a branch
 
-Only a PR ties a branch (in some repo) to an issue. You can open an issue in
-`NousResearch/hermes-agent` with no fork at all. A `Closes #NNNN` line in a PR
-body is what links/closes it — so the PR (and thus its head repo) must exist
-for that linkage to resolve.
+Only a PR ties a branch (in some repo) to an issue. You can open an issue in `NousResearch/hermes-agent` with no fork at all. A `Closes #NNNN` line in a PR body is what links/closes it — so the PR (and thus its head repo) must exist for that linkage to resolve.
 
 ### Keep PRs focused (CONTRIBUTING requirement)
 
-One logical change per PR. A new tool and the bugfixes it enables belong in
-**separate** PRs/issues — e.g. the Desktop Debug MCP server went in PR #95781
-(issue #95489) while the chat-edit bugfix it reproduces is a *separate* issue.
-Mixed tooling+bugfix PRs are harder to review and easier to reject wholesale.
+One logical change per PR. A new tool and the bugfixes it enables belong in **separate** PRs/issues — e.g. the Desktop Debug MCP server went in PR #95781 (issue #95489) while the chat-edit bugfix it reproduces is a *separate* issue. Mixed tooling+bugfix PRs are harder to review and easier to reject wholesale.
 
 ## Useful PR Commands Reference
 
