@@ -43,6 +43,7 @@ description: Chinese-to-Russian translation workflow with localization.
 - **README language selector:** Always include both original and translated: `**Языки / Languages:** [中文](README.md) · [Русский](README.ru.md)`.
 - **Chinese-specific terms:** For Chinese legal/administrative terms (e.g., 认缴出资, 一裁终局), provide Russian translation + original in parentheses at first mention.
 - **MQM verification:** Use the verification script from `references/quality-rubric.md` to programmatically check counts and structure after each chapter completion.
+- **Chapter verification workflow:** Use `references/chapter-verification-workflow.md` for standardized structural and content checks per chapter, including item counts, tag counts, DOI verification, byte-faithful sources, CJK character validation, and numeric normalization.
 - **Back-link fix:** When moving files to `book/ru/`, adjust relative depth in all back-links (e.g., `../../README.ru.md` instead of `../README.md`).
 - **Decimal comma vs dot:** When comparing numeric values, normalize both source and translation to dots before comparing — 0,58 vs 0.58 are identical, but 0.58 vs 0.580 are not.
 - **万→thousands/millions:** Treat 万 as numeric conversion (1万=10000, 1.5万=15000), not literal translation; verify numeric equivalence in all contexts.
@@ -52,8 +53,12 @@ description: Chinese-to-Russian translation workflow with localization.
 - **Statistical rounding:** Accept 40% as equivalent to 42%, 70% as equivalent to 69% when they represent plain-language approximations of precise statistics; do not flag as mismatch unless the numeric value differs beyond rounding tolerance.
 - **Background pipeline interference:** Existing background translation pipelines (e.g., `htlb-pipeline.service`) may run with outdated prompts and overwrite newer translations. Check for concurrent `hermes -z` processes and pipeline logs before starting new work; verify that background processes use current conventions (Russian slugs, README.ru.md links, MQM rules).
 - **Fork-based PR lifecycle:** When using a fork as the PR head repo, never delete the fork before the PR is merged — this auto-closes the PR. If the fork must be deleted, first merge the PR, then delete the fork. If accidentally deleted, restore from local backup branch or recreate and push the branch again.
-- **Cross-repo PR title:** For cross-fork PRs (external contributor → upstream), include both languages in the title for clarity: `翻译：俄语版（第 1–10 章 + README，见 #4） / Russian translation — chapters 01–10 + Russian README`. This helps reviewers identify the language scope immediately.
+- **Cross-repo PR title:** For cross-repo PRs (external contributor → upstream), include both languages in the title for clarity: `翻译：俄语版（第 1–10 章 + README，见 #4） / Russian translation — chapters 01–10 + Russian README`. This helps reviewers identify the language scope immediately.
 - **Issue-PR linkage:** Only a PR (not a branch) closes an issue via `Closes #NNNN`. If the fork/head repo is deleted, the PR closes and the issue reopens. Link the PR to the issue in the body: `Closes #NNNN` or reference it in comments.
+- **Chapter-by-chapter commit strategy:** Commit each chapter as a separate commit with clear message (e.g., 'translation(ru): chapter 11') to enable fine-grained review and rollback. Do not batch unrelated chapters into single commits.
+- **Chapter completion reporting:** After each 5-chapter wave, summarize progress with chapter counts, commit hashes, and verification status. Include any failed chapters and their retry strategy.
+- **Failed chapter recovery:** If a subagent fails (timeout, output not written), recover transcripts from `~/.hermes/cache/delegation/live/` and either retry with corrected instructions or reassign to another agent with stricter incremental writing requirements.
+- **PR auto-update:** After each wave, automatically update the PR with new commits and comment with progress summary. Never manually close PRs — let them stay open until all chapters are done.
 
 GitHub mechanics (fork, issues, PRs) → `github` skill.
 
