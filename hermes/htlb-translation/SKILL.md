@@ -158,3 +158,16 @@ The watchdog:
 - **Realia glossing**: For culturally specific terms, add translator's notes: '[в Китае: X — традиционная практика Y]'
 - **Units and measurements**: Convert Chinese units to metric/Russian equivalents where appropriate (e.g. 'цзинь (≈500 г)', 'ли (≈500 м)')
 - **See**: `references/localization-techniques.md` for complete catalog of 8 localization techniques with examples
+
+## Quality Assurance Techniques
+
+- **Parallel subagent verification**: After translation wave, run verification subagents to check:
+  - Natural Russian flow (avoid literal translation artifacts)
+  - Consistent field marker usage across chapters
+  - Proper localization annotations without over-annotation
+  - Emergency numbers and procedures correctly localized
+  - No untranslated Chinese terms outside sources
+- **Verification workflow**: Use separate subagents for each quality aspect (natural language, localization consistency, field markers) with strict 'work = write reports' instruction
+- **Verification scope**: Check 5 chapters at a time to maintain speed while catching systemic issues
+- **Fix priority**: Natural language issues > localization consistency > field marker accuracy
+- **Reference**: `references/natural-language-verification.md` for detailed verification instructions and quality standards
