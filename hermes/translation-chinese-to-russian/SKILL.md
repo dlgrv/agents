@@ -50,6 +50,10 @@ description: Chinese-to-Russian translation workflow with localization.
 - **CJK in links:** Allow Chinese characters ONLY in links to Chinese sources or documents; all other text must be fully translated.
 - **Verification script false positives:** Normalize numeric formats and strip whitespace before comparing; ignore punctuation-only differences (e.g., 0.5 vs 0,5) and comma/dot variations in percentages (97.2% vs 97,2%).
 - **Statistical rounding:** Accept 40% as equivalent to 42%, 70% as equivalent to 69% when they represent plain-language approximations of precise statistics; do not flag as mismatch unless the numeric value differs beyond rounding tolerance.
+- **Background pipeline interference:** Existing background translation pipelines (e.g., `htlb-pipeline.service`) may run with outdated prompts and overwrite newer translations. Check for concurrent `hermes -z` processes and pipeline logs before starting new work; verify that background processes use current conventions (Russian slugs, README.ru.md links, MQM rules).
+- **Fork-based PR lifecycle:** When using a fork as the PR head repo, never delete the fork before the PR is merged — this auto-closes the PR. If the fork must be deleted, first merge the PR, then delete the fork. If accidentally deleted, restore from local backup branch or recreate and push the branch again.
+- **Cross-repo PR title:** For cross-fork PRs (external contributor → upstream), include both languages in the title for clarity: `翻译：俄语版（第 1–10 章 + README，见 #4） / Russian translation — chapters 01–10 + Russian README`. This helps reviewers identify the language scope immediately.
+- **Issue-PR linkage:** Only a PR (not a branch) closes an issue via `Closes #NNNN`. If the fork/head repo is deleted, the PR closes and the issue reopens. Link the PR to the issue in the body: `Closes #NNNN` or reference it in comments.
 
 GitHub mechanics (fork, issues, PRs) → `github` skill.
 
