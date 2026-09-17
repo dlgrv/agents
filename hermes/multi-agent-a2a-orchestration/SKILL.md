@@ -146,6 +146,8 @@ Each agent exposes an Agent Card at `/.well-known/agent-card.json`:
 
 ### Cross-Agent Task Delegation
 
+An `a2a_call` from a local agent keeps that agent's machine on the critical path for the whole task — for work that must outlive the local machine (overnight/batch runs), put the driver script on the worker machine and use SSH only to start and monitor it; reserve `a2a_call` for short interactive exchanges.
+
 Use `a2a_call` to delegate tasks between agents:
 
 ```python
@@ -167,11 +169,11 @@ result = a2a_call(
 
 **Fix:** Always set `A2A_HOST=<tailnet-ip>` in `.env`
 
-#### 2. Token Typos
+#### 2. Token Mismatch
 
-**Symptom:** Authentication failures when calling peers
+**Symptom:** Authentication failures when calling peers; `a2a_call` returning 502 while the peer's agent card is reachable and direct JSON-RPC with a re-checked bearer token works → peer tokens have drifted
 
-**Fix:** Verify tokens match exactly (use `grep` and `wc -c` to check length)
+**Fix:** Verify tokens match exactly (use `grep` and `wc -c` to check length); re-sync `A2A_PEER_TOKENS` on both peers, then `hermes gateway restart` on each
 
 #### 3. Firewall Blocking
 
