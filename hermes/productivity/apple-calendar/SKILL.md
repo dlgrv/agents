@@ -4,7 +4,7 @@ description: "Use when creating or reading Apple Calendar events."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
-platforms: [macos]
+platforms: [macos, linux]
 metadata:
   hermes:
     tags: [calendar, macos, eventkit, applescript, mcp]
@@ -26,6 +26,41 @@ metadata:
   Reminders, Birthdays, Праздники России, Siri Suggestions) is
   service-generated — never write events there.
 - Duration unspecified → 1 hour; the user states exceptions explicitly.
+
+## Remote: Hermes on Linux VM → Mac over Tailscale
+
+Config points `mcp_servers.apple-calendar` at the Mac's Tailscale IP
+(`http://100.120.180.25:8083/mcp`, macbook-pro; plain HTTP is fine — traffic
+rides WireGuard). Hermes itself may run on the Linux VM (hermes-vm): the
+"unsupported platform" skill gate is stale — ignore it and work the server
+directly.
+
+1. Reachability first: `tailscale status` — macbook-pro must be `active`.
+   `offline, last seen …` → there is nothing to write to; use the retry
+   pattern below instead of stalling.
+2. MCP tools (`mcp_apple-calendar_*`) load only at Hermes start AND only if
+   the Mac was up then; tool_search does not see them. When missing, speak
+   JSON-RPC to the streamable-HTTP endpoint with curl:
+   - POST `initialize` with `Accept: application/json, text/event-stream`;
+     capture the session id from the response headers.
+   - POST `notifications/initialized`, then `tools/list` for tool names.
+   - POST `tools/call` `{name, arguments}` with the session header.
+3. Verify by reading the events back for the target date — exit codes lie.
+
+## Mac offline → one-shot cron retry
+
+- `cronjob_manage` action=create, schedule `in 45m`, attach_to_session=true,
+  deliver the user's telegram chat.
+- Prompt must be fully self-contained (cron runs in a fresh session): exact
+  event details, calendar "Life", Moscow time (UTC+3); guard "tailscale
+  status offline ⇒ reply exactly MAC_OFFLINE and create nothing"; dedupe
+  (list events for the date first); verify by reading events back.
+- Deferred tools are invoked as `{"name": ..., "arguments": ...}` — a bare
+  arguments object fails with "requires a 'name'".
+
+Event convention: «+1 час на дорогу» → TWO events: «Выезд из дома» 1 h
+before the meeting plus the meeting itself; the meeting event carries the
+venue in `location` and transit hints in `description` (user-confirmed).
 
 ## Create events via osascript (fallback)
 
