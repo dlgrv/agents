@@ -1,13 +1,13 @@
 ---
 name: hermes-config-tuning
-description: "Use when tuning Hermes config: models, fallbacks, retries."
-version: 1.0.0
+description: "Use when tuning Hermes config: models, fallbacks, retries, MCP servers (add/verify/use)."
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 platforms: [macos, linux]
 metadata:
   hermes:
-    tags: [hermes, config, models, fallback, parallelism, stability]
+    tags: [hermes, config, models, fallback, parallelism, stability, mcp]
 ---
 
 # Hermes Config Tuning
@@ -171,8 +171,24 @@ never hand-edit config.yaml (a stray indent corrupts it and breaks the live gate
   own instructions (domain rules like "fetch identifiers before use").
 - **`mcp_servers.*` edits apply on Hermes restart, not mid-session** — new
   tools stay invisible to tool_search until then; verify after restart
-  before promising them. For one-off urgent work while waiting, drive the
-  native app directly (Calendar → see apple-calendar skill).
+  before promising them. For one-off urgent work while waiting: drive a
+  native app directly (Calendar → see apple-calendar skill), or drive an
+  HTTP MCP server raw (next bullet).
+- **HTTP MCP server: add, verify, and use before restart.**
+  - Add via `hermes config set`, NOT `hermes mcp add --auth header` — the
+    CLI prompts for the token with getpass, which a non-TTY agent session
+    cannot answer, so the add aborts with the token lost. One inline object
+    does it: `hermes config set mcp_servers.<name> '{"url":"https://host/mcp","headers":{"Authorization":"Bearer <token>"},"connect_timeout":60,"enabled":true}'`,
+    then `hermes mcp test <name>` and require "✓ Connected" + tool list.
+  - Verify endpoint AND token in one shot before writing config: POST a
+    JSON-RPC `initialize` with `Accept: application/json, text/event-stream`
+    and the Authorization header — HTTP 200 + an `mcp-session-id` response
+    header proves both.
+  - In-session fallback before restart: call tools raw over JSON-RPC —
+    `initialize` (save the `mcp-session-id` response header), POST
+    `notifications/initialized`, then one `tools/call` per action, every
+    POST repeating the session-id header. Build and quote the curl args in
+    execute_code (python list → shell), not as a hand-typed shell line.
 
 ## Display settings for minimal noise
 
