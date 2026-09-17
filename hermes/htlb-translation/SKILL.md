@@ -31,6 +31,15 @@ cp tools/digest/16/units/*.md /root/htlb-run/16/units/
 for n in 00 01 02 03 04 05 06 07; do echo "§TAG§" >> /root/htlb-run/16/units/$n.md; echo "§SRC§" >> /root/htlb-run/16/units/$n.md; done
 ```
 
+### Unit File Structure
+
+Each unit file must contain:
+1. Chapter header (exact format per TRANSLATION.md)
+2. Empty lines
+3. Translated content with field markers
+4. §TAG§ placeholder (on its own line)
+5. §SRC§ placeholder (on its own line)
+
 ## 2. Unit Translation
 
 Translate each unit incrementally. Each unit must be written to its file immediately after translation (no JSON reports until all units are done).
@@ -46,6 +55,26 @@ Translate each unit incrementally. Each unit must be written to its file immedia
 # Write translated unit back to file immediately
 write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SRC§"
 ```
+
+### Field Marker Rules
+
+| Chinese | Russian | Notes |
+|---------|--------|-------|
+| 成本 | Стоимость | Cost/expense field |
+| 说人话 | Простыми словами | Simple language field |
+| 收益 | Эффект | Benefit/effect field |
+| 证据等级 | Уровень доказательности | Evidence level (A/B/C remain) |
+| 备注 | Примечания | Notes/remarks field |
+
+### Translation Rules
+
+- **Numbers**: Always byte-for-byte copy (§ numbers remain unchanged)
+- **Slang**: Never translate: cohort/exposure/quartile/confounding/population/low-evidence
+- **Style**: Live Russian, not literal translation
+- **Headers**: Must start with verbs
+- **Simple language field**: No numbers outside "Эффект" section
+- **Exclamation marks**: None allowed
+- **Sources**: Never translate — injected byte-by-byte by assemble.py
 
 ### Field Marker Rules
 
@@ -112,3 +141,11 @@ The watchdog:
 - Do not translate sources — they are injected byte-for-byte by assemble.py
 - Watchdog only reports when something is wrong or complete; silent during normal progress
 - Load this skill before any translation work to ensure correct field markers and workflow
+
+## Subagent Pitfall
+
+- **Never let subagents spend time on analysis or planning** — they must write files immediately
+- Each subagent gets one unit (not a whole chapter) and must write it to its file upon completion
+- Do not let subagents study existing chapters for style — provide a style sample in the task instead
+- Subagents must not return JSON summaries — only write the translated unit file
+- If a subagent stalls, restart it with stricter instructions: 'work = write files, no analysis'
