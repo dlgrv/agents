@@ -138,7 +138,7 @@ The watchdog:
 - Always leave §TAG§ and §SRC§ placeholders intact in units — they are filled later by assemble.py
 - Numbers must be byte-for-byte; never add or remove numbers from "Эффект"
 - Field markers must be exact: 成本→Стоимость, 说人话→Простыми словами, etc.
-- Do not translate sources — they are injected byte-for-byte by assemble.py
+- Do not translate sources — they are injected byte-by-byte by assemble.py
 - Watchdog only reports when something is wrong or complete; silent during normal progress
 - Load this skill before any translation work to ensure correct field markers and workflow
 
@@ -149,3 +149,12 @@ The watchdog:
 - Do not let subagents study existing chapters for style — provide a style sample in the task instead
 - Subagents must not return JSON summaries — only write the translated unit file
 - If a subagent stalls, restart it with stricter instructions: 'work = write files, no analysis'
+
+## Localization and Realia Handling
+
+- **Legal/official identifiers**: Court case numbers (最高法知民终 51 号), document codes (国食药监办〔2010〕432 号), and other Chinese legal/administrative identifiers must be preserved byte-for-byte per TRANSLATION.md — they function like DOIs and are not translated
+- **Emergency numbers**: When translating emergency service numbers (e.g. 120), add localization in parentheses: 'звоните 120 (для Китая — 112/103, для РФ — 103)'
+- **Country-specific procedures**: Add translator's comments in brackets for procedures that vary by country: '[в Китае — процедура X, в РФ — процедура Y]'
+- **Realia glossing**: For culturally specific terms, add translator's notes: '[в Китае: X — традиционная практика Y]'
+- **Units and measurements**: Convert Chinese units to metric/Russian equivalents where appropriate (e.g. 'цзинь (≈500 г)', 'ли (≈500 м)')
+- **See**: `references/localization-techniques.md` for complete catalog of 8 localization techniques with examples
