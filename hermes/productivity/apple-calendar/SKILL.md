@@ -1,7 +1,7 @@
 ---
 name: apple-calendar
 description: "Use when creating or reading Apple Calendar events."
-version: 1.0.0
+version: 1.1.0
 author: Hermes Agent
 license: MIT
 platforms: [macos, linux]
@@ -16,16 +16,38 @@ metadata:
 
 - EventKit MCP server is configured: `mcp_servers.apple-calendar` →
   `npx -y @redpop/apple-calendar-mcp` in ~/.hermes/config.yaml. Prefer its
-  `mcp_apple-calendar_*` tools once Hermes has been restarted with them:
-  correct recurrence expansion, full CRUD, faster and less brittle than
-  AppleScript.
-- **MCP tools load only at Hermes restart.** If tool_search finds no
-  apple-calendar tools this session, don't stall and don't promise them —
-  act now via Calendar.app AppleScript (below).
+  `mcp__apple_calendar__*` tools: correct recurrence expansion, full CRUD,
+  faster and less brittle than AppleScript.
+- The tools are deferred: surface `mcp__apple_calendar__list_events /
+  create_event / update_event / delete_event` via tool_search +
+  tool_describe, then call them normally. If they are missing or error
+  this session, don't stall — fall back to raw JSON-RPC (Remote, below)
+  or Calendar.app AppleScript.
 - User's personal calendar is **"Life"**. Everything else (Scheduled
   Reminders, Birthdays, Праздники России, Siri Suggestions) is
   service-generated — never write events there.
 - Duration unspecified → 1 hour; the user states exceptions explicitly.
+- Local tool calls are one event per tool_call — batching several
+  create_event entries into one call is rejected.
+
+## Event conventions
+
+- «+1 час на дорогу» → TWO events. Travel: «Выезд из дома — <место>»,
+  1 h ending exactly at the meeting start, venue address in `location`,
+  notes «Час на дорогу. Встреча с HH:MM.» Meeting event: venue in
+  `location`, transit hints in `notes`.
+- Splitting an EXISTING single event the same way: `update_event` with
+  `eventIdentifier` + `occurrenceDate` = the event's CURRENT start (that
+  pair identifies the occurrence; new values ride in the plain fields) —
+  move `start` to the meeting time, then `create_event` the travel hour
+  in the freed slot. Verify by re-listing the whole day, not by exit
+  status.
+- The user's stated day/time doesn't match the calendar: widen the read
+  window ±3 days BEFORE concluding "nothing that day" and match by
+  content (title/venue/notes) — weekday recollection drifts. On a
+  near-match, don't silently move or duplicate: offer options (keep
+  as-is / move to the stated day / create new and keep the original)
+  and let the user pick.
 
 ## Remote: Hermes on Linux VM → Mac over Tailscale
 
@@ -38,9 +60,8 @@ directly.
 1. Reachability first: `tailscale status` — macbook-pro must be `active`.
    `offline, last seen …` → there is nothing to write to; use the retry
    pattern below instead of stalling.
-2. MCP tools (`mcp_apple-calendar_*`) load only at Hermes start AND only if
-   the Mac was up then; tool_search does not see them. When missing, speak
-   JSON-RPC to the streamable-HTTP endpoint with curl:
+2. If the deferred tools are missing or erroring (e.g. the Mac was down
+   at call time), speak JSON-RPC to the streamable-HTTP endpoint with curl:
    - POST `initialize` with `Accept: application/json, text/event-stream`;
      capture the session id from the response headers.
    - POST `notifications/initialized`, then `tools/list` for tool names.
@@ -57,10 +78,6 @@ directly.
   (list events for the date first); verify by reading events back.
 - Deferred tools are invoked as `{"name": ..., "arguments": ...}` — a bare
   arguments object fails with "requires a 'name'".
-
-Event convention: «+1 час на дорогу» → TWO events: «Выезд из дома» 1 h
-before the meeting plus the meeting itself; the meeting event carries the
-venue in `location` and transit hints in `description` (user-confirmed).
 
 ## Create events via osascript (fallback)
 
