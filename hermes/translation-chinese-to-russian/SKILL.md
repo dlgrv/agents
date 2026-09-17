@@ -42,6 +42,8 @@ description: Chinese-to-Russian translation workflow with localization.
 - **Navigation consistency:** In `book/ru/` files, use `[← К общему огупление](../../README.ru.md)`; adjust depth if README.ru.md is nested.
 - **README language selector:** Always include both original and translated: `**Языки / Languages:** [中文](README.md) · [Русский](README.ru.md)`.
 - **Chinese-specific terms:** For Chinese legal/administrative terms (e.g., 认缴出资, 一裁终局), provide Russian translation + original in parentheses at first mention.
+- **MQM verification:** Use the verification script from `references/quality-rubric.md` to programmatically check counts and structure after each chapter completion.
+- **Back-link fix:** When moving files to `book/ru/`, adjust relative depth in all back-links (e.g., `../../README.ru.md` instead of `../README.md`).
 
 GitHub mechanics (fork, issues, PRs) → `github` skill.
 
