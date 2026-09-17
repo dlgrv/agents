@@ -28,7 +28,12 @@ description: Chinese-to-Russian translation workflow with localization.
    - Field-label mapping (来源→Источники, 成本→Затраты, 收益→Выгода, 证据等级→Уровень доказательности, 备注→Примечания).
    - Per-file header: status line + back-link with adjusted relative depth.
    - Country-context rule: facts true only for China are translated faithfully; law chapters get disclaimer.
-5. **Delegate translation, verify centrally:** One subagent per chapter (bulk I/O). Main agent verifies programmatically: heading/item counts, tag-comment counts, doi.org-line counts, zero untranslated text outside byte-faithful zones.
+5. **Optimized translation pipeline for large chapters:**
+   - Split chapters into 1–2 Kbyte units using `tools/make_digest.py <NN> /tmp/workdir`
+   - Extract sources/tags byte-for-byte into `blocks.json` (never feed to LLM)
+   - Delegate each unit to subagents (1–2 Kb context vs 30–42 Kb chapter)
+   - Monitor with `python3 tools/watchdog.py /tmp/workdir --stall-min 25`
+   - Assemble with `python3 tools/assemble.py <NN> /tmp/workdir <output.md>`
 6. **Review with MQM rubric:** Separate reviewer subagents for fidelity/terminology and structure/links. Apply all fixes centrally, re-run verification before committing.
 7. **Ship:** Push `translation/ru` branch; open pilot PR titled bilingually (中文 + Русский); comment in Chinese linking PR.
 

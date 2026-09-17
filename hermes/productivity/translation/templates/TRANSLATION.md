@@ -32,6 +32,16 @@
 - Quotes that the original itself rendered in the source language (e.g. an English paper quote rendered in Chinese) are translated INTO the target language meaning-wise — the original wording lives in the byte-faithful citation line.
 - Country-specific facts and institutions are translated faithfully, never localized; chapters citing the source country's law get one line under the heading: "Chapter N cites <country> laws and institutions; for readers outside <country> it is reference material, not applicable law."
 
+## Translator's additions — permitted insertions
+
+Three types of contextual additions are allowed when they improve clarity for the target audience, **without altering source meaning**:
+
+1. **Block-quote note in chapter header** (`> Примечание переводчика:`): for country-specific facts that differ significantly (e.g. emergency numbers, local units, government agency names), or for context that is essential to understand the chapter but only relevant locally. Must be concise and clearly marked.
+2. **Gloss at first mention**: for recurring domain-specific terms that need explanation (e.g. `低保 (дибао — госпрограмма гарантированного минимального дохода)`). Use parentheses to give the original term and brief explanation, only where it first appears.
+3. **Glossary in README.md**: for core domain terms that recur throughout the book (e.g. хукоу, 五险, RCT). Add these to the project's main README glossary section with brief explanations, not translations.
+
+All additions must be reversible — the original text must remain byte-identical, and these notes are purely explanatory.
+
 ## Verification gate (main agent, scripted)
 
 count(### items) and count(tag comments) and count(doi.org lines) in the translation == the source's actual counts (grep the source, don't trust stated counts); no source-language text outside the byte-faithful zones.

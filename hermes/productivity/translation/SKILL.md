@@ -32,7 +32,7 @@ description: Use when translating books/docs or reviewing translations.
 - Preserving links ≠ preserving paths: keep link text/targets but re-adjust relative depth for the new file location; visible text of file-reference links stays as-is.
 - When byte-comparing citation lines source vs translation, strip the field label AND leading whitespace first (source uses `：`, the translation's label uses `:`); comparing raw colon-splits flags every line as a false diff.
 - Sweep terminology fixes by grep on the STEM, not the exact word — inflected forms (especially Russian) hide leftovers in later items; re-grep until the stem count is zero.
-- Keep the entire `hermes -z` prompt as ONE quoted argument with flags (`--in`, `--yolo`) AFTER it — a split or mis-ordered prompt exits rc=2 "expected one argument" in ~1s per chapter, and the driver logs a whole run of instant failures.
-- Scope prep tasks handed to an autonomous (`--yolo`) peer explicitly ("set up only; do not translate yet") — an open-ended prompt to an agent with repo write access is executed to completion, not rehearsed.
+- When verifying byte-faithful preservation (citation lines, DOIs, etc.), strip field labels and leading whitespace before comparison — source uses `：`, translation uses `:`; raw colon-split comparison creates false positives.
+- Always run verification scripts BEFORE committing — manual counts are error-prone; grep the source for actual item/heading/tag/doi counts and match against translation, never trust stated counts.
 
 GitHub mechanics (fork, issues, PRs) → `github` skill.
