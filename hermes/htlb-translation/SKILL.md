@@ -159,6 +159,16 @@ The watchdog:
 - **Units and measurements**: Convert Chinese units to metric/Russian equivalents where appropriate (e.g. 'цзинь (≈500 г)', 'ли (≈500 м)')
 - **See**: `references/localization-techniques.md` for complete catalog of 8 localization techniques with examples
 
+## Source Title Retrofits
+
+- **Chinese article/document titles**: Add Russian translation in brackets immediately after Chinese title: `中国人健康指南 [рус. «Руководство по здоровью китайцев»]`
+- **Format**: `[рус. «…»]` for Russian, `[eng. "..."]` for English titles
+- **Placement**: After Chinese title, before author/journal info or parentheses (for laws)
+- **Preservation**: Original Chinese title, author names, journal names, DOIs, URLs, HTML tags, dates, and document codes remain byte-for-byte unchanged
+- **Scope**: Only applies to source lines (starting with `- Источники:`), never to main text content
+- **Verification**: After retrofit, verify that all source lines with Chinese titles have the annotation, while English-only source lines remain untouched
+- **Batch processing**: Use balanced batches of 4-6 chapters per subagent to maintain speed and consistency
+
 ## Quality Assurance Techniques
 
 - **Parallel subagent verification**: After translation wave, run verification subagents to check:
