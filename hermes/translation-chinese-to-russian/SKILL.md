@@ -39,11 +39,17 @@ description: Chinese-to-Russian translation workflow with localization.
 - Preserving links ≠ preserving paths: keep link text/targets but re-adjust relative depth for new file location.
 - When byte-comparing citation lines, strip the field label AND leading whitespace first (source uses `：`, translation uses `:`).
 - Sweep terminology fixes by grep on the STEM, not exact word — inflected forms hide leftovers; re-grep until stem count is zero.
-- **Navigation consistency:** In `book/ru/` files, use `[← К общему огупление](../../README.ru.md)`; adjust depth if README.ru.md is nested.
+- **Navigation consistency:** In `book/ru/` files, use `[← К общему оглавлению](../../README.ru.md)`; adjust depth if README.ru.md is nested.
 - **README language selector:** Always include both original and translated: `**Языки / Languages:** [中文](README.md) · [Русский](README.ru.md)`.
 - **Chinese-specific terms:** For Chinese legal/administrative terms (e.g., 认缴出资, 一裁终局), provide Russian translation + original in parentheses at first mention.
 - **MQM verification:** Use the verification script from `references/quality-rubric.md` to programmatically check counts and structure after each chapter completion.
 - **Back-link fix:** When moving files to `book/ru/`, adjust relative depth in all back-links (e.g., `../../README.ru.md` instead of `../README.md`).
+- **Decimal comma vs dot:** When comparing numeric values, normalize both source and translation to dots before comparing — 0,58 vs 0.58 are identical, but 0.58 vs 0.580 are not.
+- **万→thousands/millions:** Treat 万 as numeric conversion (1万=10000, 1.5万=15000), not literal translation; verify numeric equivalence in all contexts.
+- **Locale-specific numbers:** Do not flag numbers as 'lost' or 'extra' if they are only different due to locale formatting (e.g., 1,5 vs 1.5, 1000 vs 1,000, 97.2% vs 97,2%).
+- **CJK in links:** Allow Chinese characters ONLY in links to Chinese sources or documents; all other text must be fully translated.
+- **Verification script false positives:** Normalize numeric formats and strip whitespace before comparing; ignore punctuation-only differences (e.g., 0.5 vs 0,5) and comma/dot variations in percentages (97.2% vs 97,2%).
+- **Statistical rounding:** Accept 40% as equivalent to 42%, 70% as equivalent to 69% when they represent plain-language approximations of precise statistics; do not flag as mismatch unless the numeric value differs beyond rounding tolerance.
 
 GitHub mechanics (fork, issues, PRs) → `github` skill.
 
@@ -52,3 +58,4 @@ GitHub mechanics (fork, issues, PRs) → `github` skill.
 - `references/quality-rubric.md` for MQM-based review rubric
 - `templates/TRANSLATION.md` for convention starter template
 - `references/localization-rules.md` for Chinese-to-Russian localization specifics
+- `references/verification-script.md` for automated structural and numeric verification
