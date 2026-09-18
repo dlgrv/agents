@@ -302,7 +302,8 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - wmt22-cometkiwi-da и XCOMET-XL/XXL — CC-BY-NC-SA-4.0 + gated (НЕ Apache); в опенсорс-репо и коммерческий прод нельзя. Apache-замены: wmt20-comet-qe-da, wmt22-comet-da, MetricX-24.
 - zh→ru для cometkiwi — out-of-distribution (пары нет в обучающих данных); zh→en — in-distribution. До гейта — валидация на 30–50 сегментах.
 - CometKiwi почти не чувствителен к перефразированию (TransAgents App. B) и sentence-level с лимитом 512 токенов → только advisory-сигнал, не гейт.
-- Source-blind судья валиден только для беглости; точность всегда с источником (error-span MQM, GEMBA-MQM). Парные сравнения со swap, tie при несогласии (Zheng et al. MT-Bench). Судья ≠ семья модели переводчика.
+- Source-blind судья валиден только для беглости; точность всегда с источником (error-span MQM, GEMBA-MQM). Парные сравнения со swap, tie при несогласии (Zheng et al. MT-Bench).
+- Судья пассов C/D — GLM-5.3-Flash через API z.ai (решение Лёни 2026-09-18; сильный, уже оплачен, локальный стек не нужен). Офсеты: self-preference (судья = семья переводчика) → A/B против контролируемых деградаций, а не против второго GLM-вывода; невоспроизводимость API → в вердиктах логировать model id + дату + prompt_hash, при смене весов — дешёвая ревалидация золотого сета (60 пар). Если κ(судья, Лёня) < 0.4 — запасные: локальный Qwen3-30B-A3B или Gemma 3 27B (Mac M5 Pro 48GB).
 - Порядок пассов: translate → assemble → verify(FAIL) → fact-check E(FAIL, заземление CN-цитатами) → style A(WARN) → QE B(advisory) → judge C/D(advisory) → MQM(человек, приоритет над QE) → MR+squash.
 
 ## Clone & Publication Rules (2026-09-18)
