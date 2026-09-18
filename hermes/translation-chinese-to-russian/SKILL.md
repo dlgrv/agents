@@ -73,3 +73,14 @@ GitHub mechanics (fork, issues, PRs) → `github` skill.
 - `templates/TRANSLATION.md` for convention starter template
 - `references/localization-rules.md` for Chinese-to-Russian localization specifics
 - `references/verification-script.md` for automated structural and numeric verification
+
+## Consolidated playbook
+- The full method (pipeline diagram, subagent contracts, verification gotchas, post-translation waves, web-version localization, upstream etiquette, next-language launch checklist) lives in the repo: `docs/translation-playbook.md` in dlgrv/HowToLiveBetter (branch translation/ru). Read it before launching a new-language translation of the same book.
+
+## Delegation-provider lesson
+- Cheap API gateways (cometapi etc.) time out on long subagent generations (120–600 s limits). Switch `delegation.provider` to a direct provider (z.ai) and keep subagent payloads at 1–2 KB units — zero timeouts afterwards.
+
+## Web-version localization lesson (bilingual index.html)
+- Translate only VISIBLE strings: chip labels, card badges (via LABEL/RATIO_LABEL dictionaries), loading/error states, perf panel. Data keys (`data-v`, tag values) stay byte-identical or filters silently break.
+- Audit for leftovers with regex on `\u4e00-\u9fff` AND full-width punctuation `，。：；` in RU text; allowed zones: data keys, original title, lang switch, script comments.
+- Russian text is longer than Chinese: flex label+hint rows overlap on mobile (use column layout), `max-width:72ch` intros leave dead space, verify deployment by curl+grep after 50 s.

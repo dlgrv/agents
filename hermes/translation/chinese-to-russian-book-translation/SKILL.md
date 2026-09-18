@@ -42,25 +42,43 @@ See `references/localization-techniques.md` for the full catalog:
 - Block-quote notes in chapter headers
 
 ## Pitfalls
-- A subagent doing long-form generation can burn the entire run on reasoning and never write the output file. Instruct translators to WRITE THE OUTPUT FILE FIRST.
-- Trust grep, not stated counts, for source counts — stated counts have been wrong before.
-- If a translation subagent dies, recover from cache: transcripts persist under `~/.hermes/cache/delegation/`.
-- When byte-comparing citation lines, strip field labels and leading whitespace first (source uses `：`, translation uses `:`).
-- Sweep terminology fixes by grep on the STEM, not the exact word — inflected forms hide leftovers.
-- Always run verification scripts BEFORE committing — manual counts are error-prone.
-- Never merge conflicting edits from multiple agents: verify that a chapter is fully done before merging.
-- During review phases, apply ALL suggested fixes from reviewers, not only blockers.
-- When applying reviewer fixes, use patch with exact string matching: adapt only the exact quoted string.
-- After any batch of edits, run verification scripts again: reviewer edits can accidentally alter structure.
-- For Chinese-to-Russian translation, calques of Chinese bureaucratic phrasing are common — use MQM fluency dimension to identify and fix these.
-- Check specifically for calques in the 'Простыми словами' field: these must read as natural Russian speech.
-- Always verify that numeric values and statistical terms (HR/RR/OR/CI) are unchanged after applying edits.
+- **Translation subagent burnout:** A subagent doing long-form generation can burn the entire run on reasoning and never write the output file. Instruct translators to WRITE THE OUTPUT FILE FIRST.
+- **Never trust stated counts** — grep the actual files for source counts; stated counts have been wrong before.
+- **Cache recovery:** If a translation subagent dies, recover from cache: transcripts persist under `~/.hermes/cache/delegation/`.
+- **Citation byte-comparison:** When comparing citation lines, strip field labels and leading whitespace first (source uses `：`, translation uses `:`).
+- **Terminology sweep:** Fix terminology by grep on the STEM, not the exact word — inflected forms hide leftovers.
+- **Pre-commit verification:** Always run verification scripts BEFORE committing — manual counts are error-prone.
+- **No agent conflicts:** Never merge conflicting edits from multiple agents: verify that a chapter is fully done before merging.
+- **Apply all reviewer fixes:** During review phases, apply ALL suggested fixes from reviewers, not only blockers.
+- **Exact patching:** When applying reviewer fixes, use patch with exact string matching: adapt only the exact quoted string.
+- **Post-edit verification:** After any batch of edits, run verification scripts again: reviewer edits can accidentally alter structure.
+- **Bureaucratic calques:** For Chinese-to-Russian translation, calques of Chinese bureaucratic phrasing are common — use MQM fluency dimension to identify and fix these.
+- **'Простыми словами' naturalness:** Check specifically for calques in the 'Простыми словами' field: these must read as natural Russian speech.
+- **Numeric preservation:** Always verify that numeric values and statistical terms (HR/RR/OR/CI) are unchanged after applying edits.
 - **Unit-based QA for retrofits:** When checking inserted [рус. «…»] in source lines, split large batches into units of 10–15 lines per subagent. Whole-chapter checks are slow (50+ minutes) and prone to timeout; unit-based QA completes in 1–3 minutes per unit. Subagents must write only JSON verdicts — no file edits — to avoid conflicts in shared worktrees.
 - **QA verdict workflow:** After subagent reports, aggregate issues centrally and fix using exact string matching with patch. Never let multiple agents write to the same files during QA.
-- **Chinese punctuation artifacts:** Watch for stray Chinese punctuation in Russian text (e.g. `，` instead of `,` or `… …` instead of `…`). Use regex to scan for these patterns and replace them with proper Russian equivalents.
+- **CJK punctuation artifacts:** Watch for stray Chinese punctuation in translated text (e.g. `，` instead of `,` or `… …` instead of `…`). Use regex to scan for these patterns and replace them with proper Russian equivalents.
 - **Double ellipsis fix:** Loading status text may contain `… …` due to copy-paste artifacts from animated elements. Replace with single `…` and check CSS for ::after animations that could reintroduce the issue.
-- **UI layout sync:** After text updates, re-check CSS for layout issues like misaligned headings (flexbox wrapping, text overflow) — Russian text is longer and may break responsive layouts.
-- **GitHub Pages deployment:** After pushing commits, wait 50+ seconds for GitHub Pages propagation before verifying live site changes; use `curl -s <url> | grep -o 'text pattern'` to confirm fixes.
+- **Layout sync:** After text updates, re-check CSS for layout issues like misaligned headings (flexbox wrapping, text overflow) — Russian text is longer and may break responsive layouts.
+- **Propagation delay:** After pushing commits, wait 50+ seconds for GitHub Pages propagation before verifying live site changes; use `curl -s <url> | grep -o 'text pattern'` to confirm fixes.
+
+## English translation extension
+
+This workflow has been extended for Chinese-to-English translation (HowToLiveBetter EN project):
+
+- **Prompt engineering:** Use a strict 'one unit per step' loop with immediate file writing. First tool call must be `write_file` of the translated unit.
+- **Conventions in prompt:** Embed all translation rules inline in the prompt (never reference external files). Include specific field mappings (成本→`- Cost:`, 说人话→`- In plain terms:`, etc.), byte-faithful requirements, and explicit warnings against invented facts.
+- **Watchdog automation:** Deploy a cron-based watchdog to monitor delegation logs every 3 minutes and alert if any subagent stalls for ≥6 minutes.
+- **Parallel wave dispatch:** Launch chapters in waves (e.g. 5 chapters per batch) with identical prompts and concurrent watchdog monitoring.
+- **QA automation:** After assembly, verify: heading/item/tag/DOI counts, source line byte-identity, zero CJK outside machine zones (allowed: link targets, §TAG§/§SRC§ placeholders).
+- **Commit strategy:** One commit per completed chapter with descriptive message including verification status (e.g. 'tags/sources byte-identical').
+- **Progress tracking:** Maintain a running tally of completed chapters and use delegate_task status queries to monitor active waves.
+
+### English-specific pitfalls
+- **Model timeout:** Translation subagents may timeout on long chapters (e.g. ch13 took 3 attempts). Retry with identical prompt + shorter timeout (e.g. 1000s).
+- **CJK in output:** The only allowed CJK outside machine zones is byte-identical link targets (e.g. `../docs/遇到陌生人出事该不该停.md`). All other CJK indicates a translation error.
+- **Slug convention:** English filenames use kebab-case (e.g. `13-Emergencies.md`), not Chinese characters or pinyin.
+- **Status line translation:** Translate visible text in status lines and back-links; keep link targets byte-identical to source.
 
 ## Verification checklist
 
@@ -83,4 +101,9 @@ See `references/localization-techniques.md` for the full catalog:
 - Retrofit QA workflow: `references/retrofit-qa.md`
 - Server pipeline: `../translation/references/server-pipeline.md`
 - Website deployment: `references/website-deployment.md`
+- English translation workflow: `references/english-translation-workflow.md`
 - TRANSLATION.md template: `../translation/templates/TRANSLATION.md`
+
+## Scripts
+
+- English translation watchdog: `scripts/htlb-en-watchdog.py`
