@@ -76,3 +76,29 @@ Slice for checks too, not just for translation: QA of 316 source lines ran as 32
 - Strip insertions to compare payload with the original: `[рус. «…»]` titles may contain NESTED «…» quotes — strip from `' [рус. '` to the next `]`, not with a `[^»]*»` regex (nested-quotes lines fail otherwise, e.g. ch17).
 - RU label is `- Источники:` with an optional trailing space (chapter-wide convention); ZH is `- 来源：` with none — normalize `^- Источники:\s?` vs `^- 来源：` before comparing, else every line 'differs'.
 - Compare per-line after label strip, not whole-file; label bytes must not leak into the diff.
+
+### English Translation QA (2026-09-18)
+
+For English translation fidelity checks, use the same unit-based QA approach but with stricter number/meaning/term checks:
+- Slice chapters into ~4-item units for parallel verification subagents
+- Check every number/price/HR/RR/OR/CI/percentage/count/date in ZH body appears in EN with same value and role (万→numeric conversion is fine, 六成→60% is fine)
+- Verify no dropped conditions, no added advice, no reversed logic, no softened hard claims, no invented facts
+- Check 'In plain terms' contains no numbers beyond what ZH '说人话' has, is natural spoken English
+- Ensure China-specific terms have transliteration + one-time gloss (dibao (低保 — ...))
+- Confirm field labels are exactly `- Cost:`, `- In plain terms:`, `- Benefit:`, `- Evidence grade:`, `- Notes:`
+- Flag any untranslated Chinese term in English body (except law/regulation references)
+- TONE: no exclamation marks, no marketing language, restrained register
+- Output verdict JSON (`{unit, verdict:PASS|FAIL, issues:[{item,type:...,zh,en,why}]}`), never edit files
+- Use 10 parallel subagents, each assigned a group of 14-15 units; aggregate results programmatically
+
+### QA Fix and Commit Protocol
+
+When QA reveals defects:
+- **Never edit book/ files directly** — always fix the source unit files in `/root/htlb-run-en/<chapter>/units/` and re-assemble
+- **Fix pattern**: Find the problematic unit, correct the error in the unit file, then run `python3 tools/assemble_en.py <chapter> /root/htlb-run-en/<chapter> /tmp/<chapter>.md` and verify the diff matches only the intended fix
+- **Unit sync**: After fixing book/ files, mirror the fix into the corresponding unit file to prevent reassembly regression (assemble.py overwrites units with the latest book/ content)
+- **Commit message**: Format as `en QA fixes: <brief description>` (e.g., "万分之五 rate, dibao gloss, 轻伤二级 grade, non-epidural")
+- **Push strategy**: Always push fixes immediately after verification — QA is not complete until fixes are committed and pushed to the branch
+- **Verification after fix**: Re-run assembly and compare against the fixed book/ file expecting only the intended diff lines (counters/sources must remain byte-identical)
+
+**Pitfall**: Direct editing of book/ files without updating units causes reassembly to clobber fixes. Always fix units first, then reassemble, then verify the diff is exactly what you intended.
