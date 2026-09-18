@@ -109,6 +109,28 @@
 
 **Pitfall**: Invented terms confuse readers and undermine translation credibility. Always verify against source corpus.
 
+### 11. Legal/Regulation Term Handling
+
+**Technique**: Preserve byte-for-byte with descriptive context, never translate
+
+**Rule**: Chinese legal/regulation titles (法律, 法规, 条例, etc.) and document codes remain in original Chinese with brief Russian context in parentheses. Never translate the legal terms themselves.
+
+**Examples**:
+- Chinese: '治安管理处罚法'
+- Russian: '治安管理处罚法 (закон об административных наказаниях)'
+- Chinese: '刑法第二百三十四条'
+- Russian: '刑法第二百三十四条 (статья 234 Уголовного кодекса)'
+- Chinese: '国食药监办〔2010〕432号'
+- Russian: '国食药监办〔2010〕432号 (документ Государственного управления по контролю за лекарствами)'
+
+**Implementation**: 
+- Legal terms stay as Chinese characters
+- Add Russian description in parentheses immediately after
+- Document codes (国食药监办〔2010〕432号) also preserved byte-for-byte with context
+- Never translate "法", "条例", "规定", "办法" etc. — these are legal category markers
+
+**Pitfall**: Translating legal terms creates ambiguity about which jurisdiction's law is referenced. Always preserve original Chinese legal terms with contextual explanation.
+
 ## Implementation Rules
 
 - **Always use square brackets [ ]** for localization annotations
