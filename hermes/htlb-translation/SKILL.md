@@ -63,6 +63,7 @@ write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SR
 - 成本 → Стоимость
 - 说人话 → Простыми словами
 - 收益 → Эффект
+- Выгода → Эффект (legacy label must be replaced with Эффект)
 - 证据等级 → Уровень доказательности (A/B/C remain)
 - 备注 → Примечания
 - All numbers/dosages are byte-for-byte (§ numbers remain)
@@ -150,10 +151,11 @@ The watchdog:
 - Never infer permission to commit/branch/PR from "task done" — always require explicit ask in the same turn
 - Always leave §TAG§ and §SRC§ placeholders intact in units — they are filled later by assemble.py
 - Numbers must be byte-for-byte; never add or remove numbers from "Эффект"
-- Field markers must be exact: 成本→Стоимость, 说人话→Простыми словами, etc.
+- Field markers must be exact: 成本→Стоимость, 说人话→Простыми словами, **收益/Выгода→Эффект**, etc.
 - Do not translate sources — they are injected byte-by-byte by assemble.py
 - Watchdog only reports when something is wrong or complete; silent during normal progress
 - Load this skill before any translation work to ensure correct field markers and workflow
+- **Legacy label trap**: New translations sometimes use '- Выгода:' instead of '- Эффект:'. This breaks the web parser (regex expects 'Эффект'), causing 'Эффект' blocks to disappear from the site. Always replace 'Выгода' with 'Эффект' in all units before assembly.
 
 ## Subagent Pitfall
 
@@ -180,6 +182,8 @@ The watchdog:
 - **Units and measurements**: Convert Chinese units to metric/Russian equivalents where appropriate (e.g. 'цзинь (≈500 г)', 'ли (≈500 м)')
 - **Hot-line analog placement**: Chinese emergency numbers (120, 110, 12356, 96110, etc.) remain in item titles as original realia; Russian equivalents are moved to translator notes at chapter start (see `references/localization-techniques.md` technique 9)
 - **Term validation**: Never add invented Chinese terms 'pro запас' — verify all terms exist in book/*.md using grep before adding to localization examples (see `references/localization-techniques.md` technique 10)
+- **Numeric conversion trap**: Chinese 万/亿/千/万亿 must be converted to Russian тыс/млрд/млрд/трлn with correct magnitude — verify conversions against original CN values (e.g., 90895.5 亿 = 9 089.55 млрд, not 90895.5 млрд)
+- **Number preservation**: Numbers in 'Простыми словами' must match CN 说人话 — if CN says '9.6 万人', RU should say '96 000 человек', not reuse '96,217' from 'Эффект' section
 - **See**: `references/localization-techniques.md` for complete catalog of 10 localization techniques with examples
 
 ## Web UI Layout Optimization
@@ -324,7 +328,8 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Verification workflow**: Use separate subagents for each quality aspect (natural language, localization consistency, field markers) with strict 'work = write reports' instruction
 - **Verification scope**: Check 5 chapters at a time to maintain speed while catching systemic issues
 - **Fix priority**: Natural language issues > localization consistency > field marker accuracy
-- **Unit-based QA (proven 2026-09-18)**: For source fidelity checks, slice into small units (~10 line pairs) and run parallel verification subagents that write verdict JSON files (no file editing). Aggregate issues programmatically and apply fixes centrally. See `references/subagent-instructions.md` for unit QA script details.
+- **Unit-based QA (proven 2026-09-18)**: For source fidelity checks, slice into small units (~10 line pairs) and run parallel verification subagents that write verdict JSON files (no file editing). Aggregate issues programmatically and apply fixes centrally. See `references/subagent-instructions.md` for unit QA script details
 - **Reference**: `references/natural-language-verification.md` for detailed verification instructions and quality standards
-- **Web UI capitalization**: For web interfaces (index.html, README.ru.md), apply automatic capitalization to field values (Простыми слова, Эффект, Примечания) using conditional logic in the parser. See `references/web-ui-capitalization.md` for implementation details and QA procedures.
-- **Consolidated playbook**: `docs/translation-playbook.md` in the repo is the single source of truth for the whole method (pipeline, subagent contracts, verification, post-waves, web, upstream, EN-launch checklist). Read it before launching another-language translation; this skill keeps only the operational bits.
+- **Web UI capitalization**: For web interfaces (index.html, README.ru.md), apply automatic capitalization to field values (Простыми слова, Эффект, Примечания) using conditional logic in the parser. See `references/web-ui-capitalization.md` for implementation details and QA procedures
+- **Consolidated playbook**: `docs/translation-playbook.md` in the repo is the single source of truth for the whole method (pipeline, subagent contracts, verification, post-waves, web, upstream, EN-launch checklist). Read it before launching another-language translation; this skill keeps only the operational bits
+- **Verify.py gate**: Always run `tools/verify.py <NN> --lang ru|en` before committing. Common failure modes and fixes are documented in `references/verify-gate-handling.md`
