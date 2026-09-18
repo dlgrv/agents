@@ -40,7 +40,7 @@ This workflow extends the core Chinese-to-Russian translation process for HowToL
 
 ### Common issues to catch
 - **Model timeout:** Long chapters may timeout (e.g., ch13 took 3 attempts). Retry with identical prompt + shorter timeout (1000s)
-- **CJK contamination:** Only byte-identical link targets are permitted (e.g., `../docs/遇到陌生人出事该不该停.md`)
+- **CJK contamination:** Only byte-identical link targets are permitted (e.g. `../docs/遇到陌生人出事该不该停.md`) and machine zone comments (`<!-- 成本标签: ... -->`). All other CJK indicates a translation error.
 - **Invented facts:** Watch for added numbers or claims not in source
 - **Punctuation errors:** Replace Chinese punctuation with English equivalents
 

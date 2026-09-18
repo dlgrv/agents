@@ -227,6 +227,7 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Fork main merge**: Only after complete translation, merge `translation/en` → `main` in fork, then delete branch
 - **PR workflow**: Create PR from `translation/en` to `main` in fork, auto-merge if fast-forward, close after merge
 - **Quality check**: After each wave, verify byte-identical sources, field labels, and no Chinese characters in visible text (regex `\u4e00-\u9fff`)
+- **CJK false positives**: Some legal/regulation titles contain CJK characters in the middle of English text (e.g., "The General Office of the State Council measures in April 2026 on accelerating the building of pooling region (统筹地区 — the locality where you are insured)"). These are valid and should not trigger warnings; grep for `\u4e00-\u9fff` should exclude lines with known gloss patterns like `(统筹地区 — ...)` or `(副主任医师 — ...)`
 
 ## Issue Management for External Repositories
 
