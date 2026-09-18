@@ -52,7 +52,7 @@
 - Chinese: '国食药监办〔2010〕432号'
 - Russian: '国食药监办〔2010〕432号 (документ Государственного управления по контролю за лекарствами)'
 - Chinese: '最高法知民终51号'
-- Russian: '最高法知民终51号 (решение Верховного суда по интеллектуальным правам)'
+- Russian: '最高法知民终51号 (решение Верховного суда по интеллектуальных правам)'
 
 ### 6. Cultural Concepts
 
@@ -83,6 +83,31 @@
 - Russian: 'реформы и открытость [политика КПК с 1978 года]'
 - Chinese: '文化大革命'
 - Russian: 'Культурная революция [1966-1976, период политических потрясений]'
+
+### 9. Hot-Line Analog Placement
+
+**Technique**: Place Russian analogs in translator notes, not in item titles
+
+**Rule**: Chinese emergency numbers (120, 110, 12356, 96110, etc.) remain in item titles as original realia; Russian equivalents are moved to translator notes at chapter start.
+
+**Example**:
+- ❌ Title: '2. Обнаружили обман — сразу позвоните на 110 (в России — 102) или 96110 (антифрод-линия; в России похожая функция у банка и у 8-800 МВД — но прямого аналога нет)'
+- ✅ Title: '2. Обнаружили обман — сразу позвоните на 110 или антифрод-линию 96110'
+- ✅ Translator note: 'при звонке на 110 в России аналог — 102 (полиция), у антифрод-линии 96110 прямого российского аналога нет — похожую функцию выполняют банк и горячая линия МВД 8-800'
+
+**Pitfall**: Never move Chinese emergency numbers from titles — they are original realia. Only Russian analogs go to notes.
+
+### 10. Term Validation
+
+**Technique**: Only include real Chinese terms from the book corpus
+
+**Rule**: Never add invented terms 'pro запас' (in advance). Verify all Chinese terms exist in book/*.md using grep before adding to localization examples.
+
+**Example**: 
+- ❌ Invented: 'фэйцзюй (非居 — внебрачный/нелегальный статус жилья)'
+- ✅ Real: 'гунцзицзинь (公积金 — жилищный накопительный фонд)'
+
+**Pitfall**: Invented terms confuse readers and undermine translation credibility. Always verify against source corpus.
 
 ## Implementation Rules
 

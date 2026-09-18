@@ -157,7 +157,9 @@ The watchdog:
 - **Country-specific procedures**: Add translator's comments in brackets for procedures that vary by country: '[в Китае — процедура X, в РФ — процедура Y]'
 - **Realia glossing**: For culturally specific terms, add translator's notes: '[в Китае: X — традиционная практика Y]'
 - **Units and measurements**: Convert Chinese units to metric/Russian equivalents where appropriate (e.g. 'цзинь (≈500 г)', 'ли (≈500 м)')
-- **See**: `references/localization-techniques.md` for complete catalog of 8 localization techniques with examples
+- **Hot-line analog placement**: Chinese emergency numbers (120, 110, 12356, 96110, etc.) remain in item titles as original realia; Russian equivalents are moved to translator notes at chapter start (see `references/localization-techniques.md` technique 9)
+- **Term validation**: Never add invented Chinese terms 'pro запас' — verify all terms exist in book/*.md using grep before adding to localization examples (see `references/localization-techniques.md` technique 10)
+- **See**: `references/localization-techniques.md` for complete catalog of 10 localization techniques with examples
 
 ## Source Title Retrofits
 
@@ -169,6 +171,15 @@ The watchdog:
 - **Verification**: After retrofit, verify that all source lines with Chinese titles have the annotation, while English-only source lines remain untouched
 - **Batch processing**: Use balanced batches of 4-6 chapters per subagent to maintain speed and consistency
 
+## Documentation Articles Translation
+
+- **Scope**: Translate four long docs articles (家庭应急装备清单, 结婚划不划算, 遇到陌生人出事该不该停, 做平台要办哪些证) referenced by chapters and README
+- **Volume**: 2.5K/3.2K/1.8K/2K hanzi, 89/123/55/69 lines respectively — small enough for one parallel wave of 4 subagents
+- **Workflow**: Same as chapters (digest → units → translation → assemble), but units are smaller (5-10 lines per unit)
+- **Integration**: After translation, update all chapter and README links from `(на китайском)` to point to new Russian docs files
+- **Quality**: Apply same field markers, localization rules, and QA as main chapters; verify cross-references work correctly
+- **Pitfall**: Do not skip these — they are the only remaining Chinese content in the Russian edition and actively referenced
+
 ## Issue Management for External Repositories
 
 - **Issue title**: Always keep issue title in the target language only (no mixed languages)
@@ -179,6 +190,17 @@ The watchdog:
 - **Third-party comments**: Remove non-target-language comments from other users (keep only target-language comments)
 - **Issue description**: Update to reflect current status (complete/in progress) with live links to fork/PR
 
+## Fork Main Branch Merging
+
+- **Timing**: Merge `translation/ru` → `main` in the fork when the translation is complete (not before)
+- **Prerequisite**: Ensure `translation/ru` is based on latest `fork/main` (check with `git merge-base`)
+- **Fast-forward**: If no conflicts (typical), merge directly; else resolve conflicts manually
+- **Branch cleanup**: After merge, delete `translation/ru` unless explicitly kept for ongoing work
+- **PR workflow**: Create PR in fork (dlgrv/HowToLiveBetter) from `translation/ru` to `main`, auto-merge if fast-forward, close after merge
+- **Author notification**: Provide clean link to fork's main branch (without branch name in URL) for author's README
+- **Pages option**: Enable GitHub Pages in fork for live web reading at `dlgrv.github.io/HowToLiveBetter/`
+- **Pitfall**: Never merge incomplete translations — wait until all chapters and docs articles are done
+
 ### Issue Management Workflow
 
 1. Update issue title to reflect target language only
@@ -186,6 +208,8 @@ The watchdog:
 3. Update issue body with current status and live links
 4. Preserve author's response comments (even if not in target language)
 5. Add brief English note if needed for clarity
+
+**Pitfall**: Issue title must be in target language only — mixed titles confuse readers and violate repository conventions.
 
 ### Example Issue Structure
 
@@ -211,4 +235,5 @@ The watchdog:
 - **Verification workflow**: Use separate subagents for each quality aspect (natural language, localization consistency, field markers) with strict 'work = write reports' instruction
 - **Verification scope**: Check 5 chapters at a time to maintain speed while catching systemic issues
 - **Fix priority**: Natural language issues > localization consistency > field marker accuracy
+- **Unit-based QA (proven 2026-09-18)**: For source fidelity checks, slice into small units (~10 line pairs) and run parallel verification subagents that write verdict JSON files (no file editing). Aggregate issues programmatically and apply fixes centrally. See `references/subagent-instructions.md` for unit QA script details.
 - **Reference**: `references/natural-language-verification.md` for detailed verification instructions and quality standards
