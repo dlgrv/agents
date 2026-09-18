@@ -90,6 +90,37 @@ write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SR
 - No exclamation marks
 - Headers with verbs
 
+### Web UI Capitalization Rules
+
+When translating content for web interfaces (such as the Russian index.html and README.ru.md), apply automatic capitalization to field values:
+
+- **Простыми словами values**: Capitalize first letter (e.g., 'пристёгнутый ремень...' → 'Пристёгнутый ремень...')
+- **Эффект values**: Capitalize first letter (e.g., 'по оценке...' → 'По оценке...')
+- **Примечания values**: Capitalize first letter (e.g., 'цифры NHTSA...' → 'Цифры NHTSA...')
+
+**Implementation**: Add `if (LANG==='ru') entry.human = entry.human.replace(/^\s*(.)/, (c)=>c.toUpperCase());` to the parser logic for each field. This ensures consistent capitalization across all translated entries in the web interface while preserving the original lowercase formatting in markdown files.
+
+**Pitfall**: Do not apply this capitalization to the field labels themselves (Стоимость, Эффект, Примечания), only to their values. Field labels should remain as defined in the field marker rules.
+
+## Intro Paragraph Layout Optimization
+
+Russian text in chapter introductions is longer than the Chinese original; the default `.intro{max-width:72ch}` leaves dead space on the right while cards run to 900px. Fix: `.intro{max-width:100%}` in index.html only (never touch markdown). Scope and verification: `references/intro-layout-optimization.md`.
+
+## Sidebar UI Capitalization Rules
+
+When working with sidebar filter chips in Russian web interfaces, apply consistent capitalization to all user-facing chip labels:
+
+- **Chip labels**: All filter chips must start with a capital letter (e.g., 'очень высокая' → 'Очень высокая', 'жизнь' → 'Жизнь')
+- **Money chips**: Special case — Chinese-derived chips (少/多) must be translated to Russian with capitalization: 'Мало' / 'Много'
+- **Card badge labels**: Values in the LABEL map (e.g., 'бесплатно' → 'Бесплатно', 'небольшие траты' → 'Небольшие траты') must also be capitalized for consistency
+- **Section header alignment**: Use CSS `flex-direction: column` and `align-items: flex-start` for `.gt` elements to prevent header/helper text overlap on mobile screens
+
+**Implementation**: During web interface updates, systematically replace all lowercase chip labels with capitalized versions using regex or string replacement. Verify that `data-v` attributes remain unchanged to preserve filter functionality.
+
+**Pitfall**: Preserve `data-v` values (e.g., 少, 多, 否, 是) unchanged — these are internal filter keys, not user-facing text. Only update the visible chip text labels.
+
+**Quality Check**: After applying capitalization, verify that no Chinese characters remain in visible text by scanning for `\u4e00-\u9fff` ranges in chip labels and card badge text.
+
 ## 3. Assembly and Validation
 
 When all units of a chapter are translated, use `assemble.py` to inject sources and validate:
@@ -160,6 +191,16 @@ The watchdog:
 - **Hot-line analog placement**: Chinese emergency numbers (120, 110, 12356, 96110, etc.) remain in item titles as original realia; Russian equivalents are moved to translator notes at chapter start (see `references/localization-techniques.md` technique 9)
 - **Term validation**: Never add invented Chinese terms 'pro запас' — verify all terms exist in book/*.md using grep before adding to localization examples (see `references/localization-techniques.md` technique 10)
 - **See**: `references/localization-techniques.md` for complete catalog of 10 localization techniques with examples
+
+## Web UI Layout Optimization
+
+When working with Russian web interfaces (index.html), be aware of layout constraints that may cause visual imbalance between text sections:
+
+- **Intro paragraph width constraint**: The `.intro` CSS class limits line length to 72 characters (~600px), while content cards extend to 900px. For longer Russian text, this creates excessive whitespace to the right of the introduction.
+- **Fix**: Remove `max-width:72ch` and set `max-width:100%` for `.intro` to match card layout and eliminate visual imbalance.
+- **Scope**: This optimization applies only to web interfaces, not markdown source files.
+- **Verification**: After applying the fix, confirm that intro text flows naturally across the full width without awkward line breaks or excessive whitespace.
+- **Reference**: `references/intro-layout-optimization.md` for detailed implementation instructions and quality assurance procedures.
 
 ## Source Title Retrofits
 
@@ -237,3 +278,5 @@ The watchdog:
 - **Fix priority**: Natural language issues > localization consistency > field marker accuracy
 - **Unit-based QA (proven 2026-09-18)**: For source fidelity checks, slice into small units (~10 line pairs) and run parallel verification subagents that write verdict JSON files (no file editing). Aggregate issues programmatically and apply fixes centrally. See `references/subagent-instructions.md` for unit QA script details.
 - **Reference**: `references/natural-language-verification.md` for detailed verification instructions and quality standards
+- **Web UI capitalization**: For web interfaces (index.html, README.ru.md), apply automatic capitalization to field values (Простыми слова, Эффект, Примечания) using conditional logic in the parser. See `references/web-ui-capitalization.md` for implementation details and QA procedures.
+- **Consolidated playbook**: `docs/translation-playbook.md` in the repo is the single source of truth for the whole method (pipeline, subagent contracts, verification, post-waves, web, upstream, EN-launch checklist). Read it before launching another-language translation; this skill keeps only the operational bits.

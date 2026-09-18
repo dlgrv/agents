@@ -57,6 +57,10 @@ See `references/localization-techniques.md` for the full catalog:
 - Always verify that numeric values and statistical terms (HR/RR/OR/CI) are unchanged after applying edits.
 - **Unit-based QA for retrofits:** When checking inserted [рус. «…»] in source lines, split large batches into units of 10–15 lines per subagent. Whole-chapter checks are slow (50+ minutes) and prone to timeout; unit-based QA completes in 1–3 minutes per unit. Subagents must write only JSON verdicts — no file edits — to avoid conflicts in shared worktrees.
 - **QA verdict workflow:** After subagent reports, aggregate issues centrally and fix using exact string matching with patch. Never let multiple agents write to the same files during QA.
+- **Chinese punctuation artifacts:** Watch for stray Chinese punctuation in Russian text (e.g. `，` instead of `,` or `… …` instead of `…`). Use regex to scan for these patterns and replace them with proper Russian equivalents.
+- **Double ellipsis fix:** Loading status text may contain `… …` due to copy-paste artifacts from animated elements. Replace with single `…` and check CSS for ::after animations that could reintroduce the issue.
+- **UI layout sync:** After text updates, re-check CSS for layout issues like misaligned headings (flexbox wrapping, text overflow) — Russian text is longer and may break responsive layouts.
+- **GitHub Pages deployment:** After pushing commits, wait 50+ seconds for GitHub Pages propagation before verifying live site changes; use `curl -s <url> | grep -o 'text pattern'` to confirm fixes.
 
 ## Verification checklist
 
@@ -78,4 +82,5 @@ See `references/localization-techniques.md` for the full catalog:
 - Localization techniques: `references/localization-techniques.md`
 - Retrofit QA workflow: `references/retrofit-qa.md`
 - Server pipeline: `../translation/references/server-pipeline.md`
+- Website deployment: `references/website-deployment.md`
 - TRANSLATION.md template: `../translation/templates/TRANSLATION.md`
