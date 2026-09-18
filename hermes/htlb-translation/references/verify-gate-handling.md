@@ -34,7 +34,7 @@ sed -i 's/25007.5 млрд/2 500.75 млрд/g' book/ru/*.md
 grep -n "96,217" /root/htlb-run-ru/01/units/33.md  # Find instances
 grep -o "9.6 万" book/01-不要早死.md  # Check CN original
 # Replace '96,217' with '96 000' in Простыми словами section
-sed -i '/Простыми слова/,/Выгода:/ s/96,217/96 000/g' /root/htlb-run-ru/01/units/33.md
+sed -i '/Простыми слова/,/Эффект:/ s/96,217/96 000/g' /root/htlb-run-ru/01/units/33.md
 ```
 **Rule**: 'Простыми словами' must use rounded/approximate numbers from CN 说人话, not precise stats from 'Эффект'
 
@@ -58,6 +58,24 @@ grep -r "когорт\|популяц" book/ru/ | head  # Find instances
 # популяц → группа населения (for population)
 ```
 **Rule**: Use natural Russian terminology, not literal translations of Chinese academic terms
+
+### 6. Comma Format False Positives
+**Problem**: Numbers with comma format like '20,024' or '60,000 IU' trigger false positives in verify.py due to comma parsing rules
+**Root cause**: Comma after '0' is interpreted as decimal separator in RU format
+**Fix**:
+```bash
+grep -o "[0-9]*,[0-9]*" book/ru/*.md | head  # Find comma-formatted numbers
+# Replace with space format to avoid FP:
+sed -i 's/20,024/20 024/g' /root/htlb-run-ru/01/units/33.md
+sed -i 's/60,000 IU/60 000 IU/g' /root/htlb-run-ru/06/units/03.md
+```
+**Rule**: Use space format '20 024' instead of comma format '20,024' for numbers in RU text to avoid verify FP
+
+## Known FP verify.py (not to be crudely fixed)
+- "60,000 IU" in RU text is read as decimal (comma = thousands only if not "0..."; one line in ru06). Fix: replace with "60 000 IU" to avoid false positive.
+- CN "250 多万粉丝" vs EN paraphrase without number — en09, requires text-level resolution, not script fix.
+- Real findings from first run 53/62: calques "когорт" ×13 (ch. 13/28/29/30), "популяц" ×2 (ch. 29), missing numbers in ru10/ru11 — material for a fix wave.
+- CJK gloss false positives: Legal titles in English text with CJK characters (e.g., "统筹地区 — ...") are allowed and should not trigger warnings. Verify regex excludes gloss patterns like `(统筹地区 — ...)` or `(副主任医师 — ...)`.
 
 ## Pre-Commit Verification Checklist
 

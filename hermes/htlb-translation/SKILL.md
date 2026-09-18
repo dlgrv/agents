@@ -312,10 +312,11 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **`tools/verify.py <NN> --lang ru|en [--file X]`** — гейт перед коммитом: заголовки/теги/поля/источники (байт-тождество с допуском [рус. «…»]/[eng. "…"] ретрофитов), числа в пространстве ЗНАЧЕНИЙ (万/亿/千/万亿 ↔ тыс/млн/млрд/трлн, прописные числительные, месяцы, дистрибутивный масштаб «от 81 до 138 тыс.» = «8.1 万 到 13.8 万»; исчезло = FAIL, стало реже = WARN), CJK вне легальных зон (источники/теги/глоссы/цитаты-реалии/блок «Примечание переводчика»), запрещённые кальки ≤1 на файл (RU), jargon HR/RR/OR/CI в строке «Простыми словами/In plain terms» (WARN, оба языка). Пишет tools/.status/<NN>-<lang>.ok для status.py.
 - **`tools/status.py [NN…]`** — дашборд волны: файлы RU/EN, свежесть verify-маркера («изм.» = правили после проверки), прогресс юнитов /root/htlb-run, активные волны.
 
-### Известные FP verify.py (не лечить грубо)
-- «60,000 IU» в RU-тексте читается как десятичная (запятая = тысячи, только если целая часть не «0…»; одна строка в ru06).
-- CN «250 多万粉丝» vs EN-парафраз без числа — en09, требует решения по тексту, не по скрипту.
-- Реальные находки первого прогона 53/62: кальки «когорт» ×13 (гл. 13/28/29/30), «популяц» ×2 (гл. 29), пропавшие числа в ru10/ru11 — материал для правочной волны.
+### Known FP verify.py (not to be crudely fixed)
+- "60,000 IU" in RU text is read as decimal (comma = thousands only if not "0..."; one line in ru06). Fix: replace with "60 000 IU" to avoid false positive.
+- CN "250 多万粉丝" vs EN paraphrase without number — en09, requires text-level resolution, not script fix.
+- Real findings from first run 53/62: calques "когорт" ×13 (ch. 13/28/29/30), "популяц" ×2 (ch. 29), missing numbers in ru10/ru11 — material for a fix wave.
+- CJK gloss false positives: Legal titles in English text with CJK characters (e.g., "统筹地区 — ...") are allowed and should not trigger warnings. Verify regex excludes gloss patterns like `(统筹地区 — ...)` or `(副主任医师 — ...)`.
 
 ## Quality Assurance Techniques
 
