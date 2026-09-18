@@ -169,6 +169,37 @@ The watchdog:
 - **Verification**: After retrofit, verify that all source lines with Chinese titles have the annotation, while English-only source lines remain untouched
 - **Batch processing**: Use balanced batches of 4-6 chapters per subagent to maintain speed and consistency
 
+## Issue Management for External Repositories
+
+- **Issue title**: Always keep issue title in the target language only (no mixed languages)
+- **Issue body**: Use target language only, with brief English note if needed
+- **Comments**: Remove all comments not in the target language (user's or third-party)
+- **Fork maintenance**: Translations live in fork; issue tracks progress and links to PR
+- **Author responses**: Preserve non-target-language comments from repository owner (do not delete author's own comments)
+- **Third-party comments**: Remove non-target-language comments from other users (keep only target-language comments)
+- **Issue description**: Update to reflect current status (complete/in progress) with live links to fork/PR
+
+### Issue Management Workflow
+
+1. Update issue title to reflect target language only
+2. Clean up comments: remove non-target-language comments (except author's own)
+3. Update issue body with current status and live links
+4. Preserve author's response comments (even if not in target language)
+5. Add brief English note if needed for clarity
+
+### Example Issue Structure
+
+**Title**: `Russian translation (俄语版) — tracked in PR #7 / fork`
+
+**Body (target language + brief English)**:
+- Complete status in target language
+- Link to fork README for live reading
+- Link to PR for changelog
+- Translation conventions summary
+- Brief English note about future English version
+
+**Comments**: Only target-language comments (remove user's mixed-language comments)
+
 ## Quality Assurance Techniques
 
 - **Parallel subagent verification**: After translation wave, run verification subagents to check:

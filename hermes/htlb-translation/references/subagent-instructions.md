@@ -63,3 +63,16 @@ Write result back to /root/htlb-run/16/units/01.md immediately. No analysis, no 
 - Do not let subagents study existing chapters for style — provide a style sample in the task instead
 - Subagents must not return JSON summaries — only write the translated unit file
 - If a subagent stalls, restart it with stricter instructions: 'work = write files, no analysis'
+
+## Unit-based QA (proven 2026-09-18)
+
+Slice for checks too, not just for translation: QA of 316 source lines ran as 32 units (~10 line pairs each) over 8 parallel subagents — done in ~12 min vs 50+ min for whole-chapter batches, zero stalls. Recipe:
+- Generate unit files containing ZH original + RU line pairs and a 3-point instruction header (translation correct / position correct / payload intact).
+- Subagents are READ-ONLY: they write only verdict JSON (`{unit, checked, issues:[{file,line,problem}]}`), fixes are applied centrally by the orchestrator. Never let QA subagents edit book/ in a shared worktree.
+- Verify verdict count == unit count before aggregating; aggregate issues in Python, not by hand.
+
+### Verification-script gotchas (caused false mismatches)
+
+- Strip insertions to compare payload with the original: `[рус. «…»]` titles may contain NESTED «…» quotes — strip from `' [рус. '` to the next `]`, not with a `[^»]*»` regex (nested-quotes lines fail otherwise, e.g. ch17).
+- RU label is `- Источники:` with an optional trailing space (chapter-wide convention); ZH is `- 来源：` with none — normalize `^- Источники:\s?` vs `^- 来源：` before comparing, else every line 'differs'.
+- Compare per-line after label strip, not whole-file; label bytes must not leak into the diff.

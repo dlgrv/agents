@@ -55,6 +55,8 @@ See `references/localization-techniques.md` for the full catalog:
 - For Chinese-to-Russian translation, calques of Chinese bureaucratic phrasing are common — use MQM fluency dimension to identify and fix these.
 - Check specifically for calques in the 'Простыми словами' field: these must read as natural Russian speech.
 - Always verify that numeric values and statistical terms (HR/RR/OR/CI) are unchanged after applying edits.
+- **Unit-based QA for retrofits:** When checking inserted [рус. «…»] in source lines, split large batches into units of 10–15 lines per subagent. Whole-chapter checks are slow (50+ minutes) and prone to timeout; unit-based QA completes in 1–3 minutes per unit. Subagents must write only JSON verdicts — no file edits — to avoid conflicts in shared worktrees.
+- **QA verdict workflow:** After subagent reports, aggregate issues centrally and fix using exact string matching with patch. Never let multiple agents write to the same files during QA.
 
 ## Verification checklist
 
@@ -74,5 +76,6 @@ See `references/localization-techniques.md` for the full catalog:
 
 - MQM quality rubric: `../translation/references/quality-rubric.md`
 - Localization techniques: `references/localization-techniques.md`
+- Retrofit QA workflow: `references/retrofit-qa.md`
 - Server pipeline: `../translation/references/server-pipeline.md`
 - TRANSLATION.md template: `../translation/templates/TRANSLATION.md`
