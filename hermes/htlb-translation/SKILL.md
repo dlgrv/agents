@@ -27,7 +27,7 @@ Each chapter is split into units by `tools/digest.py`. Units are stored in `/roo
 
 ```bash
 # Prepare run directory for a chapter (e.g. chapter 16)
-cd ~/github/htlb-ru
+cd ~/github/HowToLiveBetter
 mkdir -p /root/htlb-run/16/units
 cp tools/digest/16/units/*.md /root/htlb-run/16/units/
 for n in 00 01 02 03 04 05 06 07; do echo "§TAG§" >> /root/htlb-run/16/units/$n.md; echo "§SRC§" >> /root/htlb-run/16/units/$n.md; done
@@ -108,7 +108,7 @@ When working with sidebar filter chips in Russian web interfaces, apply consiste
 When all units of a chapter are translated, use `assemble.py` to inject sources and validate:
 
 ```bash
-cd ~/github/htlb-ru
+cd ~/github/HowToLiveBetter
 python3 tools/assemble.py /root/htlb-run/16
 ```
 
@@ -192,6 +192,26 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Verification**: After applying the fix, confirm that intro text flows naturally across the full width without awkward line breaks or excessive whitespace.
 - **Reference**: `references/intro-layout-optimization.md` for detailed implementation instructions and quality assurance procedures.
 
+## Trilingual Web UI (ru/en/zh)
+
+- **index.html is now trilingual**: `LANG` accepts `ru|en|zh`; data source per lang: ru → `README.ru.md`+`book/ru/`, en → `README.md`+`book/en/`, zh → `README.zh.md`+`book/`. Language switcher = `<details class="lang-dd">` dropdown top-right in `.nav-r` (click on menu item → `__setLang` → `?lang=` + localStorage `htlb-lang`).
+- **Machine tag keys stay CJK everywhere**: `data-v` attrs (少/多/否/些/是/极高/高/一般/死亡率/金钱/时间/自由), the `<!-- 成本标签: ... -->` parser, ratio computation, and `COST_W` weights are language-independent keys; only visible labels come from the `I18N[LANG]` dict (`T().ratio/lens/moneyL2/timeL2/willL2`). Never translate `data-v` values.
+- **Field-label parser regexes are tri-lingual**: `- (?:成本|Стоимость|Cost)` etc. for all six fields; glossary heading regex has an EN branch (`/^## Reading the numbers/`), and the glossary header-row skip must include `Term` as well as `термин`.
+- **Contested/TODO detection is per-lang**: dispute = zh `争议`, ru `Спорно`, en `Contested` (regex branch on LANG); todo matches `待核实|TODO|to be verified`.
+- **Capitalization of field values**: ru and en yes (T().cap), zh no — values in zh files start without capital.
+- **Testing without a real browser**: browser tool blocks localhost. Use jsdom (`npm i jsdom` in /tmp) with `runScripts:'dangerously'`, polyfill fetch (read files from repo dir), IntersectionObserver, PerformanceObserver, requestAnimationFrame, scrollTo; then assert per-lang: title, htmlLang, field labels, chips text, cards=498, sections=31, glossary terms, dispute/todo badge counts, filter clicks (Freedom → 82), search. Extract single big script; don't eval script blocks concatenated naively (`const` collisions).
+- **Default language = navigator.language** (`ru*/zh*/en*` prefix match, unknown → `en`); priority: `?lang=` > localStorage > system > `en`.
+- **Full-page i18n audit checklist** (things easy to miss): `meta description/keywords/author`, `og:title/description/locale/site_name`, `twitter:*`, JSON-LD `@graph[].name/description/abstract/inLanguage/about` (rewrite at runtime via `JSON.parse` → mutate → `textContent`), nav button `aria-label`/`title` (menu, theme, GitHub, README icon — README icon `href` must also switch: `README.ru.md`/`README.md`/`README.zh.md`), the dynamically built "All sections" chip (use `T().allSections` in its template, not a hardcoded string), `<html lang>`. Audit by rendering with jsdom and scanning every UI surface for foreign-language text; card-body CJK/RU "leaks" that are legitimate: transliteration+gloss `(低保 — …)` and Chinese law titles in descriptive references (per TRANSLATION.md convention).
+- **When patching a large JS dict programmatically, anchor on exact unique strings and re-verify structure after each batch** (`const I18N` count==1, `function T()` count==1, file still ends with `</html>`, `node --check` on the extracted main script). Splitting on `'   cap:true },'` misplaces the zh block because zh ends `'cap:false }'` without comma — locate each dict's tail individually before inserting.
+## Per-language Pages URLs
+
+- Live URLs: root `/` = auto-detect (`navigator.language` → fallback `en`, then `?lang=`/localStorage), `/ru/`, `/en/`, `/zh/` = forced language. The upstream author can link any of them directly from the original README.
+- **Mechanism**: subdir `index.html` files are GENERATED from root `index.html` via `tools/build_pages.py` (run from repo root after every root-file edit; commit the outputs). The generator swaps the bootstrap placeholder after `<head>` for `<script>window.__HTLB_LANG__='<lang>';window.__HTLB_BASE__='../';</script>` and rewrites canonical/og:url to `https://dlgrv.github.io/HowToLiveBetter/<lang>/`.
+- **Relative-path trap**: subdir pages sit one level deeper, so every relative fetch (`README.ru.md`, `book/ru/…`) must be prefixed with `../`. The page does this itself: when `__HTLB_BASE__` is set it wraps `window.fetch` (skips absolute, `/`-rooted and `../` URLs). CSS/`og.png` refs are either absolute or inline.
+- `__setLang(l)` navigates to `new URL(l+'/', new URL(BASE||'.', location.href))` — works both from root and from any subdir.
+- Editing rule: change ONLY root `index.html`, then regenerate; never hand-edit `ru|en|zh/index.html`.
+- **Upstream links to the fork** (author cites dlgrv in upstream README): after EN-primary merge the two referenced targets stay valid — `blob/main/README.ru.md` (file kept, only header lines edited) and Pages root (index.html untouched by EN branch; site rebuilds from main). Verify with API `contents?ref=main` 200 + HTML HEAD 200.
+
 ## Source Title Retrofits
 
 - **Chinese article/document titles**: Add Russian translation in brackets immediately after Chinese title: `中国人健康指南 [рус. «Руководство по здоровью китайцев»]`
@@ -272,6 +292,13 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - Brief English note about future English version
 
 **Comments**: Only target-language comments (remove user's mixed-language comments)
+
+## Clone & Publication Rules (2026-09-18)
+
+- Локальный клон: `~/github/HowToLiveBetter` (раньше был `~/github/htlb-ru` — переименован, имя «ru» вводило в заблуждение; пайплайн двуязычный CN→RU/EN). Не использовать старый путь.
+- **Публикация в main форка — ТОЛЬКО через MR + squash-merge** (правило пользователя): рабочая ветка от `fork/main` → push → `gh pr create --repo dlgrv/HowToLiveBetter` → `gh pr merge N --squash --delete-branch`. Прямой push в main запрещён. Пример: tools-пайплайн опубликован MR #2 (squash → commit `2ad4ab3`).
+- После squash в main — cherry-pick squash-коммита в активные контентные ветки (`translation/en`), чтобы инструменты не разъезжались.
+- В коммиты инструментов не брать transient-состояние: `tools/digest/`, `tools/.status/` (в .gitignore).
 
 ## Pipeline tools (2026-09-18, в репо `tools/`)
 

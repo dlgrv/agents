@@ -62,7 +62,7 @@ print('Numeric match:', set(zh_norm) == set(ru_norm))
 
 ### 1. Individual Chapter Commit
 ```bash
-cd ~/github/htlb-ru
+cd ~/github/HowToLiveBetter
 git add book/ru/<chapter>-<slug>.md
 git commit -m "translation(ru): chapter <chapter>"
 ```

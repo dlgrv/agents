@@ -33,7 +33,7 @@ Each unit file must contain:
 
 ```bash
 # Prepare run directory for a chapter
-cd ~/github/htlb-ru
+cd ~/github/HowToLiveBetter
 mkdir -p /root/htlb-run/<chapter>/units
 cp tools/digest/<chapter>/units/*.md /root/htlb-run/<chapter>/units/
 for n in 00 01 02 ...; do 

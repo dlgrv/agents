@@ -61,6 +61,10 @@ See `references/localization-techniques.md` for the full catalog:
 - **Double ellipsis fix:** Loading status text may contain `… …` due to copy-paste artifacts from animated elements. Replace with single `…` and check CSS for ::after animations that could reintroduce the issue.
 - **Layout sync:** After text updates, re-check CSS for layout issues like misaligned headings (flexbox wrapping, text overflow) — Russian text is longer and may break responsive layouts.
 - **Propagation delay:** After pushing commits, wait 50+ seconds for GitHub Pages propagation before verifying live site changes; use `curl -s <url> | grep -o 'text pattern'` to confirm fixes.
+- **Merge conflicts:** When merging branches, check `.gitignore` for conflicts — automatic merge tools may miss file-specific exclusions like `tools/` directories.
+- **Pages rebuild delay:** GitHub Pages rebuilds take 1-2 minutes after push; always wait before verification to avoid false negatives.
+- **PR auto-merge detection:** GitHub may auto-close and merge a PR when the branch is merged to target — check PR state after merge and add closing comment if needed.
+- **Live site verification:** Verify multiple URLs after deployment: index.html, README.md, sample book chapters, upstream links — single file checks miss cascading failures.
 
 ## English translation extension
 
@@ -72,6 +76,8 @@ This workflow has been extended for Chinese-to-English translation (HowToLiveBet
 - **No retrofit needed:** Unlike Russian, English bodies contain no free-standing Chinese titles to retrofit with [eng. "…"] — CJK confined to machine zones (tags, sources, link targets)
 - **Source preservation:** All source lines (来源：/DOI/URLs) remain byte-identical per QA requirement; only field label punctuation may differ (`：`→`:`)
 - **Status line translation:** Translate visible text in status lines and back-links; keep link targets byte-identical to source
+- **Language detection:** Use `navigator.language` for automatic language selection, fallback to English for unknown languages
+- **Trilingual UI:** Implement language dropdown in top-right corner with expandable toggle
 
 ### Verification checklist
 
@@ -88,6 +94,8 @@ This workflow has been extended for Chinese-to-English translation (HowToLiveBet
 - [ ] Counts preserved after final edits
 - [ ] README.md is English-primary with language switcher
 - [ ] Zero CJK in body text outside machine zones
+- [ ] Language dropdown implemented and functional
+- [ ] Automatic language detection working
 
 ## References
 
