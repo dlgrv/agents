@@ -66,21 +66,14 @@ See `references/localization-techniques.md` for the full catalog:
 
 This workflow has been extended for Chinese-to-English translation (HowToLiveBetter EN project):
 
-- **Prompt engineering:** Use a strict 'one unit per step' loop with immediate file writing. First tool call must be `write_file` of the translated unit.
-- **Conventions in prompt:** Embed all translation rules inline in the prompt (never reference external files). Include specific field mappings (成本→`- Cost:`, 说人话→`- In plain terms:`, etc.), byte-faithful requirements, and explicit warnings against invented facts.
-- **Watchdog automation:** Deploy a cron-based watchdog to monitor delegation logs every 3 minutes and alert if any subagent stalls for ≥6 minutes.
-- **Parallel wave dispatch:** Launch chapters in waves (e.g. 5 chapters per batch) with identical prompts and concurrent watchdog monitoring.
-- **QA automation:** After assembly, verify: heading/item/tag/DOI counts, source line byte-identity, zero CJK outside machine zones (allowed: link targets, §TAG§/§SRC§ placeholders).
-- **Commit strategy:** One commit per completed chapter with descriptive message including verification status (e.g. 'tags/sources byte-identical').
-- **Progress tracking:** Maintain a running tally of completed chapters and use delegate_task status queries to monitor active waves.
+### Core workflow differences
 
-### English-specific pitfalls
-- **Model timeout:** Translation subagents may timeout on long chapters (e.g. ch13 took 3 attempts). Retry with identical prompt + shorter timeout (e.g. 1000s).
-- **CJK in output:** The only allowed CJK outside machine zones is byte-identical link targets (e.g. `../docs/遇到陌生人出事该不该停.md`). All other CJK indicates a translation error.
-- **Slug convention:** English filenames use kebab-case (e.g. `13-Emergencies.md`), not Chinese characters or pinyin.
-- **Status line translation:** Translate visible text in status lines and back-links; keep link targets byte-identical to source.
+- **Primary language shift:** README.md is now English-primary; Chinese original moved to README.zh.md, Russian to README.ru.md
+- **No retrofit needed:** Unlike Russian, English bodies contain no free-standing Chinese titles to retrofit with [eng. "…"] — CJK confined to machine zones (tags, sources, link targets)
+- **Source preservation:** All source lines (来源：/DOI/URLs) remain byte-identical per QA requirement; only field label punctuation may differ (`：`→`:`)
+- **Status line translation:** Translate visible text in status lines and back-links; keep link targets byte-identical to source
 
-## Verification checklist
+### Verification checklist
 
 - [ ] Heading count matches source
 - [ ] Item count matches source
@@ -93,6 +86,8 @@ This workflow has been extended for Chinese-to-English translation (HowToLiveBet
 - [ ] Block notes for country-specific chapters
 - [ ] All reviewer fixes applied
 - [ ] Counts preserved after final edits
+- [ ] README.md is English-primary with language switcher
+- [ ] Zero CJK in body text outside machine zones
 
 ## References
 
