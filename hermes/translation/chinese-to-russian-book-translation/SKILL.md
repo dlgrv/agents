@@ -60,7 +60,9 @@ See `references/localization-techniques.md` for the full catalog:
 - **CJK punctuation artifacts:** Watch for stray Chinese punctuation in translated text (e.g. `，` instead of `,` or `… …` instead of `…`). Use regex to scan for these patterns and replace them with proper Russian equivalents.
 - **Double ellipsis fix:** Loading status text may contain `… …` due to copy-paste artifacts from animated elements. Replace with single `…` and check CSS for ::after animations that could reintroduce the issue.
 - **Layout sync:** After text updates, re-check CSS for layout issues like misaligned headings (flexbox wrapping, text overflow) — Russian text is longer and may break responsive layouts.
-- **Propagation delay:** After pushing commits, wait 50+ seconds for GitHub Pages propagation before verifying live site changes; use `curl -s <url> | grep -o 'text pattern'` to confirm fixes.
+- **Propagation delay:** After pushing commits, wait 50+ seconds for GitHub Pages propagation before verifying live site changes; use `curl -s <url> | grep -o 'text pattern'` to confirm fixes
+- **Upstream hash sync:** Verify main repo content (book/, docs/) matches upstream exactly via hash comparison; empty result means CN chapters identical
+- **Issue resolution protocol:** Allow 1–2 days for author response to completion announcements; conclude issue resolved after 48 hours if no response.
 - **Merge conflicts:** When merging branches, check `.gitignore` for conflicts — automatic merge tools may miss file-specific exclusions like `tools/` directories.
 - **Pages rebuild delay:** GitHub Pages rebuilds take 1-2 minutes after push; always wait before verification to avoid false negatives.
 - **PR auto-merge detection:** GitHub may auto-close and merge a PR when the branch is merged to target — check PR state after merge and add closing comment if needed.
@@ -97,6 +99,34 @@ This workflow has been extended for Chinese-to-English translation (HowToLiveBet
 - [ ] Language dropdown implemented and functional
 - [ ] Automatic language detection working
 
+### Upstream communication protocol
+
+When proposing or announcing translations to upstream authors:
+
+1. **Open issue early:** Propose translation plan in Chinese upstream issue to avoid confusion
+2. **Clarify fork-only policy:** Explicitly state that translation lives in fork, no PR to main (per author request)
+3. **Highlight QA rigor:** Emphasize byte-identity of sources, machine tags, and verification scripts
+4. **Provide website link:** When complete, provide live site URLs (zh/ru/en) for README integration
+5. **Request README updates:** Ask author to update language links in main README to point to dedicated URLs (/ru/, /en/)
+6. **Follow up:** Allow 1–2 days for author response before concluding issue closed
+
+## Post-deployment verification
+
+After deployment, verify:
+
+1. **Content sync:** Check that main repo content (book/, docs/) matches upstream exactly via hash comparison
+2. **README structure:** Verify language links are correctly updated
+3. **Issue resolution:** Confirm upstream issues are closed or updated with translation status
+4. **Release notes:** Document translation completion and website URLs in MR description
+
+### Hash verification command
+```bash
+cd /path/to/repo
+echo "=== upstream content sync ==="
+git -c core.quotepath=false ls-tree -r origin/main --name-only book/ | while IFS= read -r f; do h1=$(git rev-parse "origin/main:$f" 2>/dev/null); h2=$(git rev-parse "fork/main:$f" 2>/dev/null); [ "$h1" != "$h2" ] && echo "DIFF: $f"; done
+echo "(empty above = CN chapters identical)"
+```
+
 ## References
 
 - MQM quality rubric: `../translation/references/quality-rubric.md`
@@ -105,6 +135,7 @@ This workflow has been extended for Chinese-to-English translation (HowToLiveBet
 - Server pipeline: `../translation/references/server-pipeline.md`
 - Website deployment: `references/website-deployment.md`
 - English translation workflow: `references/english-translation-workflow.md`
+- Upstream communication protocol: `references/upstream-communication.md`
 - TRANSLATION.md template: `../translation/templates/TRANSLATION.md`
 
 ## Scripts
