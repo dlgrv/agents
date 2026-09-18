@@ -297,6 +297,14 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 
 **Comments**: Only target-language comments (remove user's mixed-language comments)
 
+## QE/метрики: факты ревью 2026-09-18
+
+- wmt22-cometkiwi-da и XCOMET-XL/XXL — CC-BY-NC-SA-4.0 + gated (НЕ Apache); в опенсорс-репо и коммерческий прод нельзя. Apache-замены: wmt20-comet-qe-da, wmt22-comet-da, MetricX-24.
+- zh→ru для cometkiwi — out-of-distribution (пары нет в обучающих данных); zh→en — in-distribution. До гейта — валидация на 30–50 сегментах.
+- CometKiwi почти не чувствителен к перефразированию (TransAgents App. B) и sentence-level с лимитом 512 токенов → только advisory-сигнал, не гейт.
+- Source-blind судья валиден только для беглости; точность всегда с источником (error-span MQM, GEMBA-MQM). Парные сравнения со swap, tie при несогласии (Zheng et al. MT-Bench). Судья ≠ семья модели переводчика.
+- Порядок пассов: translate → assemble → verify(FAIL) → fact-check E(FAIL, заземление CN-цитатами) → style A(WARN) → QE B(advisory) → judge C/D(advisory) → MQM(человек, приоритет над QE) → MR+squash.
+
 ## Clone & Publication Rules (2026-09-18)
 
 - Локальный клон: `~/github/HowToLiveBetter` (раньше был `~/github/htlb-ru` — переименован, имя «ru» вводило в заблуждение; пайплайн двуязычный CN→RU/EN). Не использовать старый путь.
