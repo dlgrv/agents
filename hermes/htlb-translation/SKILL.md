@@ -11,7 +11,9 @@ metadata:
     related_skills: [github-pr-workflow]
 ---
 
-# HTLB Translation Workflow
+# HTLB Translation
+
+README policy (fork dlgrv/HowToLiveBetter): `README.md` = English primary (from translation/en onward), `README.zh.md` = renamed Chinese original, `README.ru.md` = Russian; all three linked via a Languages: line. Commit 8126ee6. Workflow
 
 Workflow for translating the HowToLiveBetter book from Chinese to Russian. Uses chunked units (not whole chapters) and incremental commits with explicit developer approval before any git/PR action.
 
@@ -55,26 +57,6 @@ Translate each unit incrementally. Each unit must be written to its file immedia
 # Write translated unit back to file immediately
 write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SRC§"
 ```
-
-### Field Marker Rules
-
-| Chinese | Russian | Notes |
-|---------|--------|-------|
-| 成本 | Стоимость | Cost/expense field |
-| 说人话 | Простыми словами | Simple language field |
-| 收益 | Эффект | Benefit/effect field |
-| 证据等级 | Уровень доказательности | Evidence level (A/B/C remain) |
-| 备注 | Примечания | Notes/remarks field |
-
-### Translation Rules
-
-- **Numbers**: Always byte-for-byte copy (§ numbers remain unchanged)
-- **Slang**: Never translate: cohort/exposure/quartile/confounding/population/low-evidence
-- **Style**: Live Russian, not literal translation
-- **Headers**: Must start with verbs
-- **Simple language field**: No numbers outside "Эффект" section
-- **Exclamation marks**: None allowed
-- **Sources**: Never translate — injected byte-by-byte by assemble.py
 
 ### Field Marker Rules
 
@@ -176,10 +158,18 @@ The watchdog:
 ## Subagent Pitfall
 
 - **Never let subagents spend time on analysis or planning** — they must write files immediately
+- **Batch-reading trap**: subagents may read ALL unit files first (transcript active, 0 writes), then die on timeout before writing anything. Detect: many `read_file` calls, 0 writes, 0 files changed. Steer: "STOP READING. One file per step, overwrite each before the next." Prevention: in every task prompt write "do NOT re-read conventions or reference files — everything is in this task; start writing immediately". Watchdog cron (3m interval, no_agent script) alerts on 3 conditions: silence ≥6 min, chapter complete (→ assemble), reads-without-writes.
 - Each subagent gets one unit (not a whole chapter) and must write it to its file upon completion
 - Do not let subagents study existing chapters for style — provide a style sample in the task instead
 - Subagents must not return JSON summaries — only write the translated unit file
 - If a subagent stalls, restart it with stricter instructions: 'work = write files, no analysis'
+
+## Subagent Timeout Recovery
+
+- **Timeout pattern**: When subagents stall (25+ minutes with no writes, transcript shows many `read_file` calls but 0 `write_file`), they are stuck in analysis/reading loop
+- **Recovery**: Reset pristine units from digest source, restart with HARD PROCESS RULE: first tool call must be `write_file` of the translated unit — no reading other units, no analysis, no planning
+- **Detection**: Check transcript for ≥10 lines with only `read_file` and 0 `write_file` calls; check file timestamps for last write >15 minutes ago
+- **Prevention**: In every task prompt, enforce: "your FIRST tool call must be a write_file of the translated NN.md. You may NOT read any unit other than the one you are currently translating in this same step."
 
 ## Localization and Realia Handling
 
@@ -220,6 +210,23 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Integration**: After translation, update all chapter and README links from `(на китайском)` to point to new Russian docs files
 - **Quality**: Apply same field markers, localization rules, and QA as main chapters; verify cross-references work correctly
 - **Pitfall**: Do not skip these — they are the only remaining Chinese content in the Russian edition and actively referenced
+
+## English Translation Launch (2026-09-18)
+
+- **Pilot wave**: Always start with chapters 01 (smallest) and 13 (largest) to test all pipeline components (digest, assemble, web UI capitalization, EN field labels)
+- **EN field labels**: Use `- Cost:`, `- In plain terms:`, `- Benefit:`, `- Evidence grade:`, `- Notes:` (not Russian equivalents)
+- **EN slug naming**: Two-digit prefix + English title slug (e.g., `01-Do-Not-Die-Early.md`), recorded in TRANSLATION.md naming table
+- **EN-specific localization**: China-specific concepts on first use: transliteration + short gloss (e.g., "dibao (低保 — means-tested minimum subsistence allowance)")
+- **Legal/regulation titles**: Not translated; refer descriptively in body text, exact names stay in sources (injected)
+- **万-notation**: Numeric conversion (2 万 = "20,000 yuan")
+- **Status line**: Translate visible text, keep link targets byte-identical
+- **Unit-based QA**: Same proven approach as RU — slice into ~10-line pairs for parallel verification subagents
+- **Wave planning**: Group chapters by unit count (5 chapters per wave), pilot wave validates full pipeline before mass translation
+- **Commit strategy**: One chapter per commit (clear message: `translation(en): chapter NN`), enable GitHub Pages in fork
+- **Issue management**: Issue title in Chinese only, body in Chinese with brief EN note; preserve author comments, remove third-party non-CN comments
+- **Fork main merge**: Only after complete translation, merge `translation/en` → `main` in fork, then delete branch
+- **PR workflow**: Create PR from `translation/en` to `main` in fork, auto-merge if fast-forward, close after merge
+- **Quality check**: After each wave, verify byte-identical sources, field labels, and no Chinese characters in visible text (regex `\u4e00-\u9fff`)
 
 ## Issue Management for External Repositories
 
