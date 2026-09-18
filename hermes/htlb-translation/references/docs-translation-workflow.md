@@ -14,7 +14,7 @@ Translate four long documentation articles referenced by chapters and README:
 
 ```bash
 # Create digest for docs article
-cd ~/github/htlb-ru
+cd ~/github/HowToLiveBetter
 python3 tools/digest.py docs/家庭应急装备清单.md --units-dir /root/htlb-run/docs/家庭应急装备清单/units
 ```
 
@@ -34,7 +34,7 @@ Use 4 parallel subagents, one per article. Each subagent:
 
 ```bash
 # Assemble translated docs
-cd ~/github/htlb-ru
+cd ~/github/HowToLiveBetter
 python3 tools/assemble.py /root/htlb-run/docs/家庭应急装备清单
 python3 tools/assemble.py /root/htlb-run/docs/结婚划不划算
 python3 tools/assemble.py /root/htlb-run/docs/遇到陌生人出事该不该停

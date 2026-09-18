@@ -12,7 +12,7 @@
 2. **Reset pristine units** from digest source:
    ```bash
    rm -rf /root/htlb-run-en/13/units
-   cp -r /root/github/htlb-ru/tools/digest/13/units /root/htlb-run-en/13/units
+   cp -r /root/github/HowToLiveBetter/tools/digest/13/units /root/htlb-run-en/13/units
    ```
 3. **Restart with HARD PROCESS RULE**:
    - Task prompt: "your FIRST tool call must be a write_file of the translated NN.md. You may NOT read any unit other than the one you are currently translating in this same step."

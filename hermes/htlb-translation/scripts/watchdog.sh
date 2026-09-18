@@ -30,12 +30,12 @@ cronjob_manage action=create name=htlb-translation-watchdog no_agent=true script
 # Silent when everything is fine. Reports only:
 #  - stall: no writes to a chapter's units for 40+ minutes
 #  - complete: all units of a chapter translated (dedup via marker file)
-cd /root/github/htlb-ru || exit 0
+cd /root/github/HowToLiveBetter || exit 0
 STATE=/root/htlb-run/.notified
 touch "$STATE"
 for n in 12 14 16 18 19; do
   d=/root/htlb-run/$n/units
-  s=/root/github/htlb-ru/tools/digest/$n/units
+  s=/root/github/HowToLiveBetter/tools/digest/$n/units
   [ -d "$d" ] || continue
   exp=$(ls $s/*.md 2>/dev/null | wc -l)
   done_u=$(grep -L '§TAG§' $d/*.md 2>/dev/null | wc -l)
@@ -60,4 +60,4 @@ done
 - Only reports when something is wrong or complete; silent during normal progress
 - Uses marker file to avoid duplicate completion notifications
 - Expects units to have §TAG§ placeholder; translated units remove it
-- Must be run from ~/github/htlb-ru for path consistency
+- Must be run from ~/github/HowToLiveBetter for path consistency

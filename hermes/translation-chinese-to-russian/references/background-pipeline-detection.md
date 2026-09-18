@@ -35,7 +35,7 @@ If the background pipeline is running with outdated prompts:
 
 ```bash
 # Let it finish, but verify its output against current standards
-cd ~/github/htlb-ru
+cd ~/github/HowToLiveBetter
 for chapter in $(ls book/ru/*.md | sed 's/.*\([0-9][0-9]-.*\)\.md/\1/' | sort -V); do
   echo "Verifying $chapter..."
   python3 htlb_verify.py book/$chapter.md book/ru/$chapter.md --normalize
