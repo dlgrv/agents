@@ -140,6 +140,13 @@ graph TD
 - **Whitespace drift tolerance** — when locating spans in CN text, normalize whitespace (collapse all whitespace) before position lookup, but use original line context for service-line rule.
 - **CN body filtering is positional** — cn_body() removes entire lines that start service blocks; text merely containing service markers stays.
 - **Grounding filter is conservative** — better to drop slightly too many spans than to hallucinate grounding; false positives are caught by mutation controls.
+- **Hardened claim defense** — assertions with `hardened_claim=true` are immune to major gates; use this for verified facts or meta-notes
+- **Span supports claim gate** — assertions with `span_supports_claim=false` are dropped immediately; use this when span text doesn't actually support the claim (fabricated-claim defense)
+- **Ellipsis-tolerant span grounding** — spans with …/.../…… are split into fragments; each fragment must ground in order (ellipsis spans as a whole are not expected to sit verbatim in body)
+- **Multi-line span line-checking** — when a span touches multiple lines, check EVERY line it touches for service lines, not just the first or last
+- **Contract schema sync** — factcheck gate expects `status` field in verdict assertions, not `ru_ok`/`en_ok` (those are prompt-level flags, not gate inputs)
+- **Error verdict handling** — broken verdicts (missing fields, malformed JSON) are gated as `error`, not silently dropped; this prevents silent bypass of quality gates
+- **Mutation anchor regeneration** — when updating chapter text, regenerate mutation anchors in tools/validate/results/mutations_seed42.json to match new text; mutation semantics must be preserved even if exact text changes
 
 ## Tasks 5-14: Validation Tiers
 
@@ -212,17 +219,23 @@ delegate_task(
 4. **Merge request** — Open MR to main with descriptive title and body
 5. **Post-merge verification** — Confirm pipeline still works after merge
 
-**Pitfalls:**
-- **Never merge dirty branches** — ensure all transient files are removed before squashing
-- **Squash after all tests pass** — don't squash if Task 13 fails; fix first
-- **MR title must be descriptive** — include 'quality-pipeline' and scope (e.g., 'quality-pipeline: HTLB validation tier')
-- **MR body should summarize changes** — list all validation tasks completed and key findings
-- **Post-merge verification mandatory** — pipeline must work after squash; test on main branch
-- **Transient file cleanup** — tools/judge/ and tools/validate/results/ must be gitignored and removed
-- **Branch name convention** — use quality/pipeline-v2 (or similar descriptive name) for tracking
-- **Squash preserves content** — don't squash until all files are properly committed; squash only combines commits, doesn't lose content
-- **Review before merge** — if possible, have another agent review the MR for completeness
-- **Publication is final** — once merged, changes go live; ensure all quality gates are passed before publishing
+**Expert review integration:**
+- Before publication, run independent expert evaluations of the pipeline
+- Generate adversarial test cases (reverse-engineered attack vectors)
+- Write reports to `tools/validate/results/expert_review_<expert_type>.md`
+- Fix all critical findings before publishing
+- Batch-fix multiple issues in one commit when possible (e.g., 20 fixes from 3 reviews)
+- Test all fixes locally (101/101 unit tests OK, manifest valid) before committing
+- **Pitfall:** Never merge dirty branches — ensure all transient files are removed before squashing
+- **Pitfall:** Squash after all tests pass — don't squash if Task 13 fails; fix first
+- **Pitfall:** MR title must be descriptive — include 'quality-pipeline' and scope (e.g., 'quality-pipeline: HTLB validation tier')
+- **Pitfall:** MR body should summarize changes — list all validation tasks completed and key findings
+- **Pitfall:** Post-merge verification mandatory — pipeline must work after squash; test on main branch
+- **Pitfall:** Transient file cleanup — tools/judge/ and tools/validate/results/ must be gitignored and removed
+- **Pitfall:** Branch name convention — use quality/pipeline-v2 (or similar descriptive name) for tracking
+- **Pitfall:** Squash preserves content — don't squash until all files are properly committed; squash only combines commits, doesn't lose content
+- **Pitfall:** Review before merge — if possible, have another agent review the MR for completeness
+- **Pitfall:** Publication is final — once merged, changes go live; ensure all quality gates are passed before publishing
 
 ## Task 13: Final verification
 

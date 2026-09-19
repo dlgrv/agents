@@ -306,6 +306,21 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - Судья пассов C/D — GLM-5.3-Flash через API z.ai (решение Лёни 2026-09-18; сильный, уже оплачен, локальный стек не нужен). Офсеты: self-preference (судья = семья переводчика) → A/B против контролируемых деградаций, а не против второго GLM-вывода; невоспроизводимость API → в вердиктах логировать model id + дату + prompt_hash, при смене весов — дешёвая ревалидация золотого сета (60 пар). Если κ(судья, Лёня) < 0.4 — запасные: локальный Qwen3-30B-A3B или Gemma 3 27B (Mac M5 Pro 48GB).
 - Порядок пассов: translate → assemble → verify(FAIL) → fact-check E(FAIL, заземление CN-цитатами) → style A(WARN) → QE B(advisory) → judge C/D(advisory) → MQM(человек, приоритет над QE) → MR+squash.
 
+## Expert Review Integration (2026-09-19)
+
+- **Before publication**, run independent adversarial evaluations of the pipeline
+- Generate reverse-engineered attack vectors (malformed JSON, edge-case spans, broken field markers)
+- Dispatch 3–4 subagents with different expertise: code quality, translation QA, statistical validation, infrastructure
+- Write reports to `tools/validate/results/expert_review_<expert_type>.md`
+- Fix all critical findings before publishing (batch-fix when possible, test locally 101/101 OK)
+- **Pitfall**: Never merge dirty branches — ensure all transient files are removed before squashing
+- **Pitfall**: Test all fixes locally before committing (manifest valid, no test failures)
+- **Pitfall**: Batch fixes that share root causes (e.g., schema sync + contract validation)
+- **Pitfall**: Post-merge verification mandatory — pipeline must work after squash
+- **Pitfall**: Branch name convention — use quality/pipeline-v2 (or similar descriptive name)
+- **Pitfall**: Publication is final — ensure all quality gates are passed before publishing
+- See `references/expert-review-workflow.md` for detailed execution pattern
+
 ## Pipeline v2 (2026-09-18) — Quality Assurance System
 
 **Обновлённый пайплайн с автоматизированной валидацией качества:**
