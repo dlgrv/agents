@@ -402,6 +402,7 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 
 - Локальный клон: `~/github/HowToLiveBetter` (раньше был `~/github/htlb-ru` — переименован, имя «ru» вводило в заблуждение; пайплайн двуязычный CN→RU/EN). Не использовать старый путь.
 - **Публикация в main форка — ТОЛЬКО через MR + squash-merge** (правило пользователя): рабочая ветка от `fork/main` → push → `gh pr create --repo dlgrv/HowToLiveBetter` → `gh pr merge N --squash --delete-branch`. Прямой push в main запрещён. Пример: tools-пайплайн опубликован MR #2 (squash → commit `2ad4ab3`).
+- **Ветка — только от свежего `fork/main`** (`git fetch fork main && git checkout -B <branch> fork/main`), НЕ от локального `main` — он обычно отстаёт после squash-мержей, PR выходит с конфликтами; лечится rebranch + `git cherry-pick <sha>` + force-push. `gh pr merge` без номера PR с флагом `--repo` падает ("argument required") — всегда указывать номер. `origin` = upstream (push запрещён, это норма), пушить в `fork`.
 - После squash в main — cherry-pick squash-коммита в активные контентные ветки (`translation/en`), чтобы инструменты не разъезжались.
 - В коммиты инструментов не брать transient-состояние: `tools/digest/`, `tools/.status/` (в .gitignore).
 
