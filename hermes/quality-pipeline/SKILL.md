@@ -71,6 +71,11 @@ graph TD
 - **ZAI_API_KEY in env not visible** — key lives in Hermes auth.json, judges use subagents with auto-injected keys
 - **HTTP client is fallback only** — primary path is subagent-glm
 - **Test offline behavior first** — ensure judge.py writes verdicts without network
+- **Mutation anchor regeneration** — when updating chapter text, regenerate mutation anchors in tools/validate/results/mutations_seed42.json to match new text; mutation semantics must be preserved even if exact text changes
+- **Positional service-line rule** — spans sitting ON service lines (来源/§SRC§/成本标签/证据等级) are dropped; spans merely CONTAINING service markers (e.g. 出资来源 = source of funds) are kept. Use line context detection, not substring matching.
+- **Whitespace drift tolerance** — when locating spans in CN text, normalize whitespace (collapse all whitespace) before position lookup, but use original line context for service-line rule.
+- **CN body filtering is positional** — cn_body() removes entire lines that start service blocks; text merely containing service markers stays.
+- **Grounding filter is conservative** — better to drop slightly too many spans than to hallucinate grounding; false positives are caught by mutation controls.
 
 ## Task 2: Judge Prompts and Taxonomy
 
@@ -158,7 +163,49 @@ graph TD
 - Squashed commit with clean history
 - Final publication verification
 
-**Publication workflow:**
+## Golden set validation workflow
+
+Before enabling new judges in production:
+
+1. **Generate B-variants** (controlled degradations):
+```bash
+delegate_task(
+    goal="Generate B-variants for golden set validation",
+    context="Apply degradation recipes from tools/validate/golden_pairs.py to A-variants in tools/digest/golden/*.json. Write to tools/digest/golden_b_*.json. Validate with tools/validate/golden_pairs.py validate"
+)
+```
+
+2. **Blind validation**:
+```bash
+delegate_task(
+    goal="Blind judge validation",
+    context="Judge B-variants vs A-variants as if original. Judge should prefer A-variants (native preference) and reject decoys (FP rate). Write metrics to tools/validate/results/blind_validation.json"
+)
+```
+
+3. **Metrics evaluation**:
+- native_preference: should be 1.0 (judge always prefers original)
+- decoy_fp_rate: should be 0.0 (no false positives on decoys)
+- Only enable if both metrics pass threshold
+
+## Degradation recipes (for validation)
+
+From tools/validate/golden_pairs.py:
+- **officialese**: Replace common words with bureaucratic terms
+- **passive_chain**: Stack passive participle constructions
+- **jargonize**: Swap common words for professional jargon without explanation
+- **long_sentence**: Chain clauses into >25-word sentences
+- **which_chain**: Add ≥3 "который" clauses
+- **unexplained_abbrev**: Use unexplained abbreviations
+
+**Key validation principle:** Validate-before-enable — new judges must prove effectiveness on golden set before production deployment.
+
+## Expert review integration
+
+delegate_task(
+    goal="Independent expert evaluation",
+    context="Review pipeline tools and methodology. Write report to tools/validate/results/expert_review_<expert_type>.md. Focus on: statistical validation soundness, code quality, translation QA science alignment."
+)
 1. **Final verification** — Run Task 13 end-to-end test on main branch
 2. **Branch cleanup** — Remove transient files (tools/judge/, tools/validate/results/)
 3. **Squash commit** — Combine all quality-pipeline commits into one
@@ -264,7 +311,40 @@ graph TD
 - **Language packages must be loaded** — verify.py falls back to built-in labels/banned if package is empty
 - **Style audit is separate from fact-check** — style issues don't trigger major gates unless explicitly configured
 
-## Verification Commands
+## Task 12: Pass I (plainness) — readability for general audience
+
+**Objective:** Ensure "Простыми словами" field is understandable to child-level reader.
+
+**Key outputs:**
+- `tools/validate/plainness.py` — lint tool for plainness validation
+- `tools/prompts/judge-plainness.md` — semantic judge prompt
+- `tools/validate/results/plainness/<n>-<lang>.json` — lint results
+- `tools/judge/plainness/<n>-<lang>-<unit>.json` — judge verdicts
+
+**Plainness lint rules:**
+- **Long sentences** — >25 words per sentence (warning)
+- **Which chains** — ≥3 consecutive "который" clauses (warning)
+- **Unexplained abbreviations** — medical/legal/financial abbreviations without explanation (warning)
+- **Whitelist** — common abbreviations like ОМС, УЗИ, МРТ, ДТП, etc. are permitted
+
+**Plainness judge:**
+- Evaluates semantic readability (jargon without explanation, overly complex structures)
+- Uses "child_ok" flag — soft WARN threshold (lower than factcheck)
+- Only judges "Простыми словами" field (not "Эффект" or other fields)
+
+**Pitfalls:**
+- **Field-specific scope** — plainness judge evaluates ONLY "Простыми словами" field; other fields use technical register
+- **Child-friendly standard** — "should understand a 5-year-old" means avoiding jargon, not dumbing down content
+- **Positional service-line rule** — when filtering CN text for grounding, remove entire lines starting with service markers (来源/§SRC§/成本标签/证据等级); text merely containing service markers stays
+- **Book structure matters** — plainness.py CLI must search book/<lang>/ directory, not book/ root (chapters are book/<lang>/<n>-*.md)
+- **WARN-only stage** — plainness warnings don't block pipeline progression but inform quality
+- **Validate before enable** — new judges must prove effectiveness on golden set before production deployment
+- **Mutation anchor regeneration** — when updating chapter text, regenerate mutation anchors in tools/validate/results/mutations_seed42.json to match new text; mutation semantics must be preserved even if exact text changes
+- **Jargonize degradation recipe** — add jargonize recipe to golden_pairs.py for semantic plainness validation; jargonize = swap common words for professional jargon without explanation (e.g., "лекарства" → "препараты", "гипотензивные" without gloss)
+
+## Task 13: Pass J (consensus)
+
+**Objective:** Calculate inter-rater agreement (κ threshold) and derive final consensus verdicts.
 
 ```bash
 # Task 1: Backend registry
@@ -298,13 +378,23 @@ python3 tools/validate/retro_e_report.py
 python3 tools/validate/style_markers.py --lang ru
 python3 tools/validate/style_fp_audit.py --samples 5
 
-# Task 12: Consensus
+# Task 12: Plainness lint
+python3 tools/validate/plainness.py <chapter> <lang>  # lint only
+python3 -m unittest tools.validate.tests.test_plainness  # unit tests
+
+# Task 13: Plainness judge (pilot)
+delegate_task(
+    goal="Judge plainness for chapter <n> <lang>",
+    context="Read tools/prompts/judge-plainness.md first. Judge ALL units in book/<lang>/<n>-*.md. Write JSON verdicts to tools/judge/plainness/<n>-<lang>-<unit>.json"
+)
+
+# Task 14: Consensus
 python3 tools/validate/consensus.py --threshold 0.5
 
-# Task 13: Final verification
+# Task 15: Final verification
 python3 tools/validate/final_verification.py
 
-# Task 14: Publication
+# Task 16: Publication
 # (Manual: squash branch, create MR, verify post-merge)
 ```
 
@@ -322,6 +412,7 @@ python3 tools/validate/final_verification.py
 - Mutation test specification: `references/mutation_specification.md`
 - Golden set validation: `references/golden_set_validation.md`
 - Final verification protocol: `references/final_verification.md`
+- Plainness lint rules: `references/plainness_lint_rules.md`
 
 ## Scripts
 
