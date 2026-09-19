@@ -216,6 +216,12 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - Editing rule: change ONLY root `index.html`, then regenerate; never hand-edit `ru|en|zh/index.html`.
 - **Upstream links to the fork** (author cites dlgrv in upstream README): after EN-primary merge the two referenced targets stay valid — `blob/main/README.ru.md` (file kept, only header lines edited) and Pages root (index.html untouched by EN branch; site rebuilds from main). Verify with API `contents?ref=main` 200 + HTML HEAD 200.
 
+## Скин v2 (editorial, /v2/)
+
+- Архитектура: тот же index.html/JS; `tools/v2.css` подменяет `<style>` при генерации `v2/{ru,en,zh}/index.html` (build_pages.py), `__HTLB_BASE__='../../'` — данные из корня, без дублей. Правки JS — только в корневом index.html; правки скина v2 — только tools/v2.css + rebuild.
+- Дизайн-решения пользователя: Ч/Б Georgia-книжка (hairlines вместо карточек; тёмная #111/#d0d0d0); **один шрифт на всю страницу — Georgia и в UI, и в тексте; моно только `<code>`** — «много шрифтов — bad practice».
+- Проверка скина: jsdom ловит только сборку (528/32, 0 ошибок); стили/фильтры — реальный браузер (playwright-core из /root/github/dlgrv.com/node_modules + chromium-1234, localhost-сервер; карточки прячутся атрибутом `hidden`, не style.display).
+
 ## Source Title Retrofits
 
 - **Chinese article/document titles**: Add Russian translation in brackets immediately after Chinese title: `中国人健康指南 [рус. «Руководство по здоровью китайцев»]`
