@@ -306,6 +306,83 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - Судья пассов C/D — GLM-5.3-Flash через API z.ai (решение Лёни 2026-09-18; сильный, уже оплачен, локальный стек не нужен). Офсеты: self-preference (судья = семья переводчика) → A/B против контролируемых деградаций, а не против второго GLM-вывода; невоспроизводимость API → в вердиктах логировать model id + дату + prompt_hash, при смене весов — дешёвая ревалидация золотого сета (60 пар). Если κ(судья, Лёня) < 0.4 — запасные: локальный Qwen3-30B-A3B или Gemma 3 27B (Mac M5 Pro 48GB).
 - Порядок пассов: translate → assemble → verify(FAIL) → fact-check E(FAIL, заземление CN-цитатами) → style A(WARN) → QE B(advisory) → judge C/D(advisory) → MQM(человек, приоритет над QE) → MR+squash.
 
+## Pipeline v2 (2026-09-18) — Quality Assurance System
+
+**Обновлённый пайплайн с автоматизированной валидацией качества:**
+
+### Архитектура пайплайна
+- **Фаза 1**: Инфраструктура валидации — судьи, QE, мутационные тесты, золотой сет
+- **Фаза 2**: Запуск и измерение — прогон по FAIL-главам, тренды метрик
+- **Фаза 3**: Публикация — squash-коммит в main, cherry-pick в translation/en
+- **Единая конфигурация**: `tools/rules/project.yaml` (языки [ru,en], пути юнитов, judge/QE-бэкенды)
+- **Тест-драйв подход**: validate-before-enable — каждый пасс доказывает свою эффективность до включения в конвейер
+
+### Ключевые компоненты
+- **Судьи**: GLM-5.3-Flash (z.ai) + source-blind (беглость), A/B (эскалация), factcheck (заземление CN-цитатами)
+- **QE**: wmt20-comet-qe-da (Mac MPS/Unbabel), шум τ = max(3σ, 0.01), baseline per-unit
+- **Мутационный тест**: 60 семантических мутаций (seed=42), catch-rate ≥80%, FP ≤10%
+- **Золотой сет**: 60 пар (6 глав × 3 страты × ru/en + 24 случайных + 10 приманок A=B)
+- **Style-аудит**: FP-аудит маркеров/кальк/канцелярита (precision ≥80%, recall ≥60%)
+- **Единая таксономия**: issue_type в factcheck/judge/mutation_test (reversed_logic, invented, etc.)
+- **Unit-first политика**: правки только в юнитах (`/root/htlb-run-<lang>/<NN>/units/`) → re-assemble → verify
+
+### Порядок пассов (жёсткий)
+1. **translate** → assemble → verify(FAIL)
+2. **factcheck E** (FAIL, заземление CN-цитатами, фильтрация §TAG§/§SRC§)
+3. **style A** (WARN, только advisory)
+4. **QE B** (advisory, только на Mac)
+5. **judge C/D** (advisory, GLM-5.3-Flash)
+6. **MQM** (человек, приоритет над QE)
+7. **MR + squash** в main, затем cherry-pick в translation/en
+
+### Валидация и метрики
+- **Nativeness rate**: доля native vs translationese в золотом сете
+- **QE-тренд**: улучшение vs baseline (якорное ru13 ≥2τ)
+- **Judge agreement**: согласованность судей (Cohen's κ ≥0.6)
+- **Mutation test catch-rate**: ≥80% на семантических мутациях
+- **Style FP rate**: ≤40% на аудите (выбрасывать правило, а не тюнить)
+- **Grounding check**: каждый cn_span обязан входить в CN-юнит после нормализации и фильтрации
+
+### Публикация
+- **Ветка**: `quality/pipeline-v2` → MR → squash в fork/main
+- **Содержимое**: код tools/pipeline/ + tools/rules/ + tools/prompts/ + tools/validate/ + docs/validation-protocol.md + docs/translation-playbook.md + SKILL
+- **Исключения**: transient-состояние (tools/digest/, tools/.status/), tools/judge/, tools/.qe/
+- **После squash**: cherry-pick squash-коммита в активные контентные ветки (translation/en)
+
+### Интеграция с существующим workflow
+- **tools/verify.py**: лейблы из `tools/rules/<lang>.json` (Task 10b)
+- **tools/status.py**: колонка factcheck-покрытия
+- **tools/factcheck.py**: заземлённый fact-check с программной фильтрацией CN-спанов
+- **tools/style_check.py**: WARN-only, exit 0, маркеры из `tools/rules/<lang>.json`
+- **tools/glossary.json**: закреплённые термины + стилевые правила (RU+EN)
+
+### Pitfalls
+- **Unit-first политика**: правка book/ напрямую затирается re-assembly → clobber-питфолл; править только в units
+- **Grounding check**: cn_span на служебной строке §SRC§ отбрасывается до отправки судье
+- **QE требует Mac**: на VPS — SKIPPED, пасс B самый поздний и advisory
+- **Write-first судьи**: субагенты-судьи пишут вердикт в tools/judge/ сразу после юнита (без фазы «анализа»)
+- **Seed-репродукция**: все мутации/якоря/деградации зафиксированы seed=42, коммитятся в results/*.json
+- **Transient-состояние**: tools/digest/ и tools/.status/ не включаются в коммиты (gitignore)
+- **Clone & Publication Rules**: локальный клон `~/github/HowToLiveBetter`, публикация ТОЛЬКО через MR + squash
+
+### Запуск
+- **Ретро-прогон E**: 560 CN-юнитов × 2 языка = 1120 вызовов, выборка 3 глав → волны по 32 юнита (≈35 батчей, ~6–7 ч)
+- **Первая волна правок**: известные дефекты (ru10/11/13/28/30), unit-first + 1 глава = 1 коммит
+- **Метрики**: nativeness rate и QE-тренд vs baseline; stop-условие: обе в шуме τ → пересмотр пассов
+
+### Интеграция с TDD
+- **Каждый пасс**: validate-before-enable — доказать эффективность на тестовых данных
+- **Мутационный тест**: как TDD-валидация пасса E (catch-rate ≥80%)
+- **Золотой сет**: как TDD-валидация пасса judge (κ ≥0.6)
+- **Единая таксономия**: issue_type в factcheck/judge/mutation_test (reversed_logic, invented, etc.)
+- **Snapshot-тесты**: verify.py до/после рефакторинга (TDD RED-GREEN-REFACTOR для гейтов)
+
+### Рекомендации
+- **Проверить**: verify.py snapshot до/после Task 10b (refactor labels из rules)
+- **Измерить**: время ретро-прогона E (ожидаемо ~6–7 ч параллельными волнами)
+- **Автоматизировать**: watchdog для stalled chapters (40+ минут без writes)
+- **Резерв**: при провале GLM-судьи — локальный Qwen3-30B-A3B или Gemma 3 27B (Mac M5 Pro 48GB)
+
 ## Clone & Publication Rules (2026-09-18)
 
 - Локальный клон: `~/github/HowToLiveBetter` (раньше был `~/github/htlb-ru` — переименован, имя «ru» вводило в заблуждение; пайплайн двуязычный CN→RU/EN). Не использовать старый путь.
