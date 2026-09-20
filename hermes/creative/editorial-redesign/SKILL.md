@@ -34,6 +34,7 @@ Apply minimalist editorial design to book guides, blogs, and content-focused sit
 - **Buttons**: System font, no rounded corners unless explicitly requested, minimal padding
 - **Navigation**: Top-aligned on desktop, hamburger menu on mobile
 - **Lists**: Simple bullets or dashes, no background, minimal spacing
+- **Icons**: Optically equalize similar icons (e.g., README vs GitHub) with consistent spacing
 
 ## Workflow
 
@@ -48,12 +49,15 @@ Apply minimalist editorial design to book guides, blogs, and content-focused sit
 - Build with consistent spacing and typography
 - Review against anti-pattern checklist
 
-### 3. Anti-Pattern Checklist
+## Anti-Pattern Checklist
 - Avoid warm cream (#F4F1EA) + terracotta (#D97757) combinations
 - Avoid generic rounded cards with soft shadows
 - Avoid ALL-CAPS eyebrow labels
 - Avoid default fonts (Inter, Roboto, Arial)
 - Avoid linear/ease-in-out transitions (use custom cubic-bezier for motion)
+- Avoid multiple font families — use one serif (Georgia) for all content, one sans (system-ui) for UI
+- Avoid icon size mismatches — equalize optical weight between similar icons (README vs GitHub)
+- Avoid navigation layout drift — always anchor right-side clusters with margin-left:auto
 
 ## Quality Gates
 - **No design system = no UI work**—DESIGN.md must exist before components
