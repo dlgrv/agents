@@ -1,6 +1,6 @@
 ---
 name: docker-compose-local-dev
-description: "Add Docker/docker-compose for local development with instant code-reload (no rebuild), without breaking an existing non-Docker (or Docker) production CI/CD pipeline. Covers base+override compose files, live-reload mechanisms per stack, and the classic bind-mount pitfalls."
+description: "Add Docker/docker-compose for local development with instant code-reload (no rebuild), without breaking an existing non-Docker (or Docker) production CI/CD pipeline. Covers base+override compose files, live-reload mechanisms per stack, and the classic bind-mount pitfalls. Also covers host-level Docker resource optimization on a multi-stack machine: build-cache/image cleanup, gating stacks with profiles, restart policies, and mem_limit sizing (incl. ML services)."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
@@ -52,6 +52,7 @@ On macOS every Docker option is a Linux VM (Docker Desktop, OrbStack, Colima —
 
 - Bind-mount filesystem speed differs hugely: OrbStack's virtiofs implementation reloads Vite HMR 2–3× faster than Docker Desktop. For vite-in-container dev setups, the runtime choice affects the live-reload experience more than any compose tuning.
 - Set the VM memory ceiling from the worst simultaneous stack (sum service `mem_limit`s + ~1 GB VM overhead), not from fear — engines allocate lazily. If a heavy service (e.g. llama.cpp) lives under compose `profiles:`, it doesn't count unless explicitly activated.
+- Host-level cleanup across multiple stacks (build cache + image prunes, gating whole stacks with `profiles:`, `restart: unless-stopped` for optional stacks, mem_limit sizing incl. ML services, external-volume mount failures): see `references/resource-slimming.md`.
 
 ## Pitfalls (each one bit someone before you)
 
