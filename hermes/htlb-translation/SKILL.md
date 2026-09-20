@@ -219,8 +219,9 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 ## Скин v2 (editorial, /v2/)
 
 - Архитектура: тот же index.html/JS; `tools/v2.css` подменяет `<style>` при генерации `v2/{ru,en,zh}/index.html` (build_pages.py), `__HTLB_BASE__='../../'` — данные из корня, без дублей. Правки JS — только в корневом index.html; правки скина v2 — только tools/v2.css + rebuild.
-- Дизайн-решения пользователя: Ч/Б Georgia-книжка (hairlines вместо карточек; тёмная #111/#d0d0d0); **один шрифт на всю страницу — Georgia и в UI, и в тексте; моно только `<code>`** — «много шрифтов — bad practice».
+- Дизайн-решения пользователя: Ч/Б Georgia-книжка «университетской прессы» (Stanford/Harvard): шкала 36/24/19/17.5, h1 −0.015em, воздух 88px между секциями, hairlines вместо карточек, инвертированное ::selection; тёмная #111/#d0d0d0; **один шрифт — Georgia и в UI, и в тексте (кнопки/kbd/summary явно наследуют стек — кнопки НЕ наследуют font по умолчанию); моно только `<code>`**.
 - Проверка скина: jsdom ловит только сборку (528/32, 0 ошибок); стили/фильтры — реальный браузер (playwright-core из /root/github/dlgrv.com/node_modules + chromium-1234, localhost-сервер; карточки прячутся атрибутом `hidden`, не style.display).
+- Грабли v2: `.icon-btn{display:grid}` перебивал `.menu-btn{display:none}` (равная специфичность) — прятать двухклассовым селектором; абсолютный поиск в шапке уходит из потока — `margin-left:auto` переносить на `.nav-r`; ссылки README/book на v2-страницах требуют префикса `../../` (build_pages.py replace по href); эмодзи-иконки (🌐) ломают монохром — текстовые лейблы; Georgia без CJK-глифов — zh нужен CJK-serif фолбэк (TODO); vision_analyze таймаутит пачками — верить computed-style замерам.
 
 ## Source Title Retrofits
 
