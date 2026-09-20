@@ -55,20 +55,26 @@ Generate precise PDF patterns for leather goods (sleeves, wallets, bags, cases) 
 - **Geometry offset:** When drawing multiple panels (like front/back), ensure each panel is positioned at correct coordinates relative to page boundaries. Use coordinate math to verify coverage.
 - **Missing registration:** For multi-page patterns, include registration marks or reference lines at page edges to help align printed pages during assembly.
 - **Hole misalignment:** For pocket designs with two panels, ensure hole positions match exactly when panels are stacked. Use the same coordinate system for both panels.
+- **Asymmetric hole numbering:** When holes are numbered along the seam path from a single endpoint, the last interval is often missing a hole at the endpoint. This causes misalignment when panels are sewn 'meat to meat' because the hole sets are offset by one interval. **Fix:** Place holes at both endpoints of the seam path and ensure the total hole count is even (so panels can be paired 1:1 when one is flipped).
+- **Finger notch depth:** User may prefer shallow notches for easier insertion. Always clarify notch depth: 6 mm (shallow, wide opening) vs. 10 mm (deep, semi-circle). Use constants `NOTCH_DEPTH` and `NOTCH_OPENING` for clarity, and update the visual annotation to show actual depth.
+- **Seam path direction:** When generating arc segments for notches or curves, ensure the arc direction matches the contour flow. Downward-arching notches should be drawn from bottom to top (through the deepest point), not top to bottom, to avoid jagged geometry in the PDF output.
 
 ## Example: MacBook Leather Sleeve Pattern
 
-Use the ready-to-run script `references/macbook-sleeve-pattern.py` to generate a complete 13-page PDF pattern for MacBook Pro 16" leather sleeve with flap design. The script includes:
+Use the ready-to-run script `references/pocket-sleeve-pattern.py` to generate a complete two-panel pattern for MacBook Pro 16" leather sleeve with user-configurable notch depth. The script includes:
 
 - 1:1 scale calibration (verified with pixel-to-cm transform)
-- A4 tiling with registration marks for assembly
-- Stitch hole guides (5mm spacing, 5mm from edge)
-- Fold lines and panel annotations
+- A4/A3/A2 tiling with registration marks for assembly
+- Stitch hole guides (5mm spacing, 4mm from edge)
+- Symmetric hole alignment for 'meat to meat' sewing
+- Configurable shallow (6mm) or deep (10mm) finger notch
 - Visual validation instructions
 
-Run: `python3 references/macbook-sleeve-pattern.py`
+Run: `python3 references/pocket-sleeve-pattern.py`
 
-Output: 13 PDF pages (info + 12 pattern tiles) ready for printing and assembly.
+Output: PDF patterns for A2 (both panels), A3 (one panel per page), or A4 (single panel) ready for printing and assembly.
+
+For asymmetric pocket designs with simple geometry, use `references/simple-pocket-pattern.py`.
 
 ## Verification
 
