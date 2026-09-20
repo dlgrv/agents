@@ -73,17 +73,20 @@ write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SR
 - No exclamation marks
 - Headers with verbs
 
-### Web UI Capitalization Rules
+### UI Component Capitalization Rules
 
-When translating content for web interfaces (such as the Russian index.html and README.ru.md), apply automatic capitalization to field values:
+When working with Russian web interfaces, apply consistent capitalization to all UI components:
 
-- **Простыми словами values**: Capitalize first letter (e.g., 'пристёгнутый ремень...' → 'Пристёгнутый ремень...')
-- **Эффект values**: Capitalize first letter (e.g., 'по оценке...' → 'По оценке...')
-- **Примечания values**: Capitalize first letter (e.g., 'цифры NHTSA...' → 'Цифры NHTSA...')
+- **Icon buttons**: All icons must use stroke-only Lucide SVGs (24×24 viewBox, 16px rendered, `fill="none"`, `stroke="currentColor"`, `stroke-width="2`), no filled exceptions including GitHub (use `lucide/github` path). All icons must be exactly 16px in width/height with identical stroke color (`currentColor`).
+- **Language labels**: Language switcher labels must be small caps UI marks (12px, `font-weight: 600`, `letter-spacing: 0.08em`), not larger than adjacent icons.
+- **Sidebar chips**: All filter chip labels must start with a capital letter (e.g., 'очень высокая' → 'Очень высокая', 'жизнь' → 'Жизнь').
+- **Money chips**: Chinese-derived chips (少/多) must be translated to Russian with capitalization: 'Мало' / 'Много'
+- **Card badge labels**: Values in the LABEL map (e.g., 'бесплатно' → 'Бесплатно', 'небольшие траты' → 'Небольшие траты') must also be capitalized for consistency
+- **Field values**: 'Простыми словами', 'Эффект', 'Примечания' values must be capitalized (first letter only) in web UI rendering only (not source markdown). Implementation: Add `if (LANG==='ru') entry.human = entry.human.replace(/^\\s*(.)/, (c)=>c.toUpperCase());` to the parser logic for each field.
 
-**Implementation**: Add `if (LANG==='ru') entry.human = entry.human.replace(/^\s*(.)/, (c)=>c.toUpperCase());` to the parser logic for each field. This ensures consistent capitalization across all translated entries in the web interface while preserving the original lowercase formatting in markdown files.
+**Implementation**: During web interface updates, systematically replace all lowercase chip labels with capitalized versions using regex or string replacement. Verify that `data-v` attributes remain unchanged to preserve filter functionality. For icons, always measure SVG rectangles before committing: ensure identical width/height/color and no `clipped: true`.
 
-**Pitfall**: Do not apply this capitalization to the field labels themselves (Стоимость, Эффект, Примечания), only to their values. Field labels should remain as defined in the field marker rules.
+**Pitfall**: Preserve `data-v` values (e.g., 少, 多, 否, 是) unchanged — these are internal filter keys, not user-facing text. Only update visible text labels. Never mix filled and stroke icons in the same header.
 
 ## Intro Paragraph Layout Optimization
 
@@ -222,7 +225,7 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - Дизайн-решения пользователя: Ч/Б Georgia-книжка «университетской прессы» (Stanford/Harvard): шкала 36/24/19/17.5, h1 −0.015em, воздух 88px между секциями, hairlines вместо карточек, инвертированное ::selection; тёмная #111/#d0d0d0; **один шрифт — Georgia и в UI, и в тексте (кнопки/kbd/summary явно наследуют стек — кнопки НЕ наследуют font по умолчанию); моно только `<code>`**.
 - Проверка скина: jsdom ловит только сборку (528/32, 0 ошибок); стили/фильтры — реальный браузер (playwright-core из /root/github/dlgrv.com/node_modules + chromium-1234, localhost-сервер; карточки прячутся атрибутом `hidden`, не style.display).
 - v2-фичи (PR #13, коммит 2ecc078): scroll-spy — подсветка `.sec-link.spy-on` по getBoundingClientRect секций (rAF-батчинг, только при `__HTLB_V2__`); маргиналии — `aside.marg` в карточке, media ≥1440px, ширина 200px; центрует колонку РОДИТЕЛЬ `#list`, поэтому margin-прижатие на .doc не работает — геометрию проверять rect'ом в браузере, не формулой. Грабли: build_pages.py не вставлял `__HTLB_V2__=1` — все v2-ветки JS молча мертвы; ловится только подсчётом .marg/.spy-on в браузерном тесте. Кнопки шапки v2 (0f74a54): ver-switch (v2→v1, `location.pathname.replace('/v2/','/')`+search+hash, видна только при `html.v2` — класс добавляет build_pages.py в ранний скрипт); тема — icon-btn (луна в светлой, солнце в тёмной) вместо ползунка, `.switch` удалён из обоих CSS; index.html общий для v1/v2 — правки CSS шапки вносить в ОБОИХ местах (v1-блок в index.html + tools/v2.css). Грабля: fuzzy-patch может съесть закрывающий `</details>` — после правок шапки проверять childCount `.nav-r` (должно быть 5) и box'ы кнопок в один ряд (одинаковый y, шаг ~42px). Ритм v2 нормирован: шапка 20/12×4, карточка 8/12×3 (12px = базовая ступень), секции 88px.
-- Иконки: НЕ рисовать самому — брать готовые inline SVG из Lucide (https://lucide.dev, ISC; lucide-static на unpkg: `https://unpkg.com/lucide-static@0.469.0/icons/<name>.svg`) и переносить пути ДОСЛОВНО с атрибутами `fill="none" stroke="currentColor" stroke-width="2" stroke-linecap/linejoin="round"`. Брендовые знаки (GitHub-октокат) остаются официальными filled-глифами — CSS-правило `fill` не должно быть общим для всех svg (перебивает fill=none у штриховых), только классом `.ic-gh svg{fill:currentColor}`. Пользователь явно попросил открытые иконки вместо самодельных (2026-09-20).
+- Иконки: НЕ рисовать самому — брать готовые inline SVG из Lucide (https://lucide.dev, ISC; lucide-static на unpkg: `https://unpkg.com/lucide-static@0.469.0/icons/<name>.svg`) и переносить пути ДОСЛОВНО с атрибутами `fill="none" stroke="currentColor" stroke-width="2" stroke-linecap/linejoin="round"`. **Все иконки в шапке — строго stroke-стиля, включая GitHub (lucide/github), размер 16px, один currentColor. Никаких filled-исключений и оптического калибра под разные иконки.** Пользователь требует полной стилевой унификации. Перед коммитом мерить rect всех svg: width/height/color/clipped.
 - Грабли v2: `.icon-btn{display:grid}` перебивал `.menu-btn{display:none}` (равная специфичность) — прятать двухклассовым селектором; абсолютный поиск в шапке уходит из потока — `margin-left:auto` переносить на `.nav-r`; ссылки README/book на v2-страницах требуют префикса `../../` (build_pages.py replace по href); эмодзи-иконки (🌐) ломают монохром — текстовые лейблы; Georgia без CJK-глифов — zh нужен CJK-serif фолбэк (TODO); vision_analyze таймаутит пачками — верить computed-style замерам.
 
 ## Source Title Retrofits
