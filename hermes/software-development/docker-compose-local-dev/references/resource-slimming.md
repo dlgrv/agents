@@ -114,6 +114,23 @@ Any `/Volumes/<disk>/...` source needs that disk attached. A stack whose server 
 exited days ago" is often explained by exactly this — diagnose before assuming the compose
 config broke.
 
+### Planned external-disk removal (stacks backed by a /Volumes disk)
+
+Detaching a disk a running stack bind-mounts is the unplanned version of the pitfall above;
+make it planned:
+
+1. Stop the stack first: `docker compose stop` (clean SIGTERM — Exit 0/143 are both normal).
+   Containers hold the mount, so this step is not optional.
+2. Eject: `diskutil eject /Volumes/<disk>`, then verify with `ls /Volumes/`. A "disk in use"
+   error means something still holds files — usually the stack was not stopped, not a macOS
+   quirk; hunt the holder before forcing anything.
+3. Cable out. On re-attach: wait for the disk in `/Volumes`, then `docker compose up -d` — no
+   other repair needed (data lives on the disk).
+4. `restart: always` resurrects the stack on every Docker/VM restart even while the disk is
+   detached, leaving containers exited/crashed until the disk returns. Either accept that
+   (start the server container after re-attach) or put detachable stacks behind `profiles:` /
+   `restart: unless-stopped` (Scenario 2, step 3).
+
 ### Tool workaround: terminal guard blocks `docker compose up -d`
 
 The Hermes terminal tool may refuse `docker compose up -d` as an apparent long-lived server
