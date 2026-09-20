@@ -28,6 +28,13 @@ Check for these problems and fix them:
 - **All-caps subheaders everywhere.** Try lowercase italics, sentence case, or small-caps instead.
 - **Orphaned words.** Single words sitting alone on the last line. Fix with `text-wrap: balance` or `text-wrap: pretty`.
 
+### Typography Discipline (User Preference)
+
+- **One font family for entire page.** Never mix serif/sans-serif/UI fonts. All text must derive from a single typeface family.
+- **Force UI elements to inherit primary font.** Buttons, inputs, kbd must explicitly use the page's font family, not browser defaults.
+- **Hierarchy through size/weight/tracking, not font switching.** Use weights (400/500/600/700) and letter-spacing instead of changing font families.
+- **Icons sized by visual weight, not viewBox math.** SVG icons must be calibrated by optical equivalence, not raw dimensions.
+
 ### Color and Surfaces
 
 - **Pure `#000000` background.** Replace with off-black, dark charcoal, or tinted dark (`#0a0a0a`, `#121212`, or a dark navy).
@@ -101,6 +108,13 @@ Check for these problems and fix them:
 - **Light/dark toggle always a sun/moon switch.** Use a dropdown, system preference detection, or integrate it into settings.
 - **Footer link farm with 4 columns.** Simplify. Focus on main navigational paths and legally required links.
 
+### Iconography Discipline
+
+- **Icons of different heights.** Size SVG icons by visual weight, not viewBox math. Calibrate all icons to appear optically equivalent.
+- **Emojis as icons.** Replace with SVG or text labels for UI consistency.
+- **Inconsistent stroke widths.** Standardize all icons to one stroke weight for visual coherence.
+- **Uncalibrated icon groups.** When placing multiple icons together (nav bar, toolbar), ensure they have consistent visual weight despite different viewBox dimensions.
+
 ### Iconography
 
 - **Lucide or Feather icons exclusively.** These are the "default" AI icon choice. Use Phosphor, Heroicons, or a custom set for differentiation.
@@ -160,7 +174,7 @@ When upgrading a project, pull from these high-impact techniques to replace gene
 
 Apply changes in this order for maximum visual impact with minimum risk:
 
-1. **Font swap** — biggest instant improvement, lowest risk
+1. **Font unification** — single font family for entire page, including UI elements
 2. **Color palette cleanup** — remove clashing or oversaturated colors
 3. **Hover and active states** — makes the interface feel alive
 4. **Layout and spacing** — proper grid, max-width, consistent padding
