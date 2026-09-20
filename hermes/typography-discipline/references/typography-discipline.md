@@ -1,32 +1,20 @@
----
-name: typography-discipline
-description: Typography and icon discipline for premium UI.
----
+# Typography Discipline Reference
 
-# Typography Discipline
+## One Font, Infinite Hierarchy
 
-This skill enforces strict typographic and iconographic discipline to prevent AI-generated slop and ensure visual coherence. Apply whenever the user complains about "too many fonts" or "icons of different heights".
+### Core Rule
+Never mix serif/sans-serif/UI fonts on the same page. All text must derive from a single typeface family.
 
-## Core Principles
-
-- **One font family, infinite hierarchy.** Never mix serif/sans-serif/UI fonts on the same page. All text must derive from a single typeface family.
-- **Hierarchy through size, weight, case, spacing — not font switching.** Use 400/500/600/700 weights, negative tracking for headers, positive tracking for labels, caps for emphasis only when explicitly requested.
-- **No browser defaults.** Buttons, inputs, kbd, code must inherit the page's font family explicitly — never rely on browser defaults (Arial, system-ui).
-- **Icons calibrated by visual weight, not viewBox math.** SVG icons must be sized by optical equivalence, not raw dimensions. A 18/24 viewBox icon needs a larger box than a 24/24 viewBox icon to appear the same visual height.
-- **No emojis as icons.** Replace with SVG or text labels for UI consistency.
-
-## Font Unification Rules
-
-### Mandatory CSS Overrides
+### Implementation
 ```css
 /* Force all UI elements to inherit the primary font family */
 button, input, kbd, select, textarea, summary {
-  font-family: var(--primary-font, Georgia); /* or your chosen font */
+  font-family: var(--primary-font, Georgia);
 }
 
 /* Remove font switching for hierarchy */
 h1, h2, h3, h4, h5, h6 {
-  font-family: inherit; /* never 'display: serif' if body is sans */
+  font-family: inherit;
 }
 
 /* Use weight/size/tracking instead of font changes */
@@ -52,7 +40,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 ```
 
-### Exceptions (Use Sparingly)
+### Exceptions
 - **Code elements**: `code { font-family: 'SF Mono', Consolas, monospace; }`
 - **Technical kbd**: `kbd { font-family: inherit; font-size: 0.875em; }`
 - **Brand logos**: Never override font on logo SVGs
@@ -94,12 +82,9 @@ Size icons by their visual weight, not viewBox math:
 ```
 
 ### Calibration Process
-1. **Identify the heaviest visual element** in the icon set (usually the one with most filled area)
+1. **Identify the heaviest visual element** in the icon set
 2. **Set its size as the baseline** (e.g., 20px for a filled document icon)
-3. **Scale other icons proportionally** based on their visual weight:
-   - Document (filled, 18/24 viewBox): 20px
-   - GitHub (outline, 24/24 viewBox): 15px (75% of document)
-   - Chevron (simple lines, 24/24 viewBox): 10px (50% of document)
+3. **Scale other icons proportionally** based on visual weight
 4. **Test at actual pixel sizes** — don't rely on math alone
 
 ## Typography Pitfalls
@@ -120,7 +105,6 @@ Size icons by their visual weight, not viewBox math:
 ## Implementation Checklist
 
 Before finalizing typography:
-
 - [ ] All text elements use the same font family
 - [ ] No browser defaults in buttons/inputs/kbd
 - [ ] Icons sized by visual weight, not viewBox
@@ -132,7 +116,6 @@ Before finalizing typography:
 
 ## Example: Book Reference Site
 
-For a book reference site like HTLB:
 ```css
 :root {
   --primary-font: Georgia, serif;
@@ -157,22 +140,3 @@ button, input, kbd, summary {
 .ic-gh svg { width: 15px; height: 15px; }
 .lang-dd summary svg { width: 11px; height: 11px; }
 ```
-
-## When to Apply
-
-Use this skill when:
-- User says "too many fonts" or "mixing fonts looks bad"
-- User complains about "icons of different heights"
-- Redesigning existing UI with typographic inconsistency
-- Building new UI with strict visual discipline requirements
-- User explicitly asks for "one font throughout"
-
-## References
-
-- `references/typography-discipline.md` — Detailed typography and icon calibration guide with CSS examples and calibration process
-
-## User Preference (from HTLB redesign)
-
-**User rule**: "Очень много разных шрифтов — это bad practice. Разновидности шрифтов должно быть не так много и все должно быть в 1 стиле" (Too many different fonts is bad practice. Font variations should not be so many and all should be in 1 style)
-
-**Implementation**: Single font family (Georgia) for entire page, including UI elements. Hierarchy achieved through size/weight/tracking, not font switching.
