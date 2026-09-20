@@ -71,9 +71,10 @@ padding — the user rejects «запас на вырост» (same stance as vp
 ## Config state after deployment
 - Provider: Z.ai `glm-5.3-flash` (main model), `glm-4.5-air` (all auxiliary tasks except vision), `glm-5.3-flash` (vision) — all via Z.ai direct API (`https://api.z.ai/api/pas/v4`).
 - `agent.reasoning_effort: medium`, `agent.max_tokens: 32768`, `agent.max_turns: 40` (user-set; medium functional since v0.21.2). NOTE: CometAPI silently ignores reasoning params entirely (verified live — no token gradient); Z.ai accepts the native `thinking:{type,effort}` and Hermes' zai plugin maps `reasoning_effort` correctly.
-- Toolsets: web, browser, terminal, file, code_execution, vision, skills, todo, memory, session_search, clarify, delegation. Disabled: computer_use, connections, cronjob, tts, image_gen, video, video_gen, x_search, homeassistant, spotify, yuanbao, a2a (usage-audit: zero calls in 5 months).
+- Toolsets: web, browser, terminal, file, code_execution, vision, skills, todo, memory, session_search, clarify, delegation. Disabled: computer_use, connections, cronjob, tts, image_gen, video, video_gen, x_search, homeassistant, spotify, yuanbao. A2A: inbound 9900 + outbound toolset ENABLED (mac↔server A2A is live — server-origin sessions in the desktop list are normal, see New server section).
+- STT: faster-whisper `small` installed in the Hermes venv — incoming Telegram voice messages transcribe automatically, no extra service.
 - `agent.max_turns: 30` (user-set for session depth control).
-- MCP: GitHub (token), Cloudflare (OAuth), Chrome-local (disabled) — verified working post-migration.
+- MCP: GitHub (token), Cloudflare (OAuth), Chrome-local (disabled) — verified working post-migration. Headless OAuth login flow: references/mcp-oauth-headless.md.
 - **No CometAPI in use** — all services moved to Z.ai for cost and cache-read savings.
 - **Telegram UX:** Reactions now DISABLED (`platforms.telegram.reactions: false`, flipped 2026-09-13)., `display.cleanup_progress: true` (deletes 🐍-tool bubbles after successful final answer), edit streaming (`gateway.streaming.transport: auto` — drafts don't work inside forum topics, auto-degrades), rich_messages, clarify buttons, model picker. Teacher prompt for the English-learning group via `platforms.telegram.channel_prompts["<group_id>"]`; group in `group_allowed_chats`; bot is group admin (privacy mode satisfied).
 - Security hardening: ufw deny-incoming with 22/9119/4173, fail2ban (sshd jail), X11Forwarding no (sshd_config.d drop-in). Dashboard 9119 stays public (desktop connects via public IP; basic-auth gate). Tailscale = future option to close 9119.
@@ -96,8 +97,9 @@ padding — the user rejects «запас на вырост» (same stance as vp
 ## New server (2026-09-13): hermes-vm
 - Hetzner Falkenstein, 178.104.217.93, 7.6GB RAM / 75GB disk, Ubuntu 26.04; tailnet name hermes-vm. Tailnet IPs: server=100.93.178.88, macbook-pro=100.120.180.25.
 - SSH: password auth OFF (keys only); user's Mac key 'hermes-mac' in authorized_keys. Old server decommissioned after burn-in.
-- Dashboard 9119 bound to 100.93.178.88 via systemd drop-in ExecStart override (--host 100.93.178.88, hermes-dashboard.service.d/bind-tailscale.conf) + ufw 9119 public rule deleted; tailnet-only. A2A inbound enabled port 9900, peer token in .env (A2A_PEER_TOKENS=mac:...), outbound a2a toolset enabled, a2a_agents.mac -> http://100.120.180.25:9900 (gateway restart pending). Mac-side A2A setup pending.
+- Dashboard 9119 bound to 100.93.178.88 via systemd drop-in ExecStart override (--host 100.93.178.88, hermes-dashboard.service.d/bind-tailscale.conf) + ufw 9119 public rule deleted; tailnet-only. A2A inbound enabled port 9900, peer token in .env (A2A_PEER_TOKENS=mac:...), outbound a2a toolset enabled, a2a_agents.mac -> http://100.120.180.25:9900. Mac-side A2A is LIVE.
 - Tailnet route via DERP(hel) ~60-100ms, P2P not established (mac behind VPN/NAT) — fine. Server IP often blocked from RF; tailnet-over-443 is the workaround.
+- Tailscale policy: deny-by-default tailnet policy file, grants only mac↔server (both directions — A2A + SSH need each side to originate). Edited via Tailscale admin API: user supplies a scoped `tskey-api-…` key in chat; use it once, NEVER persist it in skill/memory/files. After apply: `tailscale status` on both machines + exercise one service per grant.
 
 ## Pitfalls
 - Telegram UI questions («как посмотреть X»): answer by grepping the Hermes
@@ -108,6 +110,12 @@ padding — the user rejects «запас на вырост» (same stance as vp
 - Migration validation: Always verify session count and skills count match the old server BEFORE declaring migration complete. If session count drops, the state.db transfer failed.
 - SSH key rotation: When user migrates their key (e.g. from ~/.ssh/id_rsa to ~/.ssh/hermes), ensure the old key is removed from new server's authorized_keys to prevent confusion during future debugging.
 - Gateway restart requirement: Any config change that affects Telegram (reactions, compression, etc.) requires `systemctl --user restart hermes-gateway` — agent-level restarts are insufficient and will be blocked.
+## Harness maintenance scripts (both machines)
+- Naming standard: Mac LaunchAgents `~/Library/LaunchAgents/ai.dlgrv.<name>.plist` → script `~/.hermes/scripts/<name>.sh`; server crons (`/etc/cron.d` or root crontab) → script `/root/.hermes/scripts/<name>.sh`.
+- One shared template: `#!/bin/bash`, one-line purpose comment, `set -uo pipefail`, paths as variables at top, `TAG="$(hostname)"`, `LOG_FILE`, retention as a single named variable, one log line per run. Write new automation in this style — the user reviews the set as a whole.
+- a2a-cleanup runs on BOTH machines: deletes A2A-origin sessions older than retention = **7 days** (user decision — do not re-tighten to 1 day). Before deleting "leftover a2a chats", read the session's source/origin field in state.db first: `source=desktop` test chats are NOT a2a sessions — purge by the right class, not by title text.
+- logs-cleanup on the server prunes gateway logs.
+
 ## Honcho stack (updated 2026-09-16)
 - Stack runs as docker project `honcho-local` (profile `local`); DATA volumes: old project was `local` (local_pgdata) — data restored into `honcho-local_pgdata` from /root/honcho-backup-2026-09-16.sql
 - `honcho start` re-renders docker-compose.yml from TEMPLATE in site-packages honcho_cli/local/templates/ — env keys do NOT override hardcoded environment (compose environment > env_file). Hardening (passwords, ports removal) must be patched IN THE TEMPLATE; backups: /root/compose-template-backup.yml

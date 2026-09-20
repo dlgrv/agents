@@ -33,7 +33,7 @@ draw.io stores diagrams as XML (often with base64/URL-encoded content). Direct X
 draw.io expects specific XML namespaces and structure. Always parse and regenerate with proper namespaces.
 
 ### 3. Validate Render After Edits
-Always export to PNG and verify visually. draw.io XML can be valid but render with overlaps or clipped content.
+Always export to PNG and verify visually. draw.io XML can be valid but render with overlaps or clipped content. When image-based review is unavailable (vision provider timing out), verify layout PROGRAMMATICALLY instead of skipping validation: parse every vertex's mxGeometry and check pairwise bounds overlaps — sibling vs sibling = real collision (move the box/zone), container vs its own children = expected, never flag it.
 
 ## Toolchain
 
@@ -43,7 +43,8 @@ Always export to PNG and verify visually. draw.io XML can be valid but render wi
 - **search_files** — Find nodes by ID or content
 
 ### Rendering
-- **Docker** — Use `rlespinasse/drawio-export:latest` for PNG export
+- **Local draw.io CLI (macOS, primary)** — `"/Applications/draw.io.app/Contents/MacOS/draw.io" -x -f png -o out.png diagram.drawio` (seconds, no image pulls; the `sandbox_extension_issue_file` warning is harmless). Bump `mxGraphModel pageWidth/pageHeight` first if content sits at/below the old page edge, or the export clips it.
+- **Docker** — `rlespinasse/drawio-export:latest` as fallback when the local app is absent.
 - **PIL (Python Imaging Library)** — Pixel-level validation of rendered output
 
 ## Step-by-Step Workflow
@@ -221,7 +222,7 @@ mxgeom_note = ET.SubElement(mxnote, 'mxGeometry', {
 **Never use write_file** — it overwrites the entire file, corrupting base64/URL-encoded content. Always use patch or execute_code.
 
 ### 2. Line Overlaps
-When multiple corridors exist, ensure y-coordinates differ by >30px to avoid visual overlap. Use PIL to check pixel-level ink distribution.
+When multiple corridors exist, ensure y-coordinates differ by >30px to avoid visual overlap. Use PIL to check pixel-level ink distribution. When adding a new zone/container, re-check its bounds against ALL existing top-level boxes, not just the nodes you placed inside it — existing siblings silently end up inside the new zone.
 
 ### 3. Container Boundary Violations
 Verify no line enters a container's bounding box except at designated connection points. Check y 360..823 px (top of containers) for unexpected ink.
