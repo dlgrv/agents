@@ -53,11 +53,12 @@ Generate precise PDF patterns for leather goods (sleeves, wallets, bags, cases) 
 - **Page size mismatch:** When printing on non-A4 formats (A3, A2), verify PDF page size matches target dimensions exactly. Some viewers auto-scale PDFs, causing misalignment.
 - **Text clipping:** Annotations near page edges may be cut off. Increase margins or reposition text inside safe zones.
 - **Geometry offset:** When drawing multiple panels (like front/back), ensure each panel is positioned at correct coordinates relative to page boundaries. Use coordinate math to verify coverage.
-- **Missing registration:** For multi-page patterns, include registration marks or reference lines at page edges to help align printed pages during assembly.
+- **Missing registration:** For multi-page patterns, include registration marks or reference reference lines at page edges to help align printed pages during assembly.
 - **Hole misalignment:** For pocket designs with two panels, ensure hole positions match exactly when panels are stacked. Use the same coordinate system for both panels.
 - **Asymmetric hole numbering:** When holes are numbered along the seam path from a single endpoint, the last interval is often missing a hole at the endpoint. This causes misalignment when panels are sewn 'meat to meat' because the hole sets are offset by one interval. **Fix:** Place holes at both endpoints of the seam path and ensure the total hole count is even (so panels can be paired 1:1 when one is flipped).
 - **Finger notch depth:** User may prefer shallow notches for easier insertion. Always clarify notch depth: 6 mm (shallow, wide opening) vs. 10 mm (deep, semi-circle). Use constants `NOTCH_DEPTH` and `NOTCH_OPENING` for clarity, and update the visual annotation to show actual depth.
 - **Seam path direction:** When generating arc segments for notches or curves, ensure the arc direction matches the contour flow. Downward-arching notches should be drawn from bottom to top (through the deepest point), not top to bottom, to avoid jagged geometry in the PDF output.
+- **Corner radius matching:** For realistic design, match the corner radius of the leather pattern to the actual object's corners (e.g. MacBook Pro 16" uses ~15mm radius). Use a single radius constant for both panel corners and finger notch to maintain design consistency and user preference for unified aesthetics.
 
 ## Example: MacBook Leather Sleeve Pattern
 
