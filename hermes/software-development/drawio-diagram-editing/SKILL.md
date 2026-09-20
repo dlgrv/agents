@@ -211,6 +211,23 @@ dead_edges = {c.get('id') for c in root.iter('mxCell')
 
 Diagrams accumulate real infrastructure details the owner forgets are there. Before the file leaves the machine, scan every `mxCell` value with a sensitive-data regex — IPs (`\d+\.\d+\.\d+\.\d+`), personal names, bot handles/ids, app/framework names, model names, versions, key paths — and replace hits with generic labels ("Пользователь", "Сервер (VPS)", "LLM API (облако)"). For an external audience also minimize: labels of 1–2 words, drop implementation-detail blocks (ports, versions, TODO notes, cron schedules) — the reader needs components and flows, not the owner's context.
 
+### Block labels: name the program, not the function
+
+A block label answers "what is this service": the specific program name (Clash, Tailscale, faster-whisper, skills-sync), not its function ("прокси (egress)", "STT — голосовые") and not its implementation stack (docker, postgres). The function belongs in arrow labels and the surrounding article text.
+
+Multi-program blocks list one program per line — never separate names with a middle dot "·"; the user rejects that character outright in any label, caption, or UI text. Same rule for edge labels.
+
+A diagram also asserts relationships. Before keeping or adding an edge — especially on a diagram meant for publication — confirm the relationship is real and what the user endorses: a block whose presence misrepresents the architecture (e.g. a personal egress proxy drawn as the machine-to-machine link) must go even though it exists in the system.
+
+### Semantic completeness audit (run after any relayout or minimization)
+
+Structural overlap checks do not catch meaning. After re-composing or trimming a diagram, dump every vertex and edge as text (label + `src -> dst | label`) and verify against the real system:
+
+1. Every vertex participates in at least one edge — an orphan block means a flow was lost in the rework (or the block is decoration and should be removed).
+2. Every edge's direction reads consumer → provider and still makes sense — stale edges from a previous layout survive relayouts as semantically nonsense arrows.
+3. Every real flow in the live system has an edge — cross-check against actual configs, not memory. When two machines use the same external service, both need their edge (or one shared dashed edge).
+4. After user-requested removals, re-run the check: deleting a block must not orphan its dependents.
+
 ### Adding New Nodes
 ```python
 # Create new node
@@ -320,6 +337,10 @@ Before considering work complete:
 - [ ] Badges and labels fully visible (no clipping)
 - [ ] Arrow text properly bound and positioned
 - [ ] All semantic color fills (blue for WireGuard, orange/green for NAS subblocks) present
+- [ ] No orphan vertices — every block connected to at least one edge
+- [ ] Every edge direction semantically correct (consumer → provider), no stale leftovers from earlier layouts
+- [ ] Block labels name the program; function/implementation details live in arrows and accompanying text
+- [ ] No "·" separators anywhere in labels
 
 ## Integration with Systematic Debugging
 
