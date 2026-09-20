@@ -170,6 +170,7 @@ Use this skill when:
 ## References
 
 - `references/typography-discipline.md` — Detailed typography and icon calibration guide with CSS examples and calibration process
+- `references/typography-discipline-audit.md` — Independent audit protocol with automated measurement scripts and common problem fixes
 
 ## User Preference (from HTLB redesign)
 
@@ -194,4 +195,58 @@ Use this skill when:
 .ic-doc svg { width: 20px; height: 20px; }
 .ic-gh svg { width: 15px; height: 15px; }
 .lang-dd summary svg { width: 11px; height: 11px; }
+```
+
+### WCAG Contrast Discipline Pitfall
+
+**Problem**: Light theme text colors often fail WCAG AA, especially for small text. 12px labels/badges on #ffffff may only reach 3.5:1, below the 4.5:1 requirement.
+
+**Solution**: Test all text colors against background using actual contrast ratio calculations (not browser defaults). Use darker shades for small text or low-contrast backgrounds. For 12px text on white, #6f6f6f yields 5.02:1, while #8e8e8e only gives 3.28:1 — a 50% contrast difference.
+
+**Implementation**:
+- Test with `lum(rgb)` function: `cr(a,b)=(l1>l2?[l1,l2]:[l2,l1]);return (hi+0.05)/(lo+0.05)`
+- For 12px labels: #6f6f6f on #ffffff (5.02:1)
+- For 13px links: #1a6aa8 on #ffffff (5.72:1)
+- For hover states: use --hover-2 token for deeper shade
+
+### Line Length Discipline Pitfall
+
+**Problem**: Wide text columns (e.g., 702px at 17.5px) exceed comfortable reading length (45-75 CPL). Long lines reduce readability and scanning speed.
+
+**Solution**: Constrain text width with `ch` units instead of fixed pixels. 64ch at 17.5px Georgia = ~560px, yielding ~59 CPL — optimal for long-form reading.
+
+**Implementation**:
+```css
+/* Fixed line measure, not responsive expansion */
+.sec-block, .doc { max-width: 64ch; }
+/* On ultrawide, do NOT expand — keep comfortable CPL */
+@media (min-width:1800px){ .doc { max-width: 64ch; } }
+```
+
+### CJK Font Fallback Discipline Pitfall
+
+**Problem**: CJK characters in Georgia serif fall back to system sans-serif fonts, creating visual inconsistency within the same paragraph.
+
+**Solution**: Explicitly stack CJK serif fonts before system fallback in CSS variables.
+
+**Implementation**:
+```css
+:root {
+  --serif: Georgia,"Noto Serif SC","Source Han Serif SC","Times New Roman",serif;
+  --sans: Georgia,"Noto Serif SC","Source Han Serif SC","Times New Roman",serif;
+}
+```
+
+### Hover State Discipline Pitfall
+
+**Problem**: Removing all underlines leaves only color as hover affordance, but color contrast may fail WCAG (e.g., #2481cc on white = 4.13:1 < 4.5:1). Users cannot tell if elements are interactive.
+
+**Solution**: Either ensure hover colors pass WCAG OR provide non-color affordance (e.g., underline on hover only). Prefer darker shades over lighter ones for contrast gain.
+
+**Implementation**:
+```css
+/* Hover states with guaranteed contrast */
+a:hover { color: var(--hover-2); /* e.g. #135a88 on white = 7.32:1 */ }
+/* OR underline as affordance */
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
 ```
