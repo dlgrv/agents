@@ -176,3 +176,22 @@ Use this skill when:
 **User rule**: "Очень много разных шрифтов — это bad practice. Разновидности шрифтов должно быть не так много и все должно быть в 1 стиле" (Too many different fonts is bad practice. Font variations should not be so many and all should be in 1 style)
 
 **Implementation**: Single font family (Georgia) for entire page, including UI elements. Hierarchy achieved through size/weight/tracking, not font switching.
+
+### Icon Optical Calibration Pitfall
+
+**Problem**: SVG icons with different viewBox dimensions (e.g., 18/24 vs 24/24) appear misaligned even when set to the same pixel size. An 18/24 document icon looks smaller than a 24/24 GitHub octocat at 20px height.
+
+**Solution**: Size icons by visual weight, not viewBox math. Identify the heaviest visual element in the icon set as baseline (e.g., filled document icon), then scale others proportionally.
+
+**Example HTLB header calibration**:
+- Document (filled, 18/24): 20px
+- GitHub (outline, 24/24): 15px (75% of document)
+- Chevron (simple lines, 24/24): 10px (50% of document)
+- Language menu chevron: 11px (55% of document)
+
+**CSS implementation**:
+```css
+.ic-doc svg { width: 20px; height: 20px; }
+.ic-gh svg { width: 15px; height: 15px; }
+.lang-dd summary svg { width: 11px; height: 11px; }
+```
