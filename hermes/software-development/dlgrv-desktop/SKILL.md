@@ -247,6 +247,15 @@ an unrelated change — then `git stash pop`. Verify only what your change touch
 `npx vitest run <relevant specs>` + `npx biome check <your files>` instead of gating on
 a red suite you didn't cause.
 
+## CV (public/cv) on the Linux server — specifics
+
+- **CV lives in THREE synced places** — edit all: `public/cv.md`, `public/cv/index.html`, `public/cv/Leonid_Dolgirev_CV.tex` + commit the rebuilt PDF (`npm run build:cv`).
+- **tectonic is NOT preinstalled on the server**: binary sits at `~/.local/bin/tectonic` (0.15.0 musl, downloaded 2026-09). Run as `PATH="$HOME/.local/bin:$PATH" npm run build:cv`.
+- **PDF must stay 1 page** — verify with pypdf (page count + text probes). Space reclaimed via `[itemsep=1pt, parsep=0pt, topsep=2pt]` on `\resumeItemListStart` and the Additional `itemize`.
+- **User facts (do not change without asking):** employer = `CRBSIT (Center for Research in Big-data Systems and Information Technologies)` — real company is ООО «ЦРБСИТ» (…Беспилотных Систем…); user deliberately hides the drone wording in the CV. Dates months-only; contributions count via jogruber GitHub-contributions API.
+- **trycloudflare preview FAILS layout**: vite preview 403s non-allowed Hosts (HTML passes, CSS/JS don't → naked page). Workaround: `python3 -m http.server <port> --bind 127.0.0.1` in `public/` + cloudflared pointed at it.
+- Deploy verification: grep single words in `https://dlgrv.com/cv/` (multi-word probes miss on HTML line wraps); compare prod PDF sha256 with the local build.
+
 ## References
 
 - `references/clippy-assistant.md` — Clippy assistant subsystem: reaction modules, tips pipeline + gating, agent motion helpers, persist keys, voice conventions, feature inventory (don't duplicate existing reactions), and the playful-pack plan summary. READ before editing `widgets/assistant`.
@@ -264,3 +273,7 @@ a red suite you didn't cause.
 - `references/blog-articles.md` — the blog article pipeline: `index.md` + `index.json` + `build:pages`, the tiny markdown renderer's subset (no fences/quotes/ol; external links supported), the minimal `post-toc` TOC (user stripped rules/bold/highlight classes — serif kicker only), figures (hand SVG / matplotlib→SVG; Georgia + grayscale ONLY, mathtext must not leak DejaVu), `.tl_article--post` typography, /sepia-before-build, numeric-walkthrough math + Russian-examples rules, honest authorship convention, preview on `--port 5175 --strictPort`, verification specs. READ before adding or editing blog articles.
 - `references/english-flashcards.md` — the /english Tinder-style flashcards page: stack-lifecycle rules (no card reuse, `data-slot` logical top, input locks), trackpad deltaX inversion under natural scrolling, Cursor-Dark theme requirement, FSRS-5 1:1 port note, removed-UI list. READ before editing `public/english/`.
 - `references/english-flashcards-development-workflow.md` — development workflow for multi-set mode (Tanya mode), worktree isolation, testing strategy, and implementation patterns for adding new word sets. Covers localStorage isolation, build script modifications, and e2e testing considerations.
+
+## CV edits (public/cv)
+
+Order of truth: `Leonid_Dolgirev_CV.tex` → `npm run build:cv` → commit `.tex` + PDF (+ generated HTML if it changes). `public/cv/index.html` is at least partly generated — an HTML-only edit gets silently reverted by rebuild. Tectonic lives at `/root/.local/bin/tectonic`. Don't forget `public/cv.md` (the markdown twin advertised at /cv.md) — it is hand-maintained, edit it alongside the `.tex`.
