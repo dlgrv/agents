@@ -1,6 +1,6 @@
 ---
 name: drawio-diagram-editing
-description: "Edit draw.io XML diagrams directly."
+description: "Edit draw.io XML diagrams directly: layout, bulk styling, node/edge cleanup, publication prep."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
@@ -78,6 +78,8 @@ if node:
 
 ### 3. Update Connection Points (mxGeometry.points)
 
+**Prefer default routing over waypoints.** Set `source`/`target` and let draw.io route (`edgeStyle=orthogonalEdgeStyle;rounded=1`). Waypoint arrays hard-code the path: when a block is later moved or resized, the arrow keeps its stale path and visually breaks — the user sees "сломанные стрелки". Add `points` only for a path the default router cannot produce, and when arrows break after a move, first delete the `Array as=points` and let the router re-route instead of editing the points.
+
 For custom line paths, modify the points array:
 
 ```python
@@ -154,6 +156,60 @@ for cell in mr.findall('mxCell'):
         new_value = cell.get('value').replace('old text', 'new text')
         cell.set('value', new_value)
 ```
+
+### Bulk restyle (uniform colors)
+
+Sweep styles with regex over all cells — never hand-edit each cell:
+
+```python
+for c in root.iter('mxCell'):
+    if c.get('edge') == '1':
+        st = c.get('style') or ''
+        st = re.sub(r'strokeColor=[^;]+;?', 'strokeColor=#000000;', st)
+        st = re.sub(r'fontColor=[^;]+;?', '', st)  # labels inherit edge color
+        c.set('style', st)
+```
+
+### Vertical layout pass (user's preferred shape)
+
+When re-laying-out a whole diagram, flow it VERTICALLY top-down: the human/actor node at top, the UI entry points it uses beside it, machine/service zones as parallel vertical columns below (block order inside a zone follows the flow), external services in a far column. Fan-out rule: one actor node gets one outgoing arrow per entry point (e.g. separately to Telegram bots AND to the desktop app) — never collapse them into a single merged arrow.
+
+Do bulk repositioning with a position map, not cell-by-cell edits:
+
+```python
+POS = {'user': (x, y, w, h), 'maczone': (...), ...}  # zones AND their children
+for c in root.iter('mxCell'):
+    if c.get('id') in POS:
+        x, y, w, h = POS[c.get('id')]
+        g = c.find('mxGeometry') or ET.SubElement(c, 'mxGeometry')
+        g.set('x', str(x)); g.set('y', str(y)); g.set('width', str(w)); g.set('height', str(h))
+```
+
+Pitfalls of a layout pass:
+- Snapshot the file to /tmp before a bulk geometry rewrite — a position-map typo is easier to roll back than to untangle.
+- After moving zones run BOTH checks: sibling-vs-sibling AABB overlap inside each zone, and zone-fit (every child's bottom/right edge inside the parent's bounds, minus a few px margin). Partial moves leave children hanging outside a resized zone — that is how blocks end up clipped or stacked.
+- Vertices missing from the position map keep stale coordinates and land on top of the new layout: after applying, list ALL vertex ids that were not repositioned and place them explicitly.
+- Directional semantics live on the edge cell itself: relabel with `c.set('value', ...)` on the mxCell, not by adding floating text nodes.
+
+### Deleting during minimization: keep a restore manifest
+
+Before a simplification/publication pass removes nodes or edges, dump the removed set (id, source, target, label) to stdout or a file. The user regularly notices a missing arrow afterwards ("куда пропали стрелки") — with the manifest you restore exact semantics as new source/target edges instead of reconstructing from memory.
+
+### Removing nodes
+
+Emptying a `value` leaves an empty rendered box — remove the cell AND every edge referencing it, then re-attach lost semantics as new simple edges:
+
+```python
+dead = {'node-id', ...}
+dead_edges = {c.get('id') for c in root.iter('mxCell')
+              if c.get('edge') == '1' and (c.get('source') in dead or c.get('target') in dead)}
+# remove both sets from the tree, then add replacement edges (source/target set, no waypoints)
+# finish by asserting: every edge has BOTH source and target (no floating edges)
+```
+
+### Preparing a diagram for publication (blog, screenshots, sharing)
+
+Diagrams accumulate real infrastructure details the owner forgets are there. Before the file leaves the machine, scan every `mxCell` value with a sensitive-data regex — IPs (`\d+\.\d+\.\d+\.\d+`), personal names, bot handles/ids, app/framework names, model names, versions, key paths — and replace hits with generic labels ("Пользователь", "Сервер (VPS)", "LLM API (облако)"). For an external audience also minimize: labels of 1–2 words, drop implementation-detail blocks (ports, versions, TODO notes, cron schedules) — the reader needs components and flows, not the owner's context.
 
 ### Adding New Nodes
 ```python
@@ -246,6 +302,9 @@ New nodes must have 'parent' attribute set (usually '1' for root level).
 - Ensure text containerId matches arrow id
 - AutoResize=true for text bound to arrows
 - Test render to confirm text appears on the arrow line, not offset
+
+### 8. Stale Waypoints After Moving Blocks
+Arrows that keep old paths or point into empty space after a block move are edges with hardcoded waypoint arrays — delete `Array as=points` (keep source/target) so the router re-routes. When building new diagrams for the user, default to source/target-only edges: the user moves blocks around, and only default-routed arrows survive that.
 
 ## Validation Checklist
 

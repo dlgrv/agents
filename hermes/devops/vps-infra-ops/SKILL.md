@@ -97,3 +97,8 @@ questions. Never ask the user to re-state any of it.
 - **Color standby servers with yellow/orange**, not red (red = error state).
 - **Include a legend** listing all servers and their roles for clarity.
 - **Label planned features** as 'plan' (e.g. rsync git-data A→B).
+- **Publication copy = sanitized copy.** A schema that carries real IPs,
+  names, handles, or model names must not leave the machine: strip them via
+  regex sweep over `mxCell` values (IP pattern + known names/handles) and
+  replace with generic labels — the technique lives in the
+  `drawio-diagram-editing` skill ("Preparing a diagram for publication").
