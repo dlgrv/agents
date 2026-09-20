@@ -87,8 +87,11 @@ several GB.
 4. **mem_limit sizing — match the service's appetite, not a uniform number.** Small limits
    (64–192m) are for simple stateless services (redis, mailpit). Services embedding ML models
    need GB-scale limits (e.g. immich-machine-learning: 4g) — a tight limit on an ML service
-   causes OOM-kills mid-job, not savings. Propose generous values for unfamiliar/heavy
-   workloads and confirm with the user; they often prefer headroom over tightness.
+   causes OOM-kills mid-job, not savings. The same applies to an app server doing inline image
+   processing (sharp/libvips pipelines): raising job concurrency pushed such a server past a
+   1g limit into restart loops — 3g restored stability. Size by pipeline peak, not idle
+   footprint. Propose generous values for unfamiliar/heavy workloads and confirm with the
+   user; they often prefer headroom over tightness.
 5. **Reject "hibernate idle containers" (wake-on-request proxy/Traefik schemes)** as
    overengineering on dev machines: the VM stays up anyway, so savings are marginal while
    complexity is real. Stack-level profiles give a bigger, predictable win.
