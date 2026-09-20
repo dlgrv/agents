@@ -189,6 +189,16 @@ never hand-edit config.yaml (a stray indent corrupts it and breaks the live gate
     `notifications/initialized`, then one `tools/call` per action, every
     POST repeating the session-id header. Build and quote the curl args in
     execute_code (python list → shell), not as a hand-typed shell line.
+- **`hermes mcp login <name>` (OAuth) from a headless server**: the command
+  prints an authorize URL and listens for a callback on `127.0.0.1:<port>`
+  OF THE SERVER — but the browser runs on the user's machine, so SSH-forward
+  the callback port(s); the provider may redirect to a different nearby port
+  than advertised (observed 27890 → 27891), forward BOTH. The listener dies
+  after ~5 min — run the login in tmux, and copy the FULL authorize URL from
+  a WIDE tmux pane: terminal wrapping truncates these very long URLs and a
+  truncated URL fails the consent page. The user opens the URL, approves, and
+  pastes the final `127.0.0.1:<port>/callback?...` URL; tokens then land in
+  `~/.hermes/mcp-tokens/<name>.json` (access + refresh, auto-refreshed).
 
 ## Display settings for minimal noise
 
