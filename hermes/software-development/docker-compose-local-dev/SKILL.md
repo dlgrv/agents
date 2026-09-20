@@ -1,6 +1,6 @@
 ---
 name: docker-compose-local-dev
-description: "Add Docker/docker-compose for local development with instant code-reload (no rebuild), without breaking an existing non-Docker (or Docker) production CI/CD pipeline. Covers base+override compose files, live-reload mechanisms per stack, and the classic bind-mount pitfalls. Also covers host-level Docker resource optimization on a multi-stack machine: build-cache/image cleanup, gating stacks with profiles, restart policies, and mem_limit sizing (incl. ML services)."
+description: "Add Docker/docker-compose for local development with instant code-reload (no rebuild), without breaking an existing non-Docker (or Docker) production CI/CD pipeline. Covers base+override compose files, live-reload mechanisms per stack, and the classic bind-mount pitfalls. Also covers host-level Docker resource optimization on a multi-stack machine: build-cache/image cleanup, gating stacks with profiles, restart policies, mem_limit sizing (incl. ML services), and Docker Desktop VM triage on macOS (resource changes, VM-hang recovery, virtiofs hazards on external-disk bind mounts)."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
@@ -53,6 +53,7 @@ On macOS every Docker option is a Linux VM (Docker Desktop, OrbStack, Colima —
 - Bind-mount filesystem speed differs hugely: OrbStack's virtiofs implementation reloads Vite HMR 2–3× faster than Docker Desktop. For vite-in-container dev setups, the runtime choice affects the live-reload experience more than any compose tuning.
 - Set the VM memory ceiling from the worst simultaneous stack (sum service `mem_limit`s + ~1 GB VM overhead), not from fear — engines allocate lazily. If a heavy service (e.g. llama.cpp) lives under compose `profiles:`, it doesn't count unless explicitly activated.
 - Host-level cleanup across multiple stacks (build cache + image prunes, gating whole stacks with `profiles:`, `restart: unless-stopped` for optional stacks, mem_limit sizing incl. ML services, external-volume mount failures): see `references/resource-slimming.md`.
+- VM-layer operations on Docker Desktop/macOS — raising VM CPU/RAM safely, recovery when the VM fails to start after a restart, virtiofs hazards on external-disk bind mounts (0-byte files, bogus `df` numbers), and controlling a heavy writer's job queue over its API: see `references/docker-desktop-vm-macos.md`.
 
 ## Pitfalls (each one bit someone before you)
 
