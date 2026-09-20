@@ -20,8 +20,9 @@ Generate precise PDF patterns for leather goods (sleeves, wallets, bags, cases) 
 
 - Create sleeve/case patterns for laptops, tablets, or electronics
 - Design wallet, passport cover, or bag patterns
-- Generate multi-page patterns that tile to A4 for printing/scanning
+- Generate multi-page patterns that tile to A4, A3, or A2 for printing/scanning
 - Any leatherworking project needing millimeter-precise layout
+- **Special case:** Simple two-panel 'pocket' designs (like MacBook sleeve with no flap, just two panels sewn on three sides)
 
 ## Prerequisites
 
@@ -36,22 +37,24 @@ Generate precise PDF patterns for leather goods (sleeves, wallets, bags, cases) 
 
 ## Workflow
 
-1. **Define geometry:** Calculate outline points, hole positions, fold lines, and annotation text. Use constants for dimensions (e.g. `W, L = 37.5, 84` cm for MacBook sleeve).
-2. **Set up matplotlib:** Configure figure size to A4 in cm (29.7 x 21.0), use `fig.add_axes()` to place drawing area with precise margins. Set `ax.set_aspect('equal')` for true proportions.
-3. **Draw elements:** Use matplotlib primitives (lines, polygons, scatter for holes, text for labels) with explicit coordinates in cm.
-4. **Add registration marks:** Draw crosshairs at 5cm intervals across the page for alignment during assembly.
-5. **Tile large drawings:** For drawings larger than A4, calculate sub-page offsets and generate multiple pages with overlapping registration zones.
-6. **Calibrate scale:** Verify 1:1 scale by checking that 1 cm in data = 39.37 px in output (fig.dpi should be 100). Use `ax.transData.transform()` to confirm pixel-to-cm ratio.
-7. **Generate PDF:** Save as PDF with A4 page size, verify with pypdf that all pages are exactly 29.7 x 21.0 cm.
-8. **Visually inspect:** Use `vision_analyze` to check for layout errors, overlapping text, or missing elements.
+1. **Define geometry:** Calculate outline points, hole positions, and annotation text. Use constants for dimensions (e.g. `W, L = 37.5, 26.5` cm for simple pocket sleeve). For pocket designs with no flap, define two separate panels (front and back) with identical dimensions.
+2. **Set up matplotlib:** Configure figure size to target page size (A4, A3, or A2) in cm (e.g. A4: 29.7 x 21.0, A2: 42.0 x 59.4), use `fig.add_axes()` to place drawing area with precise margins. Set `ax.set_aspect('equal')` for true proportions.
+3. **Draw elements:** Use matplotlib primitives (lines, polygons, scatter for holes, text for labels) with explicit coordinates in cm. For pocket designs, draw both panels on the same page if they fit (A2: both panels side-by-side; A3: one panel per page).
+4. **Add hole guides:** Plot stitching holes as dots with 5mm spacing from edges. For pocket designs, mark holes on all three sewn sides (top, bottom, and one side panel edge). Leave the open side (entry) without holes.
+5. **Add reference lines:** Draw straight lines at 10cm intervals across the page for manual scale verification (critical when printing on large formats).
+6. **Tile large drawings:** For drawings larger than the target page size, calculate sub-page offsets and generate multiple pages with overlapping registration zones.
+7. **Calibrate scale:** Verify 1:1 scale by checking that 1 cm in data = 39.37 px in output (fig.dpi should be 100). Use `ax.transData.transform()` to confirm pixel-to-cm ratio.
+8. **Generate PDF:** Save as PDF with correct page size, verify with pypdf that all pages are exactly the target dimensions (A4: 29.7 x 21.0, A3: 42.0 x 29.7, A2: 42.0 x 59.4 cm).
+9. **Visually inspect:** Use `vision_analyze` to check for layout errors, overlapping text, or missing elements.
 
 ## Pitfalls
 
 - **Scale drift:** Always verify pixel-to-cm ratio with `ax.transData.transform()`. Never assume DPI settings match physical output — measure.
-- **Registration errors:** Crosshairs must align perfectly across pages. Test print-and-scanner alignment before cutting materials.
+- **Page size mismatch:** When printing on non-A4 formats (A3, A2), verify PDF page size matches target dimensions exactly. Some viewers auto-scale PDFs, causing misalignment.
 - **Text clipping:** Annotations near page edges may be cut off. Increase margins or reposition text inside safe zones.
-- **Missing geometry:** When tiling, ensure all outline segments are drawn on their assigned pages. Use coordinate math to verify coverage.
-- **PDF page size:** Verify with pypdf that output pages are exactly A4. Some viewers scale PDFs automatically, causing print misalignment.
+- **Geometry offset:** When drawing multiple panels (like front/back), ensure each panel is positioned at correct coordinates relative to page boundaries. Use coordinate math to verify coverage.
+- **Missing registration:** For multi-page patterns, include registration marks or reference lines at page edges to help align printed pages during assembly.
+- **Hole misalignment:** For pocket designs with two panels, ensure hole positions match exactly when panels are stacked. Use the same coordinate system for both panels.
 
 ## Example: MacBook Leather Sleeve Pattern
 
