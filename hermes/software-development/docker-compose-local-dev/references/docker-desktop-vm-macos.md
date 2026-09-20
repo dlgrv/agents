@@ -85,3 +85,18 @@ starting anything by hand.
   then watch RestartCount. The definitive artifact-health metric is a zero-size scan inside
   the container (`find /data/thumbs -type f -size 0 | wc -l`); jobCounts shows queue state,
   not file health — a drained queue with zero-size files still means broken output.
+- `failed` counters are historical, not live health: they persist in the queue until each job
+  is re-run, so "N failed" long after the underlying cause is fixed means "not retried yet",
+  not "still broken". Re-run with `PUT /api/jobs/<name>` `{"command":"start","force":true}` —
+  once the write layer is fixed, previously-failed jobs pass immediately. Note that force on
+  thumbnailGeneration re-sweeps EVERY asset missing artifacts (can re-enqueue thousands of
+  jobs), not just the failed handful — that full sweep is usually the desired repair.
+- After any repair, verify SERVER-side before chasing UI reports: sample preview/thumbnail
+  URLs directly (curl + `x-api-key`, expect 200 + non-trivial body) across the library range,
+  plus the zero-size scan. If everything answers healthy but the user still sees "Error
+  loading image", the browser has cached the old zero-byte responses — a hard refresh may not
+  evict them; have the user clear the cache (Ctrl+Shift+Del → cached images) instead of
+  digging further server-side.
+- "Server Offline" in the UI during heavy background job load is usually the API process
+  saturating, not a crash: check `docker inspect` RestartCount/health and recent logs before
+  restarting anything — it typically recovers on its own, and restarting mid-write adds churn.

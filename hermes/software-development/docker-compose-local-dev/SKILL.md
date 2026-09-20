@@ -54,8 +54,9 @@ On macOS every Docker option is a Linux VM (Docker Desktop, OrbStack, Colima —
 - Set the VM memory ceiling from the worst simultaneous stack (sum service `mem_limit`s + ~1 GB VM overhead), not from fear — engines allocate lazily. If a heavy service (e.g. llama.cpp) lives under compose `profiles:`, it doesn't count unless explicitly activated.
 - Host-level cleanup across multiple stacks (build cache + image prunes, gating whole stacks with `profiles:`, `restart: unless-stopped` for optional stacks, mem_limit sizing incl. ML services, external-volume mount failures): see `references/resource-slimming.md`.
 - VM-layer operations on Docker Desktop/macOS — raising VM CPU/RAM safely, recovery when the VM fails to start after a restart, virtiofs hazards on external-disk bind mounts (0-byte files, bogus `df` numbers) and the gRPC
-  FUSE switch that fixes them, and controlling a heavy writer's job queue over its API: see
-  `references/docker-desktop-vm-macos.md`.
+  FUSE switch that fixes them, controlling a heavy writer's job queue over its API, re-running
+  stale `failed` job counters after a repair, and the safe detach/re-attach procedure for
+  stacks bind-mounted on an external disk: see `references/docker-desktop-vm-macos.md`.
 
 ## Pitfalls (each one bit someone before you)
 
