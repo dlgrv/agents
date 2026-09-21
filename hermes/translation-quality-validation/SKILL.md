@@ -105,6 +105,7 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 - **Anchor regeneration**: When updating chapter text, regenerate mutation anchors to match new text
 - **End-to-end sync**: Factcheck logic must be able to catch all specified mutants
 - **Major issue gating**: Only reversed_logic/invented/dropped_condition fail chapters; others warn
+- **Number preservation in degradation**: When creating degradations for abridgement, preserve numeric values and statistics; abridgement may only remove text, not change numbers (rule: abridgement must not introduce new numbers or change existing ones).
 
 ## Task 4: Multi-Rater Expert Evaluation
 
@@ -181,6 +182,8 @@ python3 tools/validate/final_validation.py
 - Judge blind runner: `scripts/judge_blind_run.py`
 - Mutation test runner: `scripts/mutation_test.py`
 - Final validation aggregator: `scripts/final_validation.py`
+- **Abridgement/bloat validation gate**: `references/abridgement-bloat-gate.md`
+- **Golden manifest regeneration**: `references/golden-manifest-regeneration.md`
 
 ## Scripts
 
