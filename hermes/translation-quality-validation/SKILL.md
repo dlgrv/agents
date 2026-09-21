@@ -68,6 +68,7 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 - **Human judge comparison**: After blind run, calculate κ between judge and human ratings to establish inter-rater reliability
 - **Stale verdicts**: Always archive v1 judge verdicts before v2 runs (they reference old manifest); move `golden_verdicts_batch*.json` to `golden_verdicts_v1_archive/`
 - **Subset randomness**: Use fixed random seed (e.g., 77) for reproducible markup subsets
+- **AI API independence**: Judge validation works with offline tools; judge_blind_run.py uses subagents with auto-injected keys, not direct API calls
 
 ## Task 2: Judge Prompt and Taxonomy Consistency
 
@@ -88,6 +89,7 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 **Pitfalls:**
 - **Prompt consistency**: Any taxonomy mismatch between prompts breaks validation
 - **Offline contract**: judge.py must work without API keys (test with `--model mock`)
+- **AI API independence**: All judge tools must work offline without API dependencies; return `judge_unavailable` status when no key present
 
 ## Task 3: Mutation Testing
 
@@ -130,6 +132,7 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 - **Expert bias**: Rotate expert types and ensure diverse perspectives
 - **Fix validation**: Every fix must be tested locally (124/124 unit tests OK for v2) before committing
 - **Merge hygiene**: Never merge transient files (tools/judge/, tools/validate/results/)
+- **AI API independence**: Expert evaluation must use offline judge tools; no API dependencies for validation
 
 ## Task 5: Aggregated Metrics and Publication Readiness
 

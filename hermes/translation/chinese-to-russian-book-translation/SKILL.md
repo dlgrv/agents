@@ -71,7 +71,7 @@ See `references/localization-techniques.md` for the full catalog:
 
 ## Multi-language extension
 
-This workflow has been extended for Chinese-to-English and Chinese-to-[target-language] translations (HowToLiveBetter EN/ES/HI projects). The core principles apply to all target languages, with language-specific adaptations.
+This workflow has been extended for Chinese-to-English, Chinese-to-Russian, and Chinese-to-[target-language] translations (HowToLiveBetter EN/ES/HI projects). The core principles apply to all target languages, with language-specific adaptations.
 
 ### Language prioritization
 
@@ -92,6 +92,7 @@ Based on Octoverse 2025 GitHub developer populations and audience overlap:
   - Spanish: Consider regional variations (Spain vs LatAm) — default to neutral Spanish unless specified
   - Hindi: Consider script (Devanagari) and potential audience (broader than just GitHub users)
   - All languages: Maintain consistent terminology glossaries across chapters
+- **UI/UX consistency:** Apply the same search placeholder logic across all languages — use short form everywhere (Search/Поиск/搜索/Buscar) and ensure proper centering on all viewports
 
 ### Number conversion for 万/亿
 
@@ -120,6 +121,8 @@ Based on Octoverse 2025 GitHub developer populations and audience overlap:
 - [ ] Language dropdown implemented and functional
 - [ ] Automatic language detection working
 - [ ] 万/亿 conversions preserved (script verification: 0 lost)
+- [ ] Search placeholder consistency: short form (Search/Поиск/搜索/Buscar) used everywhere, centered on mobile and desktop
+- [ ] Mobile viewport testing: header layout verified (search between hamburger and icons, no overflow)
 
 ### Upstream communication protocol
 

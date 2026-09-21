@@ -76,6 +76,7 @@ graph TD
 - **Whitespace drift tolerance** — when locating spans in CN text, normalize whitespace (collapse all whitespace) before position lookup, but use original line context for service-line rule.
 - **CN body filtering is positional** — cn_body() removes entire lines that start service blocks; text merely containing service markers stays.
 - **Grounding filter is conservative** — better to drop slightly too many spans than to hallucinate grounding; false positives are caught by mutation controls.
+- **AI API independence** — judge.py must work offline without API keys; return `judge_unavailable` status when no key present.
 
 ## Task 2: Judge Prompts and Taxonomy
 
@@ -93,6 +94,7 @@ graph TD
 - **Prompt consistency** — all three templates must use the same 8-class taxonomy
 - **Audit fields required** — model_id, timestamp, prompt_hash, unit_sha256
 - **Offline contract** — judge.py must work without network access
+- **AI API independence** — all judge tools must work offline without API keys; return `judge_unavailable` status when no key present
 
 ## Task 3: QE Wrapper with SKIPPED Degradation
 
@@ -169,6 +171,20 @@ graph TD
 - Merge request to main branch
 - Squashed commit with clean history
 - Final publication verification
+
+**AI-Free Publication Protocol:**
+- All blocking gates (A-E) must pass deterministically
+- Advisory passes (F-J) are optional and do not block
+- Judge tools run offline without API keys
+- Manual judge verification required before merge
+
+**Pitfalls:**
+- **Never embed AI API keys** — all judge tools must work offline with `judge_unavailable` status
+- **Advisory ≠ blocking** — judge verdicts are recommendations only, never gates
+- **Manual verification required** — run judge tools manually on final output before publication
+- **Golden set validation** — new judges must prove effectiveness on controlled degradations before use
+- **Mutation testing without AI** — use hardcoded rules for meaning inversion detection, not LLM-based generation
+- **Publication is final** — once merged, changes go live; ensure all quality gates are passed before publishing
 
 ## Golden set validation workflow
 
