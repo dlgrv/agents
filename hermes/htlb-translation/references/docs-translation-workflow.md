@@ -55,6 +55,14 @@ Update all chapter and README links:
 - Check that no Chinese text remains outside sources
 - Run unit-based QA on critical sections
 
+### Gates for docs long reads (2026-09-21, EN wave lessons)
+
+- **verify.py false-FAILs on docs articles**: its CJK whitelist is calibrated for chapter cards (CJK legal only in source lines/glosses), while long reads cite regulation titles 《…》 with glosses in body text and tables. Classify every CJK token with a script (《titles》, (CJK (translit — gloss)) parentheticals, source lines, header link) — if all classified, the FAIL is a known false positive, not a blocker.
+- **Link gate must resolve relative paths FROM THE FILE** (`os.path.join(dirname(file), target)`), never from repo root — otherwise broken paths from subfolders (docs/en/ → `../核实记录/…`) pass the check. An independent review caught exactly this bug (docs/en/做平台要办哪些证.md copied a CN link verbatim) that the root-based gate had missed.
+- **Pass E for articles**: judge subagent per article (prompt = tools/prompts/judge-factcheck.md; recover from commit a791033 if missing) → strict JSON verdict → run through tools/validate/factcheck.py --stdin-verdict (grounding gate, cn_span verbatim). 4/4 grounded:true, 72 assertions, 0 issues on the EN wave.
+- **Number gate**: every number in CN must appear in EN as-is or as a legal conversion (万=10,000 → million, 亿=100,000,000); "598 checks / 13 diffs" were all legal conversions (610.6万→6.106M etc.).
+- **Sweep all chapters after relinking**: the EN wave fixed `../README.md`→`../../README.md` back-links only in the 5 touched chapters; review found 27 more chapters with the same pre-existing broken links. Fix the pattern repo-wide in one commit, not per-chapter.
+
 ## Pitfalls
 
 - **Don't skip**: These are the only remaining Chinese content and actively referenced
