@@ -80,6 +80,7 @@ cronjob_manage --action run --job_id af2df3e90195 --prompt "Ты формиру�
 - Hype tag: `[HYPE: X -> Y апвотов]` only for resurfaced papers
 - No raw arXiv XML in output
 - No duplicate papers in same digest
+- **Terminology Education**: Use real ML/AI terminology with immediate Russian explanations in parentheses (e.g., 'KV-кэш (память модели о прочитанном тексту)') and include a glossary section for key terms
 
 ## Error Handling
 
@@ -102,6 +103,7 @@ cronjob_manage --action run --job_id af2df3e90195 --prompt "Ты формиру�
 - **False hype from 0→X**: Only count hype if previous upvotes were known (not 0 from API failure)
 - **Organization overclaiming**: Only include organization if determinable from author affiliations
 - **Replay protection**: Never reuse yesterday's digest if sources fail — output "no new papers" message
+- **Race condition in manual testing**: When debugging, always use `--dry-run` flag to avoid marking papers as seen during manual script runs — manual runs with `--dry-run` do not update seen.json, preserving state for real cron runs
 
 ## Monitoring
 

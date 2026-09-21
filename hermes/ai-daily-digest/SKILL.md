@@ -21,6 +21,11 @@ description: "Use when editing the AI digest cron, script, or dedup."
 
 ## Digest format (audience: beginner LEARNING the terminology)
 - Top-5: **Title** — 1-2 Russian sentences using the REAL terms inline, each followed by a plain-language gloss in parens: «KV-кэш (память модели о уже прочитанном)». Never hide a term behind a paraphrase — name it, then decode it.
+- STRICT Russian-only output: no CJK characters ever; foreign terms in Latin script or translated (seen once: 检索 leaked into a glossary entry).
 - Org attribution: infer from famous authors; if unsure — OMIT, never guess. Live web-search allowed to verify.
 - «📚 Словарик» block: 3-6 hardest terms ALREADY USED above, one-two plain sentences each with бытовая аналогия. The glossary DEEPENS the inline glosses, not replaces them.
 - Footer line: how many candidates scanned.
+
+## Operational pitfalls (all encountered)
+- Manual prefilter runs BETWEEN cron runs cause race conditions: cron run marks everything seen, user gets empty digest. Rule: manual runs ONLY with --dry-run; never hand-edit seen.json around a cron fire.
+- seen.json was hand-patched during debugging (upvotes 0->None mass-fix) — fine when no cron run interleaves.
