@@ -247,6 +247,15 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Quality**: Apply same field markers, localization rules, and QA as main chapters; verify cross-references work correctly
 - **Pitfall**: Do not skip these — they are the only remaining Chinese content in the Russian edition and actively referenced
 
+### English Documentation Translation (2026-09-21)
+
+- **Scope**: Same four docs articles, but translated directly from Chinese to English (not via Russian)
+- **Quality**: Apply same field markers (- Cost:, - In plain terms:, etc.) and localization rules as EN chapters
+- **Fact-check gate**: Pass E (source-grounded semantic verification) catches meaning changes, verify.py catches formatting issues
+- **CJK handling**: Legal regulation titles with glosses `(CJK — English)` are valid and should not trigger verify.py FAIL
+- **Pitfall**: verify.py may FAIL on CJK in legal titles — this is expected; use factcheck gate for semantic validation instead
+- **Reference**: `references/english-translation-factcheck-handling.md` for detailed pass E gate workflow and CJK false positive handling
+
 ## English Translation Launch (2026-09-18)
 
 - **Pilot wave**: Always start with chapters 01 (smallest) and 13 (largest) to test all pipeline components (digest, assemble, web UI capitalization, EN field labels)
@@ -263,7 +272,8 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Fork main merge**: Only after complete translation, merge `translation/en` → `main` in fork, then delete branch
 - **PR workflow**: Create PR from `translation/en` to `main` in fork, auto-merge if fast-forward, close after merge
 - **Quality check**: After each wave, verify byte-identical sources, field labels, and no Chinese characters in visible text (regex `\u4e00-\u9fff`)
-- **CJK false positives**: Some legal/regulation titles contain CJK characters in the middle of English text (e.g., "The General Office of the State Council measures in April 2026 on accelerating the building of pooling region (统筹地区 — the locality where you are insured)"). These are valid and should not trigger warnings; grep for `\u4e00-\u9fff` should exclude lines with known gloss patterns like `(统筹地区 — ...)` or `(副主任医师 — ...)`
+- **CJK false positives**: Some legal/regulation titles contain CJK characters in the middle of English text (e.g., "The General Office of the State Council measures in April 2026 on accelerating the building of pooling region (统筹地区 — the locality where you are insured)"). These are valid and should not trigger warnings; grep for `\u4e00-\u9fff` should exclude lines with known gloss patterns like `(统筹地区 - ...)` or `(副主任医师 - ...)`
+- **Documentation articles**: Use factcheck gate (pass E) for semantic validation instead of verify.py, which may FAIL on CJK in legal titles
 
 ## Issue Management for External Repositories
 
@@ -383,6 +393,11 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **tools/style_check.py**: WARN-only, exit 0, маркеры из `tools/rules/<lang>.json`
 - **tools/glossary.json**: закреплённые термины + стилевые правила (RU+EN)
 
+### Особенности для документных статей
+- **verify.py**: Может FAIL на CJK в юридических названиях — ожидаемо, игнорировать
+- **factcheck.py**: Использовать как основной гейт для семантической проверки
+- **CJK в глоссах**: `(название — объяснение)` — валидно, не ошибка перевода
+
 ### Pitfalls
 - **Unit-first политика**: правка book/ напрямую затирается re-assembly → clobber-питфолл; править только в units
 - **Grounding check**: cn_span на служебной строке §SRC§ отбрасывается до отправки судье
@@ -445,6 +460,7 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - CN "250 多万粉丝" vs EN paraphrase without number — en09, requires text-level resolution, not script fix.
 - Real findings from first run 53/62: calques "когорт" ×13 (ch. 13/28/29/30), "популяц" ×2 (ch. 29), missing numbers in ru10/ru11 — material for a fix wave.
 - CJK gloss false positives: Legal titles in English text with CJK characters (e.g., "统筹地区 — ...") are allowed and should not trigger warnings. Verify regex excludes gloss patterns like `(统筹地区 — ...)` or `(副主任医师 — ...)`.
+- **Documentation articles**: verify.py FAIL on CJK in legal titles is expected; use factcheck gate (pass E) for semantic validation instead. CJK in `(title — explanation)` patterns are valid glosses, not translation errors.
 
 ## Quality Assurance Techniques
 
