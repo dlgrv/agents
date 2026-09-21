@@ -109,3 +109,29 @@ unset QE_VENV_MISSING
 - **Memory usage**: Monitor memory consumption; large batches should not cause OOM
 - **Parallel execution**: Verify parallel subagent dispatch works correctly
 - **File cleanup**: Ensure transient directories are properly cleaned up
+- **AI API independence**: Pipeline must work without AI API keys; all judge passes are advisory-only and run offline; blocking gates are strictly deterministic (byte/number/protected string/length/plainness lints)
+
+## AI-Free Pipeline Design
+
+**Objective:** Ensure the pipeline operates without AI API dependencies for blocking gates.
+
+**Architecture:**
+- **Blocking gates (A-E):** 100% deterministic, no AI required
+  - Pass A: Structure (file format, service lines)
+  - Pass B: Content (byte drift, protected strings, numbers)
+  - Pass C: Naturalness (lint-based plainness checks)
+  - Pass D: MQM (mutation testing with hardcoded rules)
+  - Pass E: Fact-check (grounding validation with regex/positional rules)
+- **Advisory passes (F-J):** Optional AI-based quality assessment
+  - Pass F: QE scoring (requires venv, skipped if missing)
+  - Pass G: Judge review (advisory only, offline judge available)
+  - Pass H: Style audit (corpus frequency analysis)
+  - Pass I: Plainness judge (advisory readability)
+  - Pass J: Consensus (κ threshold calculation)
+
+**Pitfalls:**
+- **Never embed AI API keys** — all judge tools must work offline with `judge_unavailable` status
+- **Advisory ≠ blocking** — judge verdicts are recommendations only, never gates
+- **Manual verification required** — run judge tools manually on final output before publication
+- **Golden set validation** — new judges must prove effectiveness on controlled degradations before use
+- **Mutation testing without AI** — use hardcoded rules for meaning inversion detection, not LLM-based generation
