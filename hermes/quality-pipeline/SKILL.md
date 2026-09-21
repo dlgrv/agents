@@ -414,15 +414,14 @@ python3 tools/validate/final_verification.py
 ## References
 
 - QE model configuration: `references/qe_config.json`
-- Mutation taxonomy: `references/mutation_taxonomy.md`
-- Judge prompt templates: `references/judge_prompts/`
+- Mutation taxonomy: `references/mutation_specification.md`
+- Judge prompt templates: `references/judge_prompts.md`
 - TDD workflow: `../test-driven-development`
 - Plan mode: `../plan`
 - Grounding validation rules: `references/grounding_rules.md`
 - Service-line detection logic: `references/service_line_detection.md`
 - Style marker corpus analysis: `references/style_corpus_analysis.md`
 - κ threshold calculation: `references/consensus_threshold.md`
-- Mutation test specification: `references/mutation_specification.md`
 - Golden set validation: `references/golden_set_validation.md`
 - Final verification protocol: `references/final_verification.md`
 - Plainness lint rules: `references/plainness_lint_rules.md`
