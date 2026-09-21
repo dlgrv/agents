@@ -54,10 +54,10 @@ graph TD
 
 **Implementation:**
 ```bash
-# Lite subset (20 pairs, 2 batches)
+# Lite subset (30 pairs: 18 real + 12 decoys, shuffled)
 python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden_lite_subset.json --out tools/validate/results/golden_judge_run_lite --workers 4
 
-# Full set (60 pairs + 36 decoys)
+# Full set (60 pairs + 42 decoys)
 python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden_full_subset.json --out tools/validate/results/golden_judge_run_full --workers 4
 ```
 
@@ -66,6 +66,8 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 - **Resume safety**: Error files (`{"error":...}`) are not counted as valid; only files with `decoded` field count as completed
 - **Key export**: ZAI_API_KEY must be exported from /root/.hermes/.env before running (judges use z.ai GLM-5.3-Flash)
 - **Human judge comparison**: After blind run, calculate κ between judge and human ratings to establish inter-rater reliability
+- **Stale verdicts**: Always archive v1 judge verdicts before v2 runs (they reference old manifest); move `golden_verdicts_batch*.json` to `golden_verdicts_v1_archive/`
+- **Subset randomness**: Use fixed random seed (e.g., 77) for reproducible markup subsets
 
 ## Task 2: Judge Prompt and Taxonomy Consistency
 
@@ -106,6 +108,7 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 - **End-to-end sync**: Factcheck logic must be able to catch all specified mutants
 - **Major issue gating**: Only reversed_logic/invented/dropped_condition fail chapters; others warn
 - **Number preservation in degradation**: When creating degradations for abridgement, preserve numeric values and statistics; abridgement may only remove text, not change numbers (rule: abridgement must not introduce new numbers or change existing ones).
+- **Recipe-aware gate validation**: Use `tools/validate/check_degrade.py` to validate abridgement/bloat pairs; abridgement can only remove text, bloat can only add text; any number change in abridgement or missing numbers in bloat = gate fail
 
 ## Task 4: Multi-Rater Expert Evaluation
 
@@ -125,7 +128,7 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 **Pitfalls:**
 - **Adversarial test design**: Test cases must be realistic, not contrived
 - **Expert bias**: Rotate expert types and ensure diverse perspectives
-- **Fix validation**: Every fix must be tested locally (101/101 unit tests OK) before committing
+- **Fix validation**: Every fix must be tested locally (124/124 unit tests OK for v2) before committing
 - **Merge hygiene**: Never merge transient files (tools/judge/, tools/validate/results/)
 
 ## Task 5: Aggregated Metrics and Publication Readiness
@@ -146,9 +149,10 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 **Publication checklist:**
 - [ ] All validation tasks completed
 - [ ] All critical findings fixed
-- [ ] All unit tests pass (101/101)
-- [ ] Manifest validation passed
+- [ ] All unit tests pass (124/124 for v2, including decoy count validation)
+- [ ] Manifest validation passed (60 pairs, 42 decoys)
 - [ ] Post-merge verification planned
+- [ ] v1 judge verdicts archived before v2 runs
 
 ## Implementation Workflow
 
@@ -184,6 +188,7 @@ python3 tools/validate/final_validation.py
 - Final validation aggregator: `scripts/final_validation.py`
 - **Abridgement/bloat validation gate**: `references/abridgement-bloat-gate.md`
 - **Golden manifest regeneration**: `references/golden-manifest-regeneration.md`
+- **HTLB v2 golden set workflow**: `references/golden_set_validation.md`
 
 ## Scripts
 
