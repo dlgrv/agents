@@ -62,6 +62,7 @@ Update all chapter and README links:
 - **Pass E for articles**: judge subagent per article (prompt = tools/prompts/judge-factcheck.md; recover from commit a791033 if missing) → strict JSON verdict → run through tools/validate/factcheck.py --stdin-verdict (grounding gate, cn_span verbatim). 4/4 grounded:true, 72 assertions, 0 issues on the EN wave.
 - **Number gate**: every number in CN must appear in EN as-is or as a legal conversion (万=10,000 → million, 亿=100,000,000); "598 checks / 13 diffs" were all legal conversions (610.6万→6.106M etc.).
 - **Sweep all chapters after relinking**: the EN wave fixed `../README.md`→`../../README.md` back-links only in the 5 touched chapters; review found 27 more chapters with the same pre-existing broken links. Fix the pattern repo-wide in one commit, not per-chapter.
+- **Automated gates (2026-09-21, wired into .github/workflows/check-links.yml on every PR/push to main)**: `tools/check_links.py` (relative links resolved FROM THE FILE, scope root/book/docs, code fences skipped) and `tools/check_content.py` (CJK-leak classifier + CJK-free filenames in book|docs/{en,ru} + tri-language parity 01–32 + badge stats 528/347/1066 recomputed from book/*.md). CJK-leak calibration method: run → classify every hit (gloss 《》-title, source bullet, doc-ID 〔…〕号, quoted term) → either fix the TEXT (real leak) or extend the narrowest regex; rule ORDER matters (specific title-idiom rules before generic CJK+paren).
 
 ## Pitfalls
 

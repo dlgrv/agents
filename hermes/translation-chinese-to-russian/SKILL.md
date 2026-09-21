@@ -73,6 +73,7 @@ GitHub mechanics (fork, issues, PRs) → `github` skill.
 - `templates/TRANSLATION.md` for convention starter template
 - `references/localization-rules.md` for Chinese-to-Russian localization specifics
 - `references/verification-script.md` for automated structural and numeric verification
+- `scripts/check_links.py` for repo-wide markdown link checking (user-facing content only)
 
 ## Consolidated playbook
 - The full method (pipeline diagram, subagent contracts, verification gotchas, post-translation waves, web-version localization, upstream etiquette, next-language launch checklist) lives in the repo: `docs/translation-playbook.md` in dlgrv/HowToLiveBetter (branch translation/ru). Read it before launching a new-language translation of the same book.

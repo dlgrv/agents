@@ -1,0 +1,56 @@
+# QE Model Configuration
+
+## Model
+- **Name**: Unbabel/wmt20-comet-qe-da
+- **License**: Apache-2.0 only (NC models banned)
+- **Language**: multilingual (RU/EN supported)
+- **Output**: Quality score (0-1)
+
+## Configuration
+```json
+{
+  "model": "Unbabel/wmt20-comet-qe-da",
+  "license": "Apache-2.0",
+  "languages": ["ru", "en"],
+  "output_range": [0, 1],
+  "requires_venv": true,
+  "anchors": {
+    "ru": ["01", "13", "24"],
+    "en": ["13"]
+  }
+}
+```
+
+## License Guard
+```python
+def check_model_blocks(model_name):
+    banned = [
+        "cometkiwi",
+        "xcomet",
+        "comet-da"  # if NC license
+    ]
+    for banned_model in banned:
+        if banned_model in model_name:
+            return False
+    return True
+```
+
+## Tau Calculation
+```python
+import numpy as np
+
+def calculate_tau(anchor_scores):
+    """τ = max(3σ, 0.01) where σ = mean of per-anchor std-devs"""
+    std_devs = [np.std(scores) for scores in anchor_scores]
+    sigma = np.mean(std_devs)
+    tau = max(3 * sigma, 0.01)
+    return tau
+```
+
+## Pitfalls
+- **License compliance**: Only Apache-2.0 models allowed; NC models blocked
+- **Venv detection**: ~/.venvs/qe must exist for model to work
+- **Output parsing**: JSON line extraction from comet runner stdout
+- **SKIPPED not FAIL**: Exit 0 with explicit report when venv missing
+- **Anchor consistency**: Use same anchors for baseline and noise measurement
+- **Language support**: Model supports RU/EN; other languages may fail
