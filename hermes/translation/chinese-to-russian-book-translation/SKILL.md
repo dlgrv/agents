@@ -55,6 +55,7 @@ See `references/localization-techniques.md` for the full catalog:
 - **Bureaucratic calques:** For Chinese-to-Russian translation, calques of Chinese bureaucratic phrasing are common — use MQM fluency dimension to identify and fix these.
 - **'Простыми словами' naturalness:** Check specifically for calques in the 'Простыми словами' field: these must read as natural Russian speech.
 - **Numeric preservation:** Always verify that numeric values and statistical terms (HR/RR/OR/CI) are unchanged after applying edits.
+- **万/亿 conversion verification:** Always run number-preservation script after translation to confirm all 万/亿 conversions are preserved (0 lost). Convert adjacent to 万/亿 only; standalone numbers unchanged.
 - **Unit-based QA for retrofits:** When checking inserted [рус. «…»] in source lines, split large batches into units of 10–15 lines per subagent. Whole-chapter checks are slow (50+ minutes) and prone to timeout; unit-based QA completes in 1–3 minutes per unit. Subagents must write only JSON verdicts — no file edits — to avoid conflicts in shared worktrees.
 - **QA verdict workflow:** After subagent reports, aggregate issues centrally and fix using exact string matching with patch. Never let multiple agents write to the same files during QA.
 - **CJK punctuation artifacts:** Watch for stray Chinese punctuation in translated text (e.g. `，` instead of `,` or `… …` instead of `…`). Use regex to scan for these patterns and replace them with proper Russian equivalents.
@@ -68,9 +69,16 @@ See `references/localization-techniques.md` for the full catalog:
 - **PR auto-merge detection:** GitHub may auto-close and merge a PR when the branch is merged to target — check PR state after merge and add closing comment if needed.
 - **Live site verification:** Verify multiple URLs after deployment: index.html, README.md, sample book chapters, upstream links — single file checks miss cascading failures.
 
-## English translation extension
+## Multi-language extension
 
-This workflow has been extended for Chinese-to-English translation (HowToLiveBetter EN project):
+This workflow has been extended for Chinese-to-English and Chinese-to-[target-language] translations (HowToLiveBetter EN/ES/HI projects). The core principles apply to all target languages, with language-specific adaptations.
+
+### Language prioritization
+
+Based on Octoverse 2025 GitHub developer populations and audience overlap:
+- **Spanish:** High priority — one language covers 20+ countries, low English overlap in LatAm, significant real-world impact
+- **Hindi:** Secondary priority — massive user base, but most Indian GitHub users read English; broader audience appeal
+- **Other languages:** Portuguese (Brazil), Japanese (stable market) — evaluate on case-by-case basis
 
 ### Core workflow differences
 
@@ -79,7 +87,20 @@ This workflow has been extended for Chinese-to-English translation (HowToLiveBet
 - **Source preservation:** All source lines (来源：/DOI/URLs) remain byte-identical per QA requirement; only field label punctuation may differ (`：`→`:`)
 - **Status line translation:** Translate visible text in status lines and back-links; keep link targets byte-identical to source
 - **Language detection:** Use `navigator.language` for automatic language selection, fallback to English for unknown languages
-- **Trilingual UI:** Implement language dropdown in top-right corner with expandable toggle
+- **Trilingual+ UI:** Implement language dropdown in top-right corner with expandable toggle
+- **Language-specific considerations:**
+  - Spanish: Consider regional variations (Spain vs LatAm) — default to neutral Spanish unless specified
+  - Hindi: Consider script (Devanagari) and potential audience (broader than just GitHub users)
+  - All languages: Maintain consistent terminology glossaries across chapters
+
+### Number conversion for 万/亿
+
+- **Convert 万 → numeric:** 1 万 = 10,000; 610.6 万 = 6.106 million
+- **Convert 亿 → numeric:** 1 亿 = 100,000,000; 2.5 亿 = 250 million
+- **Verify preservation:** Run number-preservation script to confirm no loss during translation
+- **Units and statistics:** HR/RR/OR/CI values must be identical; percentages and statistical terms preserved
+- **Context-aware conversion:** Only convert when adjacent to 万/亿; standalone numbers remain unchanged
+- **Glossary consistency:** Document all 万/亿 conversions in glossary for reference
 
 ### Verification checklist
 
@@ -98,6 +119,7 @@ This workflow has been extended for Chinese-to-English translation (HowToLiveBet
 - [ ] Zero CJK in body text outside machine zones
 - [ ] Language dropdown implemented and functional
 - [ ] Automatic language detection working
+- [ ] 万/亿 conversions preserved (script verification: 0 lost)
 
 ### Upstream communication protocol
 
