@@ -149,6 +149,7 @@ graph TD
 - **Contract schema sync** — factcheck gate expects `status` field in verdict assertions, not `ru_ok`/`en_ok` (those are prompt-level flags, not gate inputs)
 - **Error verdict handling** — broken verdicts (missing fields, malformed JSON) are gated as `error`, not silently dropped; this prevents silent bypass of quality gates
 - **Mutation anchor regeneration** — when updating chapter text, regenerate mutation anchors in tools/validate/results/mutations_seed42.json to match new text; mutation semantics must be preserved even if exact text changes
+- **Factcheck merge conflicts** — when merging main branch changes, resolve conflicts in factcheck.py by keeping the version with expert review fixes (parse_error, ellipsis-grounding, span_supports_claim, hardened_claim); our version is a superset of main's version
 
 ## Tasks 5-14: Validation Tiers
 
@@ -178,6 +179,13 @@ graph TD
 - Judge tools run offline without API keys
 - Manual judge verification required before merge
 
+**Publication Workflow:**
+1. **Branch cleanup** — Remove transient files (tools/judge/, tools/validate/results/)
+2. **Squash commit** — Combine all quality-pipeline commits into one
+3. **Merge request** — Open MR to main with descriptive title and body
+4. **Post-merge verification** — Confirm pipeline still works after merge
+5. **Test fixture refresh** — Update test fixtures to match new main branch baseline
+
 **Pitfalls:**
 - **Never embed AI API keys** — all judge tools must work offline with `judge_unavailable` status
 - **Advisory ≠ blocking** — judge verdicts are recommendations only, never gates
@@ -185,6 +193,14 @@ graph TD
 - **Golden set validation** — new judges must prove effectiveness on controlled degradations before use
 - **Mutation testing without AI** — use hardcoded rules for meaning inversion detection, not LLM-based generation
 - **Publication is final** — once merged, changes go live; ensure all quality gates are passed before publishing
+- **Test fixture sync** — after main branch advances (e.g., localized docs links), update test fixtures to match new baseline; use verify.py baseline comparison to identify what changed
+- **Golden set batch handling** — batch files (golden_verdicts_batch*.json) may contain ties ('=' verdicts); test assertions must count ties as recorded verdicts, not as answered pairs; use answered + ties = total non-decoy pairs
+- **Decoy/non-decoy distinction** — 18 non-decoy pairs (lite2: abridgement+bloat) should have judge verdicts; 42 decoy pairs (A==B) test false positive rate; judge may skip decoys, but non-decoy pairs must be answered (including ties)
+- **Blind run consistency** — when regenerating golden set batches, ensure judge behavior is stable across runs; use consistent model and parameters to avoid variance in verdicts
+- **Batch file structure** — golden verdicts are stored in multiple batch files (golden_verdicts_batch*.json) for large result sets; load all batches and merge answers before calculating metrics
+- **Merge conflict resolution** — when conflicts occur (e.g., factcheck.py), prefer version with expert review fixes; our version is typically a superset of main's version
+- **Post-merge testing** — after conflict resolution, run full test suite to ensure pipeline functionality
+- **Golden manifest refresh** — regenerate golden_manifest.json if chapter text changes after merge
 
 ## Golden set validation workflow
 
@@ -280,6 +296,10 @@ delegate_task(
 - **Memory usage** — monitor memory consumption; large batches should not cause OOM
 - **Parallel execution** — verify parallel subagent dispatch works correctly (no race conditions)
 - **File cleanup** — ensure transient directories (tools/judge/, tools/validate/results/) are properly cleaned up
+- **Test fixture refresh** — when main branch advances (e.g., localized docs links), update test fixtures to match new baseline; use verify.py comparison to identify changes and refresh golden manifest
+- **Golden manifest sync** — tools/validate/results/golden_manifest.json must reflect current chapter text; regenerate when chapters are updated to ensure test validity
+- **Batch verdict handling** — golden verdict batch files may contain ties ('=' verdicts); test assertions must account for ties as recorded verdicts, not just answered pairs
+- **Non-decoy coverage** — verify all 18 non-decoy pairs (lite2: abridgement+bloat) have recorded verdicts (including ties); 42 decoy pairs test false positive rate but may be skipped by judge
 
 ## Task 12: Pass I (consensus)
 
@@ -441,6 +461,8 @@ python3 tools/validate/final_verification.py
 - Golden set validation: `references/golden_set_validation.md`
 - Final verification protocol: `references/final_verification.md`
 - Plainness lint rules: `references/plainness_lint_rules.md`
+- Human markup workflow: `references/human_markup_workflow.md`
+- Publication merge conflict resolution: `references/publication_merge_conflict_resolution.md`
 
 ## Scripts
 
