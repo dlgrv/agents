@@ -33,8 +33,8 @@ sed -i 's/25007.5 млрд/2 500.75 млрд/g' book/ru/*.md
 ```bash
 grep -n "96,217" /root/htlb-run-ru/01/units/33.md  # Find instances
 grep -o "9.6 万" book/01-不要早死.md  # Check CN original
-# Replace '96,217' with '96 000' in Простыми словами section
-sed -i '/Простыми слова/,/Эффект:/ s/96,217/96 000/g' /root/htlb-run-ru/01/units/33.md
+# Replace '96,217' with '96 000' in Простыми слова section
+sed -i '/Простыми слово/,/Эффект:/ s/96,217/96 000/g' /root/htlb-run-ru/01/units/33.md
 ```
 **Rule**: 'Простыми словами' must use rounded/approximate numbers from CN 说人话, not precise stats from 'Эффект'
 
@@ -69,7 +69,24 @@ grep -o "[0-9]*,[0-9]*" book/ru/*.md | head  # Find comma-formatted numbers
 sed -i 's/20,024/20 024/g' /root/htlb-run-ru/01/units/33.md
 sed -i 's/60,000 IU/60 000 IU/g' /root/htlb-run-ru/06/units/03.md
 ```
-**Rule**: Use space format '20 024' instead of comma format '20,024' for numbers in RU text to avoid verify FP
+**Rule**: Use space format '20 04' instead of comma format '20,024' for numbers in RU text to avoid verify FP
+
+### 7. Numeric Normalization Failures
+**Problem**: verify.py reports 'numbers absent from translation' for numbers that are actually present but normalized differently
+**Example**: CN '80300' becomes '80,300' in RU (comma formatting) or '80 300' (space formatting)
+**Root cause**: verify.py normalizes all numbers to remove commas/spaces before comparison
+**Fix**:
+```bash
+# Find the specific failing number in CN original
+grep -o "80300" book/02-不要慢慢死.md
+# Check how it appears in RU translation
+grep -o "80[, ]?300" book/ru/02-*.md
+# Normalize both for comparison: remove commas/spaces, then compare
+cn_num=$(grep -o "80300" book/02-不要慢慢死.md | tr -d ' ,')
+ru_num=$(grep -o "80[, ]?300" book/ru/02-*.md | tr -d ' ,')
+if [ "$cn_num" = "$ru_num" ]; then echo "OK"; else echo "FAIL"; fi
+```
+**Rule**: Numbers are compared after removing commas/spaces — verify.py treats '80,300' and '80 300' as identical to '80300'
 
 ## Known FP verify.py (not to be crudely fixed)
 - "60,000 IU" in RU text is read as decimal (comma = thousands only if not "0..."; one line in ru06). Fix: replace with "60 000 IU" to avoid false positive.
@@ -85,7 +102,7 @@ Before committing any translated chapter:
 3. Verify numeric conversions against CN originals
 4. Check for number consistency between sections
 5. Scan for prohibited calques
-6. Run assemble.py and validate web output
+6. Run assemble.py and validate web UI
 
 ## Post-Fix Verification
 

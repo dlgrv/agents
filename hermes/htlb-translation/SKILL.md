@@ -328,6 +328,32 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - Судья пассов C/D — GLM-5.3-Flash через API z.ai (решение Лёни 2026-09-18; сильный, уже оплачен, локальный стек не нужен). Офсеты: self-preference (судья = семья переводчика) → A/B против контролируемых деградаций, а не против второго GLM-вывода; невоспроизводимость API → в вердиктах логировать model id + дату + prompt_hash, при смене весов — дешёвая ревалидация золотого сета (60 пар). Если κ(судья, Лёня) < 0.4 — запасные: локальный Qwen3-30B-A3B или Gemma 3 27B (Mac M5 Pro 48GB).
 - Порядок пассов: translate → assemble → verify(FAIL) → fact-check E(FAIL, заземление CN-цитатами) → style A(WARN) → QE B(advisory) → judge C/D(advisory) → MQM(человек, приоритет над QE) → MR+squash.
 
+## Spanish Translation Extension (2026-09-22)
+
+- **New language track**: Spanish translation follows the same pipeline as Russian (CN→ES)
+- **Field markers**: Use Spanish equivalents: 成本→Costo, 说人话→En términos simples, 收益→Beneficio, 证据等级→Nivel de evidencia, 备注→Notas
+- **Slug naming**: Two-digit prefix + Spanish title (e.g., `01-No-Mueras-Temprano.md`)
+- **Localization**: Adapt Chinese concepts for Spanish readers, add brief glosses for culturally specific terms
+- **Pipeline**: Same chunked units approach (tools/digest.py → units → delegation → assemble_es.py → verify.py)
+- **Quality gates**: Same verification rules as RU, but Spanish-specific calque detection (e.g., avoid literal translations of Chinese administrative terms)
+- **Web UI**: Capitalize field values (Costo, En términos simples, Beneficio, etc.) in index.html using conditional logic
+- **Watchdog**: Use cron watchdog for stalled chapters (40+ minutes without writes)
+- **Documentation**: Translate the same four documentation articles referenced in chapters
+- **Integration**: Update README.es.md with language selector and chapter links to Spanish slugs
+- **Commit strategy**: One chapter per commit with clear Spanish commit messages
+- **Upstream sync**: Verify content matches CN original using same diff methodology as RU/EN tracks
+- **Pitfall**: verify.py may report 'numbers absent from translation' for numbers present but formatted differently (e.g., '80,300' vs '80 300') — normalize before comparison
+- **Field marker validation**: Ensure all Spanish units use correct field labels; legacy labels ('- Ganancia:' instead of '- Beneficio:') break web parser regex
+- **Numeric conversion**: Chinese 万/亿 → Spanish miles/millones with correct magnitude (e.g., 90895.5 亿 = 9 089.55 millones)
+- **CJK handling**: Chinese characters allowed only in sources, tags, and legal title glosses; scan with regex `\u4e00-\u9fff` to detect violations
+- **Assembly script**: Use `tools/assemble_es.py` for Spanish (injects sources, validates unit count, generates out-NN.md files)
+- **README.es.md**: Create with status line, language selector (`**Idiomas / Languages:** [中文](README.md) · [Русский](README.ru.md) · [Español](README.es.md)`), and chapter links to Spanish slugs
+- **Back-links**: Use `[← Volver al índice](../README.md)` in Spanish chapters with adjusted relative depth
+- **Verification workflow**: Run `tools/verify.py <NN> --lang es` before committing; handle Spanish-specific false positives
+- **Capitalization rules**: Apply to web UI chip labels and field values (first letter only) for Spanish interface
+- **Chapter completion**: After each wave, verify assembly output with `python3 tools/assemble_es.py <NN> /root/htlb-run-es/<NN> book/es/out-<NN.md>`
+- **Quality assurance**: Use same parallel subagent verification approach as RU/EN for natural flow and consistency
+
 ## Expert Review Integration (2026-09-19)
 
 - **Before publication**, run independent adversarial evaluations of the pipeline

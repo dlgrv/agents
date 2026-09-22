@@ -67,6 +67,15 @@ description: Chinese-to-Russian translation workflow with localization.
 
 GitHub mechanics (fork, issues, PRs) → `github` skill.
 
+## Numeric Normalization Handling
+
+- **Comma format false positives**: Numbers like '20,024' or '60,000 IU' trigger verify.py FP due to comma parsing rules. Fix: replace with space format '20 024' or '60 000 IU'.
+- **Numeric normalization failures**: verify.py reports 'numbers absent' for present but differently formatted numbers (e.g., '80,300' vs '80 300'). Fix: normalize by removing commas/spaces before comparison — verify.py treats them as identical.
+- **Locale-specific tolerance**: Accept decimal comma vs dot (1,5 vs 1.5) and thousands separator (1000 vs 1,000) as equivalent; normalize by removing all punctuation.
+- **Statistical rounding tolerance**: Accept ±2% differences for plain-language approximations (40% vs 42%, 70% vs 69%) as equivalent.
+- **Pre-commit verification**: Run `tools/verify.py <NN> --lang ru`, check if failures are formatting-related, normalize manually, document in commit message if equivalent.
+- **See**: `references/numeric-normalization-handling.md` for detailed troubleshooting scripts and normalization methods.
+
 ## See also
 - `translation` skill for general book/doc translation workflow
 - `references/quality-rubric.md` for MQM-based review rubric
