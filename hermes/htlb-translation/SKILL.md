@@ -60,12 +60,12 @@ write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SR
 
 ### Field Marker Rules
 
-- 成本 → Стоимость
-- 说人话 → Простыми словами
-- 收益 → Эффект
+- 成本 → Стоимость (RU) / Costo (ES)
+- 说人话 → Простыми словами (RU) / En términos sencillos (ES)
+- 收益 → Эффект (RU) / Beneficio (ES)
 - Выгода → Эффект (legacy label must be replaced with Эффект)
-- 证据等级 → Уровень доказательности (A/B/C remain)
-- 备注 → Примечания
+- 证据等级 → Уровень доказательности (RU) / Nivel de evidencia (ES) (A/B/C remain)
+- 备注 → Примечания (RU) / Notas (ES)
 - All numbers/dosages are byte-for-byte (§ numbers remain)
 - No slang: cohort/exposure/quartile/confounding/population/low-evidence
 - Live Russian, not literal translation
@@ -153,12 +153,14 @@ The watchdog:
 
 - Never infer permission to commit/branch/PR from "task done" — always require explicit ask in the same turn
 - Always leave §TAG§ and §SRC§ placeholders intact in units — they are filled later by assemble.py
-- Numbers must be byte-for-byte; never add or remove numbers from "Эффект"
-- Field markers must be exact: 成本→Стоимость, 说人话→Простыми словами, **收益/Выгода→Эффект**, etc.
+- Numbers must be byte-for-byte; never add or remove numbers from "Эффект"/"Beneficio"
+- Field markers must be exact: 成本→Стоимость/Costo, 说人话→Простыми словами/En términos sencillos, **收益/Выгода→Эффект/Beneficio**, etc.
 - Do not translate sources — they are injected byte-by-byte by assemble.py
 - Watchdog only reports when something is wrong or complete; silent during normal progress
 - Load this skill before any translation work to ensure correct field markers and workflow
-- **Legacy label trap**: New translations sometimes use '- Выгода:' instead of '- Эффект:'. This breaks the web parser (regex expects 'Эффект'), causing 'Эффект' blocks to disappear from the site. Always replace 'Выгода' with 'Эффект' in all units before assembly.
+- **Legacy label trap**: New translations sometimes use '- Выгода:' instead of '- Эффект:' (RU) or '- Ganancia:' instead of '- Beneficio:' (ES). This breaks the web parser (regex expects 'Эффект'/'Beneficio'), causing blocks to disappear from the site. Always replace legacy labels before assembly.
+- **Cost tag comment trap**: Never insert `<!-- 成本标签 ... -->` comment lines into units — the assembler injects them via §TAG§; a hand-inserted copy breaks the gate and causes duplication.
+- **Number word trap**: Never write numbers as words («Treinta» → «30», «años noventa» → «años 1990») — always use digits with appropriate formatting (80 300, 17,4 for ES; 80 300, 17,4 for RU).
 
 ## Subagent Pitfall
 
@@ -331,12 +333,12 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 ## Spanish Translation Extension (2026-09-22)
 
 - **New language track**: Spanish translation follows the same pipeline as Russian (CN→ES)
-- **Field markers**: Use Spanish equivalents: 成本→Costo, 说人话→En términos simples, 收益→Beneficio, 证据等级→Nivel de evidencia, 备注→Notas
-- **Slug naming**: Two-digit prefix + Spanish title (e.g., `01-No-Mueras-Temprano.md`)
+- **Field markers**: Use Spanish equivalents: 成本→Costo, 说人话→En términos sencillos, 收益→Beneficio, 证据等级→Nivel de evidencia, 备注→Notas
+- **Slug naming**: Two-digit prefix + Spanish title (e.g., `02-No-Te-Dejes-Morir-Lentamente.md`)
 - **Localization**: Adapt Chinese concepts for Spanish readers, add brief glosses for culturally specific terms
 - **Pipeline**: Same chunked units approach (tools/digest.py → units → delegation → assemble_es.py → verify.py)
 - **Quality gates**: Same verification rules as RU, but Spanish-specific calque detection (e.g., avoid literal translations of Chinese administrative terms)
-- **Web UI**: Capitalize field values (Costo, En términos simples, Beneficio, etc.) in index.html using conditional logic
+- **Web UI**: Capitalize field values (Costo, En términos sencillos, Beneficio, etc.) in index.html using conditional logic
 - **Watchdog**: Use cron watchdog for stalled chapters (40+ minutes without writes)
 - **Documentation**: Translate the same four documentation articles referenced in chapters
 - **Integration**: Update README.es.md with language selector and chapter links to Spanish slugs
@@ -348,11 +350,12 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **CJK handling**: Chinese characters allowed only in sources, tags, and legal title glosses; scan with regex `\u4e00-\u9fff` to detect violations
 - **Assembly script**: Use `tools/assemble_es.py` for Spanish (injects sources, validates unit count, generates out-NN.md files)
 - **README.es.md**: Create with status line, language selector (`**Idiomas / Languages:** [中文](README.md) · [Русский](README.ru.md) · [Español](README.es.md)`), and chapter links to Spanish slugs
-- **Back-links**: Use `[← Volver al índice](../README.md)` in Spanish chapters with adjusted relative depth
+- **Back-links**: Use `[← Volver al índice](../../README.md)` in Spanish chapters with adjusted relative depth
 - **Verification workflow**: Run `tools/verify.py <NN> --lang es` before committing; handle Spanish-specific false positives
 - **Capitalization rules**: Apply to web UI chip labels and field values (first letter only) for Spanish interface
 - **Chapter completion**: After each wave, verify assembly output with `python3 tools/assemble_es.py <NN> /root/htlb-run-es/<NN> book/es/out-<NN.md>`
 - **Quality assurance**: Use same parallel subagent verification approach as RU/EN for natural flow and consistency
+- **Critical Pitfalls from Wave 1**: Never insert `<!-- 成本标签 ... -->` comment lines into units — the assembler injects them via §TAG§; a hand-inserted copy breaks the gate and causes duplication. Never write numbers as words («Treinta» → «30», «años noventa» → «años 1990») — always use digits with Spanish formatting (80 300, 17,4).
 
 ## Expert Review Integration (2026-09-19)
 

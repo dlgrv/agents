@@ -68,6 +68,9 @@ See `references/localization-techniques.md` for the full catalog:
 - **Pages rebuild delay:** GitHub Pages rebuilds take 1-2 minutes after push; always wait before verification to avoid false negatives.
 - **PR auto-merge detection:** GitHub may auto-close and merge a PR when the branch is merged to target — check PR state after merge and add closing comment if needed.
 - **Live site verification:** Verify multiple URLs after deployment: index.html, README.md, sample book chapters, upstream links — single file checks miss cascading failures.
+- **Spanish translation subagent errors:** Spanish subagents may translate numbers as words instead of digits (e.g., 'Treinta minutos' instead of '30 minutos'), breaking byte-identity gates. Always verify numeric preservation after Spanish translation and fix any word-form numbers to digit-form to match source.
+- **Spanish decade/era number preservation:** Spanish subagents may convert '1990 年代' to 'años noventa' instead of preserving '1990' as digits. Always verify that era numbers remain in digit form ('años 1990') to maintain byte-identity with source.
+- **Spanish numeric format consistency:** Spanish subagents may introduce word-form numbers in contexts requiring digit-form (e.g., 'mil' instead of '1000'). Always verify that all numeric values match the source exactly and replace word-form numbers with digit-form equivalents.
 
 ## Multi-language extension
 
@@ -100,7 +103,7 @@ Based on Octoverse 2025 GitHub developer populations and audience overlap:
 - **Convert 亿 → numeric:** 1 亿 = 100,000,000; 2.5 亿 = 250 million
 - **Verify preservation:** Run number-preservation script to confirm no loss during translation
 - **Units and statistics:** HR/RR/OR/CI values must be identical; percentages and statistical terms preserved
-- **Context-aware conversion:** Only convert when adjacent to 万/亿; standalone numbers remain unchanged
+- **Context-aware conversion:** Only convert when adjacent to 万/亿; standalone numbers unchanged
 - **Glossary consistency:** Document all 万/亿 conversions in glossary for reference
 
 ### Verification checklist
@@ -160,6 +163,7 @@ echo "(empty above = CN chapters identical)"
 - Server pipeline: `../translation/references/server-pipeline.md`
 - Website deployment: `references/website-deployment.md`
 - English translation workflow: `references/english-translation-workflow.md`
+- Spanish translation QA: `references/spanish-translation-qa.md`
 - Upstream communication protocol: `references/upstream-communication.md`
 - TRANSLATION.md template: `../translation/templates/TRANSLATION.md`
 
