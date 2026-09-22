@@ -53,7 +53,7 @@ description: HTLB Spanish translation workflow and conventions.
 - **Never insert `<!-- 成本标签 ... -->` comment lines into units** — the assembler injects them via §TAG§; a hand-inserted copy breaks the gate.
 - **Verify counts with grep, not stated counts**: grep the source for actual item/heading/tag/doi counts and match against translation, never trust stated counts.
 - **Merge conflicts**: When pulling upstream/main (e.g. to sync with new chapters or infrastructure), use `git merge --allow-unrelated-histories origin/main`. Resolve conflicts in wrapper files (README.md, index.html, og.png) by preferring the fork's version (EN wrapper), but adopt upstream's EPUB link and Spanish language addition if present. Never merge upstream's Chinese content into the fork's English wrapper.
-- **README language addition**: When upstream adds new languages, update README.md to include the new language row using the pattern: `🇪🇸 Español → read on the site` (pointing to the site, not the repo).
+- **README language addition**: When upstream adds new languages, update README.md to include the new language row using the pattern: `🇪🇸 Español → read on the site` (pointing to the site, not the repo). If upstream already added EN/RU, match their format (short link names, repo link at end).
 - **CI gate removal**: If upstream CI workflows are specific to their README structure (e.g., epub-workflow tied to Chinese README), remove them from the fork's main branch to avoid failures. The fork's CI should only contain infrastructure needed for the English wrapper and translations.
 - **Relative link convention**: Use `../../docs/es/<slug>.md` for chapter links to docs/es/ files, and `../<CN-original>.md` for docs/es/ backlinks to CN originals, matching the repo's RU link convention.
 - **Check links locally**: Run `python3 tools/check_links.py` and `python3 tools/check_content.py` before committing to catch broken relative links or content parity issues.
@@ -61,6 +61,7 @@ description: HTLB Spanish translation workflow and conventions.
 - **Site display regex**: If website displays empty fields (e.g. 'Fuentes (0)' or blank Costo/Beneficio cards), the regex in `index.html` parseReadme is missing Spanish field labels. Add ES alternatives to all regex patterns: `Costo|Cost` (not just `Cost`), `Beneficio|Benefit` (not just `Benefit`), etc. Test regex with `python3 -c "import re; md=open('book/es/out-<chapter>.md').read(); print(len(re.findall(r'- (?:成本|Стоимость|Costo|Cost)[：:](.*)', md)))"` to verify all 528 entries are parsed.
 - **Banner image alt**: README.es.md must reference `og-es.png` (not og-en.png) with Spanish alt text describing the banner content (e.g. "cambia menos dinero, tiempo y esfuerzo por más vida, dinero y libertad personal"). Regenerate `tools/og-es.html` with translated text, then render with Playwright for final PNG.
 - **Regenerate language pages after parser fix**: When fixing site parser regexes (e.g. adding Spanish labels to parseReadme), **always run `python3 tools/build_pages.py`** after updating `index.html`. This copies the fixed parser to `es/index.html`, `en/index.html`, `ru/index.html`, `zh/index.html`, and `v1/*`. Without this step, users see old parser in `/es/` and translation cards display empty fields. Commit all regenerated pages together with the parser fix.
+- **Stop cron watchdogs before MR**: Before submitting PRs or merging, pause cron jobs (e.g. `hermes cron pause <job-id>`) to prevent automatic runs that may overwrite local changes or cause conflicts. Use `hermes cron list` to find job IDs and `hermes cron resume <job-id>` to restore. **Double-check: run `hermes cron list` again to confirm paused**.
 
 ## Verification checklist
 
@@ -85,3 +86,4 @@ description: HTLB Spanish translation workflow and conventions.
 - [upstream-sync.md](references/upstream-sync.md) — upstream sync procedure for infrastructure
 - [ci-gate-removal.md](references/ci-gate-removal.md) — CI workflow cleanup for upstream-specific infrastructure
 - [build-pages-procedure.md](references/build-pages-procedure.md) — regenerate language pages after parser fixes
+- [cron-workflow.md](references/cron-workflow.md) — pause cron jobs before PR work to prevent conflicts
