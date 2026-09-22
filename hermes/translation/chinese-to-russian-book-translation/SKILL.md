@@ -41,6 +41,65 @@ See `references/localization-techniques.md` for the full catalog:
 - Glossary entries
 - Block-quote notes in chapter headers
 
+## Source verification and fact-checking
+
+When working with translated content, especially in domains like health, safety, and finance, verify all claims against authoritative sources:
+
+### Verification workflow
+
+1. **Identify TODO flags** — Look for «待核实»/TODO markers in source text
+2. **Prioritize by impact** — Focus on safety-critical claims (medical, emergency, financial) first
+3. **Use authoritative sources** — Prefer primary sources (CDC, WHO, S&P, official PDFs)
+4. **Capture exact citations** — Include direct quotes from source pages
+5. **Cross-check with secondary sources** — Use Wayback/WARCs when live sites block access
+6. **Update sources section** — Replace TODO with full citation including DOI/URL
+
+### Source types by priority
+
+| Priority | Source type | Examples | Handling | Verification method |
+|---------|-------------|----------|----------|-------------------|
+| **Critical** | Health/safety agencies | CDC, WHO, NPS, CPSC | Replace TODO with exact citation | Wayback if WAF blocked |
+| **High** | Financial/statistical | S&P, CNNIC, official PDFs | Replace TODO with official data | Crossref/PDF text extraction |
+| **Medium** | Industry standards | NFPA, ERC, AAP | Replace with official guidance | Archive.org lookup |
+| **Low** | Author experience | Marked as 作者经验 | Keep as is, add disclaimer | None needed |
+
+### Verification commands
+
+```bash
+# Wayback snapshot for WAF-blocked sites
+python3 -c "import urllib.request, re; t = urllib.request.urlopen(...).read().decode('utf-8'); print(re.search(r'65%', t).group())"
+
+# Crossref DOI lookup
+curl -s "https://api.crossref.org/works/10.1111/j.1540-6261.2010.01598.x" | jq '.message.title[0]'
+
+# PDF text extraction
+pdftotext -layout /path/to/report.pdf - | grep -A 5 "人均每周"
+```
+
+### Common patterns to verify
+
+- **Emergency numbers**: 120 → 103/112, 119 → 101, 110 → 102
+- **Financial statistics**: SPIVA fund underperformance rates, CNNIC internet usage data
+- **Medical guidance**: CPR steps, choking protocols, CO detector placement
+- **Government agencies**: 民政 → органы соцзащиты, 卫健委 → Минздрав
+- **Legal terms**: 低保 → дибао (with gloss), 兵役法 → закон о воинской обязанности
+
+### Quality gates
+
+- **All citations must have URLs/DOIs** — No bare «来源：作者经验» without disclaimer
+- **Exact quote matching** — Source text must match the cited passage exactly
+- **Live URL verification** — Check that cited URLs resolve (use Wayback if blocked)
+- **PDF verification** — Official PDFs must be extractable and match claimed content
+- **Cross-source consistency** — Multiple sources should agree on key facts
+
+### Pitfalls
+
+- **WAF blocking** — Many official sites block automated access; use Wayback snapshots
+- **PDF extraction failures** — Some PDFs are images-only; use OCR or official text versions
+- **Outdated statistics** — Always check publication dates; use most recent available data
+- **Translation artifacts** — Verify that translated terms match source concepts exactly
+- **Missing context** — Some facts require country-specific context; add translator notes when needed
+
 ## Pitfalls
 - **Translation subagent burnout:** A subagent doing long-form generation can burn the entire run on reasoning and never write the output file. Instruct translators to WRITE THE OUTPUT FILE FIRST.
 - **Never trust stated counts** — grep the actual files for source counts; stated counts have been wrong before.
