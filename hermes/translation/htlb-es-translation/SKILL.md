@@ -1,0 +1,75 @@
+---
+name: htlb-es-translation
+description: HTLB Spanish translation workflow and conventions.
+---
+
+# HowToLiveBetter Spanish translation (HTLB ES)
+
+## Standing user preferences
+- Translations must read naturally in international Spanish (es-419-compatible), no regional slang, no exclamation marks, live prose not calque. Functional equivalence over word-for-word; plain-language explainer lines (说人话) must read as living speech, not calque.
+- Field labels: 成本 → `- Costo: `, 说人话 → `- En términos sencillos: `, 收益 → `- Beneficio: `, 证据等级 → `- Nivel de evidencia: A/B/C`, 备注 → `- Notas: ` (keep the grade letter A/B/C unchanged).
+- **Regulatory document IDs**: CN hanzi (e.g. 国食药监办〔2010〕432号) must be paraphrased in Spanish with the issuing office name + "(documento 〔2010〕 n.º 432)" pattern per the EN translation; never keep hanzi in body text (except in citation lines, which are byte-faithful).
+- Numbers: digits with ES style (space thousands, decimal comma); 万→×10 000 written out; never round or invent. Unit-weight figures (e.g. 0.25 千克) require parenthetical gloss with absolute value (e.g. "0,25 kilogramos (250 gramos)") due to verifier quirk.
+- Chapter intros: translate back-link → `[← Volver al índice](../README.md)`; the `# N. ...` heading (keep the number); intro paragraph. No §TAG§/§SRC§ markers in intros.
+- Units: 元 → yuanes; keep mmHg, mg, %, °C as-is.
+
+## Procedure
+
+1. **Stage chapter 32 and docs** if missing:
+   - Chapter 32: 12 units in `/root/htlb-run-es/32/units/` (00.md intro, 01-11.md units)
+   - Standalone docs: `/root/htlb-run-es/docs/` (Home-Emergency-Kit.md, What-Licenses-A-Platform-Needs.md, Should-You-Stop-To-Help-A-Stranger.md, Is-Marriage-Worth-It.md)
+2. **Delegate translation** — one subagent per chapter (25-31), one for ch32, one for docs (4 files). Each subagent follows strict unit translation rules (see below).
+3. **Verify with assemble.py + verify.py**:
+   - `python3 tools/assemble_es.py <chapter> /root/htlb-run-es/<chapter> book/es/out-<chapter>.md`
+   - `python3 tools/verify.py <chapter> --lang es --file book/es/out-<chapter>.md`
+   - Verify: assemble byte-identical, verify OK (numbers lost=0, no extra items)
+4. **Deploy to book/es/**:
+   - For chapters: copy `book/es/out-<chapter>.md` to `book/es/<slug>.md` with status line and adjusted back-link
+   - For docs: copy staged files to `book/es/docs/` with status line and adjusted relative paths
+   - Update README.es.md with ES slugs
+5. **Commit and push** to `fork/translation/es-w1` branch
+
+## Unit translation rules (for chapters only)
+
+- Field labels: 成本 → `- Costo: `, 说人话 → `- En términos sencillos: `, etc.
+- Keep the line `§TAG§` and the line `§SRC§` EXACTLY where they are (§TAG§ right after the heading, §SRC§ as the last content line). Never translate, move, or DUPLICATE them.
+- Do NOT translate source/citation lines — if a unit contains a `- 来源：...` line, replace it with just the `§SRC§` marker line (marker must be the last content line).
+- Keep the HTML comment `<!-- 成本标签: ... -->` byte-identical IF the source unit already has one.
+- Keep markdown structure: `### N. ...` keeps its number; list-item order unchanged; no new headings.
+- Chapter intro 00.md: translate back-link → `[← Volver al índice](../README.md)`, the `# N. ...` heading, and the intro paragraph. No §TAG§/§SRC§ markers.
+
+## Doc translation rules (standalone docs)
+
+- Line 1: `> Unofficial translation of [docs/<CN-filename>.md](../<CN-filename>.md). In case of discrepancies the Chinese original takes precedence.`
+- Keep the same heading structure, table columns, and section order as EN; tables keep row order.
+- Numbers: digits with ES style (space thousands, decimal comma); 万→×10 000 written out; never round or invent.
+- Law/regulation names: Spanish paraphrase, no hanzi in body text; hanzi only in parenthetical glosses where EN keeps them.
+- Style: neutral international Spanish, no exclamations, live prose; links and URLs kept verbatim.
+- 元 → yuanes.
+
+## Pitfalls
+- **Regulatory document ID translation**: CN hanzi in body text (e.g. in Notas fields) must be manually replaced with office paraphrase + "(documento 〔2010〕 n.º 432)" per EN pattern. This is a byte-faithfulness override for regulatory IDs only; other byte-faithful zones (citation lines, DOIs) must remain untouched.
+- **Unit-weight figures**: CN «0.25 千克» must become «0,25 kilogramos (250 gramos)» due to verifier quirk — the 千 inside 千克 is read as a scale word and folds to key 250, so the absolute value in parentheses is required.
+- **Never insert `<!-- 成本标签 ... -->` comment lines into units** — the assembler injects them via §TAG§; a hand-inserted copy breaks the gate.
+- **Verify counts with grep, not stated counts**: grep the source for actual item/heading/tag/doi counts and match against translation, never trust stated counts.
+- **Merge conflicts**: When pulling upstream/main (e.g. to sync with new chapters or infrastructure), use `git merge --allow-unrelated-histories origin/main`. Resolve conflicts in wrapper files (README.md, index.html, og.png) by preferring the fork's version (EN wrapper), but adopt upstream's EPUB link and Spanish language addition if present. Never merge upstream's Chinese content into the fork's English wrapper.
+
+## Verification checklist
+
+- assemble.py: byte-identical to source
+- verify.py: headings=8 tags=8 sources=8 numbers=X (lost=0, extra=Y)
+- No source-language text outside byte-faithful zones
+- Regulatory IDs paraphrased in body text (not hanzi)
+- Numbers in ES style (space thousands, decimal comma)
+- Field labels correctly mapped
+- Status line and back-link present and correctly adjusted
+- **Upstream sync**: When merging upstream/main, keep fork's English wrapper, adopt EPUB link/Spanish if present, never merge Chinese content
+
+## References
+
+- [server-pipeline.md](../translation/references/server-pipeline.md) — batch execution on server
+- [quality-rubric.md](../translation/references/quality-rubric.md) — MQM-based review
+- [TRANSLATION.md](../translation/templates/TRANSLATION.md) — general translation conventions template
+- [es-number-style.md](references/es-number-style.md) — Spanish number formatting rules
+- [es-regulatory-ids.md](references/es-regulatory-ids.md) — regulatory document ID translation pattern
+- [upstream-sync.md](references/upstream-sync.md) — upstream sync procedure for infrastructure
