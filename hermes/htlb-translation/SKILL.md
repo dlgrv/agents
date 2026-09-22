@@ -161,6 +161,7 @@ The watchdog:
 - **Legacy label trap**: New translations sometimes use '- Выгода:' instead of '- Эффект:' (RU) or '- Ganancia:' instead of '- Beneficio:' (ES). This breaks the web parser (regex expects 'Эффект'/'Beneficio'), causing blocks to disappear from the site. Always replace legacy labels before assembly.
 - **Cost tag comment trap**: Never insert `<!-- 成本标签 ... -->` comment lines into units — the assembler injects them via §TAG§; a hand-inserted copy breaks the gate and causes duplication.
 - **Number word trap**: Never write numbers as words («Treinta» → «30», «años noventa» → «años 1990») — always use digits with appropriate formatting (80 300, 17,4 for ES; 80 300, 17,4 for RU).
+- **Decimal number preservation trap**: When CN shows decimal numbers in mathematical expressions (e.g., '351.3 / 610.6 ≈ 57.5%' in notes), ES must include both numbers in the same format (e.g., '3 513,3 / 6 106,6 ≈ 57,5%') to satisfy verify.py's number matching. EN sometimes preserves decimal numbers in parentheses as explanatory context; follow this pattern if needed. Never omit decimal numbers from mathematical expressions.
 
 ## Subagent Pitfall
 
