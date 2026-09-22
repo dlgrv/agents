@@ -54,6 +54,31 @@ When working with translated content, especially in domains like health, safety,
 5. **Cross-check with secondary sources** — Use Wayback/WARCs when live sites block access
 6. **Update sources section** — Replace TODO with full citation including DOI/URL
 
+### Source verification protocol
+
+**Step 1: Identify and categorize TODO markers**
+- Scan for «待核实»/TODO flags in source text
+- Categorize by priority (see table below)
+- Focus first on safety-critical claims (medical, emergency, financial)
+
+**Step 2: Source lookup and citation extraction**
+- Use exact-match search for the claim in official sources
+- Capture direct quotes from source pages/PDFs
+- Preserve original phrasing and punctuation
+- Include full citation with DOI/URL and access date
+
+**Step 3: Cross-verification**
+- Use Wayback snapshots if WAF blocks live sites
+- Cross-check DOI metadata with Crossref API
+- Verify PDF text extraction matches claimed content
+- Ensure multiple sources agree on key facts
+
+**Step 4: Source replacement**
+- Replace TODO with full citation including exact quote
+- Update evidence等级 (C→B for verified sources)
+- Remove «待核实» marker
+- For author experience claims (作者经验), keep with disclaimer
+
 ### Source types by priority
 
 | Priority | Source type | Examples | Handling | Verification method |
@@ -73,7 +98,10 @@ python3 -c "import urllib.request, re; t = urllib.request.urlopen(...).read().de
 curl -s "https://api.crossref.org/works/10.1111/j.1540-6261.2010.01598.x" | jq '.message.title[0]'
 
 # PDF text extraction
-pdftotext -layout /path/to/report.pdf - | grep -A 5 "人均每周"
+pdftotext -layout /path-to/report.pdf - | grep -A 5 "人均每周"
+
+# Independent review protocol
+gh issue create --title "Fact-check verification" --body "Provide exact quote from source: [citation]"
 ```
 
 ### Common patterns to verify
@@ -91,6 +119,7 @@ pdftotext -layout /path/to/report.pdf - | grep -A 5 "人均每周"
 - **Live URL verification** — Check that cited URLs resolve (use Wayback if blocked)
 - **PDF verification** — Official PDFs must be extractable and match claimed content
 - **Cross-source consistency** — Multiple sources should agree on key facts
+- **Independent review required** — Critical claims require verification by second reviewer
 
 ### Pitfalls
 
@@ -99,6 +128,11 @@ pdftotext -layout /path/to/report.pdf - | grep -A 5 "人均每周"
 - **Outdated statistics** — Always check publication dates; use most recent available data
 - **Translation artifacts** — Verify that translated terms match source concepts exactly
 - **Missing context** — Some facts require country-specific context; add translator notes when needed
+- **False positives in search** — Use exact-match search with quoted phrases, not keyword matching
+- **Citation glue errors** — Never combine multiple source sentences into one citation
+- **Source title mismatch** — Verify that cited titles match actual source documents
+- **Date verification** — Always check that cited sources are current (e.g., ERC 2021 does not contain claimed sections)
+- **Wayback date drift** — Use earliest possible Wayback snapshot to avoid page changes
 
 ## Pitfalls
 - **Translation subagent burnout:** A subagent doing long-form generation can burn the entire run on reasoning and never write the output file. Instruct translators to WRITE THE OUTPUT FILE FIRST.
@@ -225,6 +259,7 @@ echo "(empty above = CN chapters identical)"
 - Spanish translation QA: `references/spanish-translation-qa.md`
 - Upstream communication protocol: `references/upstream-communication.md`
 - TRANSLATION.md template: `../translation/templates/TRANSLATION.md`
+- Source verification protocol: `references/source-verification.md`
 
 ## Scripts
 
