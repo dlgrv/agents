@@ -158,6 +158,16 @@ Each translation task follows a standardized template:
 - **Paraphrase in body text**: CN hanzi → office name + "(documento 〔year〕 n.º number)"
 - **Keep citation lines byte-faithful**: Never alter hanzi in citation lines or DOIs
 
+### Preview Banner Statistics Synchronization
+
+- **Problem**: Preview banners (og-*.png in README) often show outdated statistics (528/347/1066) after translation waves complete
+- **Rule**: Always update banner numbers to match current HTLB unit counts (601/407/1253 for RU/EN/ES)
+- **Implementation**: Update HTML source files in `tools/og-{ru,en,es}.html` with current counts, regenerate PNG via headless Chromium (1200×630)
+- **Verification**: Use vision_analyze to confirm numbers appear correctly in regenerated PNGs
+- **Sync**: Update ES badge in README.es.md to match link count (Primary%20sources-1066 → Primary%20sources-1253)
+- **Command**: `npx playwright install chromium; node og_shot.mjs` for banner regeneration
+- **Timing**: Update after each major wave completion and before final release deployment
+
 ## Workflow Steps
 
 1. **Task generation**: Create wave specifications with unit counts and file paths
@@ -169,6 +179,11 @@ Each translation task follows a standardized template:
 4. **Steer corrections**: Send updates to running agents for specification errors
 5. **Batch coordination**: Progress through waves sequentially, handling revision mapping errors
 6. **Revision mapping validation**: Before revision tasks, verify actual content changes between pre and HEAD using `difflib.SequenceMatcher`
+7. **Preview banner update**: After wave completion, regenerate preview banners:
+   - Run `python3 references/banner-regeneration-script.py`
+   - Verify numbers with `vision_analyze` if needed
+   - Commit changes to repository
+   - Update README badges (especially ES links count)
 
 ## Reference Files
 
@@ -180,6 +195,7 @@ Each translation task follows a standardized template:
 - **ES decimal example**: `/root/htlb-run-es/30/units/05.md` - shows correct 18 905 (space thousands) and 0,14 (comma decimal)
 - **Revision mapping validation**: `references/revision-mapping-validation.md` (validate actual content changes before revision tasks)
 - **Capitalization fix script**: `references/capitalization-fix-script.py` (automated tool for field value capitalization)
+- **Banner regeneration script**: `references/banner-regeneration-script.py` (update og-*.png and README badges after wave completion)
 
 ## Multi-Language Coordination
 
