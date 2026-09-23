@@ -406,6 +406,27 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Critical success factor**: Pilot must complete all 9 subagents without timeout or analysis paralysis
 - **Pilot validation checklist**: Verify assembly output, verify.py OK status, and no Chinese characters in visible text for all 9 languages × chapters
 
+## Wave Planning and Task Management
+
+### Wave Structure
+- **W1**: Chapters 02, 05, 06, 23, 04, 12, 31 (21 tasks)
+- **W2**: Chapters 03, 08, 09, 11, 20, 21, 30, 07 (24 tasks) 
+- **W3**: Chapters 10, 14, 15, 16, 17, 18, 19, 22, 24, 25, 26, 27, 28, 29, 32 (45 tasks)
+
+### Task Contract for All Waves
+Each task must include:
+- **Fresh units**: Translation from CN (already in file) → overwrite with translation
+- **Revised units**: Compare with new CN from digest → update differences in existing translation
+- **Write-first rule**: First tool call = write_file, no batch reading, no analysis paralysis
+- **Self-check**: Verify §TAG§ and §SRC§ markers, no '- Источники:', no '<!--', no '!'
+- **Output format**: JSON with units_done, list, chapter, lang fields
+
+### Pipeline Integration
+- **Preparation**: Run directories filled with CN for fresh units, translations for revised units
+- **Execution**: Delegate tasks in waves (W1 first, then W2, then W3)
+- **Validation**: After each wave, run `tools/wave_pipeline.py` to verify all chapters in the wave
+- **Publication**: Only after full wave validation and user approval
+
 ## Expert Review Integration (2026-09-19)
 
 - **Before publication**, run independent adversarial evaluations of the pipeline
@@ -543,6 +564,83 @@ python3 scripts/pilot_wave_validator.py
 - Validate with existing quality gates
 
 See `references/upstream-sync-delta-handling.md` for detailed procedures and scripts.
+
+### 6. Delta Analysis and Unit Reassignment
+
+**New workflow for precise delta mapping:** When upstream adds/removes/merges units, generate a precise mapping of which pre-translation units correspond to which HEAD units. This enables targeted retranslation instead of full-chapter redo.
+
+**Method:**
+1. Extract all pre-translation unit headers and HEAD unit headers
+2. Match via fuzzy ratio (≥0.55) to detect added/removed/merged units
+3. Generate `/tmp/new_units_final.json` mapping new units to translate
+4. Generate `/tmp/align_map.json` mapping pre-N → HEAD-M for all units
+
+**Example:** ch02 pre#3+#24 → HEAD#7 (merged sweet drinks), ch07 two units → one anti-scam unit
+
+**Implementation:**
+```bash
+# Generate precise delta mapping
+python3 -c "
+import subprocess, re, difflib, json
+# Extract pre and HEAD unit headers
+au = subprocess.run(['git','show','fe33acf^1:book/02.md'], capture_output=True, text=True).stdout.split('\n')
+bu = subprocess.run(['git','show','HEAD:book/02.md'], capture_output=True, text=True).stdout.split('\n')
+# Match headers with fuzzy ratio
+new_units = {}
+for i, pre_line in enumerate(au):
+    if pre_line.startswith('### '):
+        best = max((difflib.SequenceMatcher(None, pre_line, head_line).ratio(), j) for j, head_line in enumerate(bu) if head_line.startswith('### '))
+        if best[0] < 0.55:  # New unit
+            new_units.setdefault('02', []).append(i+1)
+# Save mapping
+json.dump(new_units, open('/tmp/new_units_final.json','w'), ensure_ascii=False)
+print('New units:', new_units)
+"
+```
+
+### 7. Reverse Unit Recovery (2026-09-23)
+
+**Critical incident recovery for translation loss:** When units are accidentally overwritten with pristine CN (e.g., during wave preparation), recover by reverse-assembling from existing book files:
+
+```bash
+# Reverse-assemble all chapters from book files to restore units
+for lang in ru en es; do
+  for f in book/$lang/[0-9][0-9]-*.md; do
+    ch=${f:10:2}
+    mkdir -p /root/htlb-run-$lang/$ch/units
+    python3 -c "
+import re, os
+with open('$f', encoding='utf-8') as t:
+    parts = re.split(r'(?m)^(?=### \\d+\. )', t.read())
+    header, items = parts[0], parts[1:]
+    os.makedirs('/root/htlb-run-$lang/$ch/units', exist_ok=True)
+    open('/root/htlb-run-$lang/$ch/units/00.md', 'w', encoding='utf-8').write(header.strip() + '\\n')
+    for it in items:
+        nn = int(re.match(r'### (\\d+)\\.', it).group(1))
+        body = re.sub(r'(?m)^<!-- 成本标签.*-->\\n', '', it.rstrip())
+        body = re.sub(r'(?m)^- (?:Источники|Sources|Fuentes):.*\\n?', '', body)
+        lines = body.splitlines()
+        unit = lines[0] + '\\n§TAG§\\n' + '\\n'.join(lines[1:]).strip('\\n') + '\\n\\n§SRC§\\n'
+        open(f'/root/htlb-run-$lang/$ch/units/{nn:02d}.md', 'w', encoding='utf-8').write(unit)
+    print(f'$lang $ch: {len(items)} units restored')
+"
+done
+```
+
+**Validation:** After recovery, verify all chapters assemble correctly:
+```bash
+for lang in ru en es; do
+  for f in book/$lang/[0-9][0-9]-*.md; do
+    ch=${f:10:2}
+    python3 tools/assemble_$lang.py $ch /root/htlb-run-$lang/$ch /tmp/recovered-$lang-$ch.md
+    python3 tools/verify.py $ch --lang $lang --file /tmp/recovered-$lang-$ch.md
+  done
+done
+```
+
+**Pitfall:** Reverse-assembled units may have cosmetic differences (blank lines around §TAG§) but must match book content structurally. Byte-identity test (verify.py) is sufficient for quality gates.
+
+**Critical lesson:** Always backup run/units directories before overwriting with fresh digest; reverse-assembly is the recovery method when units are lost.
 
 ## Clone & Publication Rules (2026-09-18)
 
