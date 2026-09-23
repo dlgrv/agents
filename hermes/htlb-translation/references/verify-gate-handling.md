@@ -93,6 +93,7 @@ if [ "$cn_num" = "$ru_num" ]; then echo "OK"; else echo "FAIL"; fi
 - CN "250 多万粉丝" vs EN paraphrase without number — en09, requires text-level resolution, not script fix.
 - Real findings from first run 53/62: calques "когорт" ×13 (ch. 13/28/29/30), "популяц" ×2 (ch. 29), missing numbers in ru10/ru11 — material for a fix wave.
 - CJK gloss false positives: Legal titles in English text with CJK characters (e.g., "统筹地区 — ...") are allowed and should not trigger warnings. Verify regex excludes gloss patterns like `(统筹地区 — ...)` or `(副主任医师 — ...)`.
+- **Relative path FPs**: verify.py may report broken links for `../docs/` in translated chapters — this is expected and should be ignored. These links are valid from CN book/*.md but need `../../docs/` in book/{ru,en,es}/. Use `tools/check_links.py` for proper link validation instead.
 
 ## Pre-Commit Verification Checklist
 

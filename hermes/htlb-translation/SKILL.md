@@ -246,6 +246,26 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Default language = navigator.language** (`ru*/zh*/en*` prefix match, unknown → `en`); priority: `?lang=` > localStorage > system > `en`.
 - **Full-page i18n audit checklist** (things easy to miss): `meta description/keywords/author`, `og:title/description/locale/site_name`, `twitter:*`, JSON-LD `@graph[].name/description/abstract/inLanguage/about` (rewrite at runtime via `JSON.parse` → mutate → `textContent`), nav button `aria-label`/`title` (menu, theme, GitHub, README icon — README icon `href` must also switch: `README.ru.md`/`README.md`/`README.zh.md`), the dynamically built "All sections" chip (use `T().allSections` in its template, not a hardcoded string), `<html lang>`. Audit by rendering with jsdom and scanning every UI surface for foreign-language text; card-body CJK/RU "leaks" that are legitimate: transliteration+gloss `(低保 — …)` and Chinese law titles in descriptive references (per TRANSLATION.md convention).
 - **When patching a large JS dict programmatically, anchor on exact unique strings and re-verify structure after each batch** (`const I18N` count==1, `function T()` count==1, file still ends with `</html>`, `node --check` on the extracted main script). Splitting on `'   cap:true },'` misplaces the zh block because zh ends `'cap:false }'` without comma — locate each dict's tail individually before inserting.
+
+## Numeric Formatting and Quality Gates
+
+**Critical verification rules for number consistency and format:**
+
+- **Digit format requirement**: All monetary amounts, time periods, statistical figures, and measurable quantities must be written in digit format with space-separated thousands (e.g., «5 000 юаней», «30 лет», «96 000 человек»), not as words («пять тысяч», «тридцать лет»). This is enforced by verify.py which searches for numeric patterns and fails when numbers are absent.
+- **万/亿 magnitude accuracy**: Chinese 万/亿 conversions must use correct Russian multipliers (e.g., 90895.5 亿 = 9 089.55 млрд, not 90895.5 млрд). Cross-check against CN originals before committing.
+- **Section number consistency**: 'Простыми словами' must use rounded/approximate numbers from CN 说人话, not precise stats from 'Эффект' section (e.g., CN '9.6 万人' → RU '96 000 человек', not '96,217').
+- **Comma format avoidance**: Use space format '20 024' instead of comma format '20,024' for numbers in RU text to avoid verify.py false positives (comma after '0' is interpreted as decimal separator).
+- **Numeric normalization understanding**: verify.py normalizes all numbers by removing spaces/commas before comparison — CN '80300', RU '80 300', and RU '80,300' are all treated as identical.
+
+**Pre-commit numeric verification checklist**:
+1. Run `tools/verify.py <NN> --lang ru` and fix all numeric-related FAILs
+2. Check for word numbers: `grep -r '[а-яё]+\s*тыс\|миллион\|миллиард' /root/htlb-run-ru/*/units/`
+3. Verify 万/亿 conversions against CN originals
+4. Check number consistency between 'Простыми словами' and 'Эффект' sections
+5. Scan for comma-formatted numbers and convert to space format
+6. Run assemble.py and validate numeric integrity
+
+**Reference**: `references/numeric-formatting-pitfalls.md` for detailed error patterns and fixes.
 ## Per-language Pages URLs
 
 - Live URLs: root `/` = auto-detect (`navigator.language` → fallback `en`, then `?lang=`/localStorage), `/ru/`, `/en/`, `/zh/` = forced language. The upstream author can link any of them directly from the original README.
@@ -598,7 +618,35 @@ print('New units:', new_units)
 "
 ```
 
-### 7. Reverse Unit Recovery (2026-09-23)
+## Relative Path Pitfall (2026-09-23)
+
+**Critical link resolution issue:** CN book/*.md use `../docs/` links that resolve correctly from book/ but break one level deeper in book/{ru,en,es}/. When assembling translated chapters, relative links must be adjusted:
+
+- **CN files (book/*.md)**: `../docs/生物钟和夜班.md` resolves to `docs/生物钟和夜班.md` (valid)
+- **Translated files (book/{ru,en,es}/02-*.md)**: Same path resolves to `book/docs/生物钟和夜班.md` (invalid)
+- **Fix**: In run units and assembled files, replace `../docs/` with `../../docs/` for translated chapters
+
+**Detection and repair:**
+```bash
+# Find all problematic links in translated chapters
+grep -r "../docs/" book/{ru,en,es}/ | cut -d: -f1 | sort | uniq
+# Repair in run units before assembly
+for lang in ru en es; do
+  for p in /root/htlb-run-$lang/02/units/*.md; do
+    sed -i 's#\.\./docs/#\.\./\.\./docs/#g' "$p"
+  done
+done
+# Repair in assembled files after assembly
+for lang in ru en es; do
+  sed -i 's#\.\./docs/#\.\./\.\./docs/#g' "book/$lang/02-*.md"
+done
+```
+
+**Prevention:** During wave preparation, ensure subagents use correct relative paths. Links in CN source files should not be modified during translation — the assembler should handle path resolution based on final file location.
+
+**Verification:** After repair, run `python3 tools/check_links.py` to validate all relative links resolve correctly. This check covers root, book/, and docs/ directories recursively.
+
+## Reverse Unit Recovery (2026-09-23)
 
 **Critical incident recovery for translation loss:** When units are accidentally overwritten with pristine CN (e.g., during wave preparation), recover by reverse-assembling from existing book files:
 

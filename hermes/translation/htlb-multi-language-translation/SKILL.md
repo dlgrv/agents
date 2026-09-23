@@ -103,6 +103,8 @@ Each translation task follows a standardized template:
 - **Unit weights**: Add parenthetical gloss for weight figures (0.25 千克 → 0,25 kilogramos (250 gramos))
 - **Large numbers (亿)**: CN «X 亿元» = X/10 billion yuan (亿 = 100 million = 0.1 billion; 6234.86 亿元 = 623.486 billion yuan — NOT 6234.86 billion)
 - **Multiple numbers with same unit**: When several numbers share one unit (millions/billions), WRITE the unit at each number: '880,000 million and 808,000 million', not '880,000 and 808,000 million'
+- **Decimal commas in ES**: Replace all decimal dots with commas (0.14 → 0,14) — verify.py expects comma decimal format for ES
+- **Space separators in ES**: Replace all decimal dots with commas and comma-thousands with spaces (18.905 → 18 905; 0.14 → 0,14) — verify.py expects both space thousands and comma decimals
 
 ### Alignment and Revision Mapping Pitfalls
 
@@ -122,6 +124,7 @@ Each translation task follows a standardized template:
 - **Never translate source/citation lines**: Replace `- 来源：...` with `§SRC§` marker
 - **Keep HTML comments byte-identical**: `<!-- 成本标签: ... -->` if present in source
 - **Preserve markdown structure**: `### N. ...` numbering, list order, no new headings
+- **ES decimal consistency**: Replace ALL decimal dots with commas in ES (0.14 → 0,14) and ALL comma-thousands with spaces (18.905 → 18 905) — verify.py strictly expects comma decimals and space thousands
 
 ### Regulatory Document IDs
 
@@ -147,6 +150,7 @@ Each translation task follows a standardized template:
 - **Task specifications**: `/tmp/wave_specs.json`
 - **Unit counts**: `/tmp/zh_counts_head.json`
 - **Alignment maps**: `/tmp/align_map.json` (requires validation against actual content)
+- **ES decimal example**: `/root/htlb-run-es/30/units/05.md` - shows correct 18 905 (space thousands) and 0,14 (comma decimal)
 - **Revision mapping validation**: `references/revision-mapping-validation.md` (validate actual content changes before revision tasks)
 
 ## Multi-Language Coordination
