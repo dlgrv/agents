@@ -12,6 +12,7 @@ description: HTLB Spanish translation workflow and conventions.
 - Numbers: digits with ES style (space thousands, decimal comma); 万→×10 000 written out; never round or invent. Unit-weight figures (e.g. 0.25 千克) require parenthetical gloss with absolute value (e.g. "0,25 kilogramos (250 gramos)") due to verifier quirk.
 - Chapter intros: translate back-link → `[← Volver al índice](../README.md)`; the `# N. ...` heading (keep the number); intro paragraph. No §TAG§/§SRC§ markers in intros.
 - Units: 元 → yuanes; keep mmHg, mg, %, °C as-is.
+- **Number formatting**: ES uses space as thousands separator (142 740) and comma as decimal (0,001); never use comma as thousands separator (e.g. 142,740 is incorrect).
 
 ## Procedure
 
@@ -37,6 +38,7 @@ description: HTLB Spanish translation workflow and conventions.
 - Keep the HTML comment `<!-- 成本标签: ... -->` byte-identical IF the source unit already has one.
 - Keep markdown structure: `### N. ...` keeps its number; list-item order unchanged; no new headings.
 - Chapter intro 00.md: translate back-link → `[← Volver al índice](../README.md)`, the `# N. ...` heading, and the intro paragraph. No §TAG§/§SRC§ markers.
+- **Number preservation**: All numeric values must match source exactly; ES formatting applies only to display (142 740 not 142,740; 0,001 not 0.001).
 
 ## Doc translation rules (standalone docs)
 
@@ -46,6 +48,7 @@ description: HTLB Spanish translation workflow and conventions.
 - Law/regulation names: Spanish paraphrase, no hanzi in body text; hanzi only in parenthetical glosses where EN keeps them.
 - Style: neutral international Spanish, no exclamations, live prose; links and URLs kept verbatim.
 - 元 → yuanes.
+- **Number formatting**: ES uses space as thousands separator (142 740) and comma as decimal (0,001); never use comma as thousands separator (e.g. 142,740 is incorrect).
 
 ## Pitfalls
 - **Regulatory document ID translation**: CN hanzi in body text (e.g. in Notas fields) must be manually replaced with office paraphrase + "(documento 〔2010〕 n.º 432)" per EN pattern. This is a byte-faithfulness override for regulatory IDs only; other byte-faithful zones (citation lines, DOIs) must remain untouched.

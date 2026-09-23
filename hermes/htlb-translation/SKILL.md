@@ -402,7 +402,7 @@ When working with Russian web interfaces (index.html), be aware of layout constr
   - Glossary for ch33 with pre-translated terms
   - Contract: first tool call = write_file, no analysis, no JSON reports
 - **Quality gates**: After pilot wave, run assemble.py/verify.py ×9 to validate byte-identity, field markers, and no Chinese leaks
-- **Wave planning**: Pilot validates pipeline before mass translation; group remaining chapters by unit count (5 chapters per wave)
+- **Wave planning**: Pilot validates pipeline before mass translation; see `references/wave-planning.md` for full wave structure and task contracts
 - **Critical success factor**: Pilot must complete all 9 subagents without timeout or analysis paralysis
 - **Pilot validation checklist**: Verify assembly output, verify.py OK status, and no Chinese characters in visible text for all 9 languages × chapters
 
@@ -657,6 +657,7 @@ done
 - **`tools/glossary.json`** — закреплённые термины, у каждого сразу RU и EN эквивалент + стилевые правила обоих языков. Наполнять ТОЛЬКО после grep-проверки по book/*.md (запрещено добавлять термины «про запас»). `make_digest.py` генерирует `units/NN.gloss.md` — только термины данного юнита (в юните 00 — все термины главы + [STYLE] правила); gloss-файлы кладут в задачу сабагента-переводчика вместе с юнитом, в assemble они не попадают.
 - **`tools/verify.py <NN> --lang ru|en [--file X]`** — гейт перед коммитом: заголовки/теги/поля/источники (байт-тождество с допуском [рус. «…»]/[eng. "…"] ретрофитов), числа в пространстве ЗНАЧЕНИЙ (万/亿/千/万亿 ↔ тыс/млн/млрд/трлн, прописные числительные, месяцы, дистрибутивный масштаб «от 81 до 138 тыс.» = «8.1 万 到 13.8 万»; исчезло = FAIL, стало реже = WARN), CJK вне легальных зон (источники/теги/глоссы/цитаты-реалии/блок «Примечание переводчика»), запрещённые кальки ≤1 на файл (RU), jargon HR/RR/OR/CI в строке «Простыми словами/In plain terms» (WARN, оба языка). Пишет tools/.status/<NN>-<lang>.ok для status.py.
 - **`tools/status.py [NN…]`** — дашборд волны: файлы RU/EN, свежесть verify-маркера («изм.» = правили после проверки), прогресс юнитов /root/htlb-run, активные волны.
+- **`tools/wave_pipeline.py`** — автоматизированная валидация волн: assemble ×3 языков + verify ×3 языков по списку глав, вердикт GREEN/FAIL. Интегрирован в workflow волн после завершения каждой волны.
 
 ### Known FP verify.py (not to be crudely fixed)
 - "60,000 IU" in RU text is read as decimal (comma = thousands only if not "0..."; one line in ru06). Fix: replace with "60 000 IU" to avoid false positive.
@@ -664,6 +665,13 @@ done
 - Real findings from first run 53/62: calques "когорт" ×13 (ch. 13/28/29/30), "популяц" ×2 (ch. 29), missing numbers in ru10/ru11 — material for a fix wave.
 - CJK gloss false positives: Legal titles in English text with CJK characters (e.g., "统筹地区 — ...") are allowed and should not trigger warnings. Verify regex excludes gloss patterns like `(统筹地区 — ...)` or `(副主任医师 — ...)`.
 - **Documentation articles**: verify.py FAIL on CJK in legal titles is expected; use factcheck gate (pass E) for semantic validation instead. CJK in `(title — explanation)` patterns are valid glosses, not translation errors.
+
+### Wave Pipeline Integration
+
+- **After each wave completion**: Run `tools/wave_pipeline.py` with all chapter numbers in the wave
+- **Quality gates**: Pipeline validates assembly output, verify.py status, and Chinese character leaks
+- **Publication readiness**: Only proceed to publication after GREEN verdict
+- **Error reporting**: Pipeline provides detailed failure reports for targeted fixes
 
 ## Quality Assurance Techniques
 
@@ -681,3 +689,4 @@ done
 - **Web UI capitalization**: For web interfaces (index.html, README.ru.md), apply automatic capitalization to field values (Простыми слова, Эффект, Примечания) using conditional logic in the parser. See `references/web-ui-capitalization.md` for implementation details and QA procedures
 - **Consolidated playbook**: `docs/translation-playbook.md` in the repo is the single source of truth for the whole method (pipeline, subagent contracts, verification, post-waves, web, upstream, EN-launch checklist). Read it before launching another-language translation; this skill keeps only the operational bits
 - **Verify.py gate**: Always run `tools/verify.py <NN> --lang ru|en` before committing. Common failure modes and fixes are documented in `references/verify-gate-handling.md`
+- **Wave pipeline**: Use `tools/wave_pipeline.py` for automated wave validation after completion. See `references/wave-pipeline.md` for usage details and integration patterns.
