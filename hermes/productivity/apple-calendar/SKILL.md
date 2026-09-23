@@ -36,6 +36,18 @@ metadata:
   1 h ending exactly at the meeting start, venue address in `location`,
   notes «Час на дорогу. Встреча с HH:MM.» Meeting event: venue in
   `location`, transit hints in `notes`.
+- Travel buffer length = whatever the user states («полчаса заложи» → 30-min
+  travel event); the 1-hour example above is the default only when they give
+  no number.
+- «Адрес тот же, как было в <день>» → list_events over THAT referenced past
+  date and copy the matching event's `location`/`notes` verbatim — never ask
+  the user to re-type an address the calendar already holds. If several
+  events could match, say which one you took it from.
+- Recurring reminders («каждый вторник N недель») via the MCP tools: the
+  create_event schema has NO recurrence field → create N separate one-off
+  events with the identical title/notes. Occurrences already in the past at
+  request time: skip them, say so, and offer to backfill — do not silently
+  create or silently drop them.
 - Splitting an EXISTING single event the same way: `update_event` with
   `eventIdentifier` + `occurrenceDate` = the event's CURRENT start (that
   pair identifies the occurrence; new values ride in the plain fields) —
