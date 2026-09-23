@@ -82,6 +82,7 @@ Each translation task follows a standardized template:
 - **assemble.py**: Ensures byte-identical assembly to source
 - **verify.py**: Checks headings, tags, sources, numbers, and count preservation
 - **Number preservation scripts**: Verify 万/亿 conversions and numeric formatting compliance
+- **wave_pipeline.py**: Batch verification tool for multiple chapters/languages
 
 ### Critical Checks
 
@@ -90,6 +91,7 @@ Each translation task follows a standardized template:
 - **Number formatting**: Apply language-specific thousands/decimal rules consistently
 - **No CJK outside machine zones**: Chinese text only in tags, sources, link targets
 - **Field labels**: Correct mapping from CN to target language (e.g., 成本→Costo)
+- **Number completeness**: All numeric values from CN must appear in translation (missing numbers = FAIL)
 
 ## Common Pitfalls
 
@@ -101,6 +103,19 @@ Each translation task follows a standardized template:
 - **Unit weights**: Add parenthetical gloss for weight figures (0.25 千克 → 0,25 kilogramos (250 gramos))
 - **Large numbers (亿)**: CN «X 亿元» = X/10 billion yuan (亿 = 100 million = 0.1 billion; 6234.86 亿元 = 623.486 billion yuan — NOT 6234.86 billion)
 - **Multiple numbers with same unit**: When several numbers share one unit (millions/billions), WRITE the unit at each number: '880,000 million and 808,000 million', not '880,000 and 808,000 million'
+
+### Alignment and Revision Mapping Pitfalls
+
+- **Alignment map accuracy**: SequenceMatcher ratio may be based on headings only (r=1.0), not actual content similarity. Always verify real content similarity before trusting alignment pairs.
+- **Pre vs HEAD revision scope**: When Chinese source updates, pre-version and HEAD units may have different content even with high alignment ratio. Always diff pre vs HEAD units to identify actual changes.
+- **Revise task scope**: Ensure revise lists include ALL edited units, not just those with high alignment ratios. Use `difflib.SequenceMatcher` to verify actual content changes between pre and HEAD.
+- **Missing revision units**: If subagents report fewer units than expected, verify task specification included all revise slots. Manual revision may be needed for units skipped due to alignment errors.
+
+### Chapter Structure and Slot Mapping
+
+- **CN chapter expansion**: When Chinese chapters add new units (e.g., ch04: 13→18 units), ensure alignment map covers all new slots. Verify unit mapping with actual content diff, not just numbering.
+- **Slot numbering changes**: New units may shift existing slot numbers (e.g., pre#10 → HEAD#15). Use git history to locate original unit content and verify actual content matches alignment expectation.
+- **Cross-unit content drift**: Units with high alignment ratio may still have significant content changes. Always run content diff before revision to identify actual translation updates needed.
 
 ### Source Line Handling
 
@@ -116,10 +131,14 @@ Each translation task follows a standardized template:
 ## Workflow Steps
 
 1. **Task generation**: Create wave specifications with unit counts and file paths
-2. **Subagent dispatch**: Deploy parallel subagents per chapter/language
-3. **Quality verification**: Run verification scripts after each batch
+2. **Subagent dispatch**: Deploy parallel subagents per chapter/language (limit 10 per batch to avoid delegation limits)
+3. **Quality verification**: Run verification scripts after each batch:
+   - `python3 tools/wave_pipeline.py CH1 CH2 CH3...` for batch verification
+   - `python3 tools/verify.py CH --lang LANG --file book/LANG/out-CH.md` for individual chapters
+   - Check for missing numbers, formatting errors, and content alignment
 4. **Steer corrections**: Send updates to running agents for specification errors
-5. **Batch coordination**: Progress through waves sequentially
+5. **Batch coordination**: Progress through waves sequentially, handling revision mapping errors
+6. **Revision mapping validation**: Before revision tasks, verify actual content changes between pre and HEAD using `difflib.SequenceMatcher`
 
 ## Reference Files
 
@@ -127,6 +146,8 @@ Each translation task follows a standardized template:
 - **Source digest**: `/root/github/htlb-ru/tools/digest/{chapter}/units/NN.md`
 - **Task specifications**: `/tmp/wave_specs.json`
 - **Unit counts**: `/tmp/zh_counts_head.json`
+- **Alignment maps**: `/tmp/align_map.json` (requires validation against actual content)
+- **Revision mapping validation**: `references/revision-mapping-validation.md` (validate actual content changes before revision tasks)
 
 ## Multi-Language Coordination
 
@@ -145,10 +166,11 @@ Each translation task follows a standardized template:
 
 ## Performance Optimization
 
-- **Parallel subagents**: Process multiple chapters simultaneously
-- **Task batching**: Group related tasks to reduce overhead
+- **Parallel subagents**: Process multiple chapters simultaneously (limit 10 per batch)
+- **Task batching**: Group related tasks to reduce overhead, split larger batches into multiple calls
 - **Cache recovery**: Use delegation transcripts for recovery if agents fail
 - **Pre-verification**: Check file existence before dispatching tasks
+- **Revision mapping**: Use `difflib.SequenceMatcher` to verify actual content changes before revision tasks
 
 ## Troubleshooting
 
@@ -156,6 +178,9 @@ Each translation task follows a standardized template:
 - **Formatting drift**: Regular verification with number preservation scripts
 - **Source mismatches**: Verify digest files match upstream Chinese content
 - **Count discrepancies**: Use grep, not stated counts, for verification
+- **Revision mapping errors**: Verify actual content changes with `difflib.SequenceMatcher` when alignment ratios seem incorrect
+- **Missing revision units**: If subagents skip units, manually verify task specification included all revise slots and content actually changed
+- **Chapter structure changes**: When Chinese chapters expand (e.g., 13→18 units), verify new slot mapping with content diff, not just numbering
 
 ## Success Metrics
 
@@ -166,11 +191,13 @@ Each translation task follows a standardized template:
 - **Wave completion**: All chapters in a wave completed successfully
 - **Batch coordination**: Parallel subagents limited to 10 per wave to avoid delegation limits
 - **Multiple number handling**: When several numbers share one unit (millions/billions), write the unit at each number
+- **Revision accuracy**: All revised units actually match current Chinese source content (verified via diff)
 
 ## Integration with HTLB Infrastructure
 
 - **Run directories**: `/root/htlb-run-{lang}/{chapter}/units/`
 - **Digest source**: `/root/github/htlb-ru/tools/digest/{chapter}/units/`
-- **Verification tools**: `tools/verify.py`, `tools/assemble_{lang}.py`
+- **Verification tools**: `tools/verify.py`, `tools/assemble_{lang}.py`, `tools/wave_pipeline.py`
 - **Deployment**: Copy to `book/{lang}/` with status lines and back-links
 - **Repository management**: Commit to fork branches with descriptive messages
+- **Revision mapping tools**: Use `difflib.SequenceMatcher` to verify actual content changes between pre and HEAD versions
