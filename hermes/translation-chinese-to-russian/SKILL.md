@@ -65,7 +65,22 @@ description: Chinese-to-Russian translation workflow with localization.
 - **Failed chapter recovery:** If a subagent fails (timeout, output not written), recover transcripts from `~/.hermes/cache/delegation/live/` and either retry with corrected instructions or reassign to another agent with stricter incremental writing requirements.
 - **PR auto-update:** After each wave, automatically update the PR with new commits and comment with progress summary. Never manually close PRs — let them stay open until all chapters are done.
 
-GitHub mechanics (fork, issues, PRs) → `github` skill.
+### GitHub counter reset
+
+To reset "behind" counter to zero:
+
+```bash
+git merge -s ours upstream/main --allow-unrelated-histories
+```
+
+- This records upstream history as an ancestor of the fork without changing any files
+- The counter shows "behind: 0" and "ahead: N" (our commits)
+- Future "behind" will show actual upstream commits not yet synced
+- Document this in `docs/upstream-sync.md` as a one-time history anchor
+
+### Skills/ directory handling
+
+If upstream adds new directories like `skills/`, add them to the path-filtered checkout list in `docs/upstream-sync.md` to keep linters and site builders working.
 
 ## Numeric Normalization Handling
 

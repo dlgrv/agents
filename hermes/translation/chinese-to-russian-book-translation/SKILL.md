@@ -71,6 +71,19 @@ When syncing with upstream Chinese content (new chapters, infrastructure), follo
 - **Infrastructure separation:** Upstream may add EPUB, ads, or other infrastructure that doesn't belong in the fork's wrapper
 - **CI safety:** Fork's CI is for translations and site building; upstream CI may be specific to Chinese workflow
 
+### GitHub counter reset
+
+To reset "behind" counter to zero:
+
+```bash
+git merge -s ours upstream/main --allow-unrelated-histories
+```
+
+- This records upstream history as an ancestor of the fork without changing any files
+- The counter shows "behind: 0" and "ahead: N" (our commits)
+- Future "behind" will show actual upstream commits not yet synced
+- Document this in `docs/upstream-sync.md` as a one-time history anchor
+
 ### Sync procedure
 
 ```bash
