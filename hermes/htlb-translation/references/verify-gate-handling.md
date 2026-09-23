@@ -2,6 +2,13 @@
 
 ## Common Verify.py Failure Modes & Fixes
 
+### 0. Word-Number FAIL Root Cause (RU numerals not folded)
+**Problem**: «numbers absent from translation: 80000×2, 120000×2 …» even though the RU text DOES contain the numbers — but spelled as words («восемьдесят с лишним тысяч», «сто двадцать с лишним тысяч»).
+**Mechanism**: verify.py `WORD_VALUES` folds only oblique forms «трёх/трем/пяти/семи/восьми/девяти», «двадцать-девяносто», «пятьсот-девятьсот», «сто» and «два/обеих/…». NOT folded: «три/семь/девять/десять/пятьдесят/тысяч/миллион/млрд» as words, so «восемьдесят с лишним тысяч» produces ZERO values (восемьдесят and тысяч are not in the fold list) → CN «8 万» value 80000 is missing → FAIL.
+**Fix**: in run units, replace word numbers with digits using book format «80 000 юаней», «50 000–500 000», «7 100 000 юаней», «7 млрд юаней» (CN 亿元 ×0.1 млрд, 万 ×10 000). Legal sentence terms → digits too («до 3 лет», «от 3 до 7», «1 год 6 месяцев условно»), matching ch08/30 convention. Keep: enumerations («пять условий», «две категории», «три вопроса» in headings), semantic ranges CN has as words («в один-пять раз больше», «1 到 5 倍», «один-пять размеров дохода», «два независимых вопроса»).
+**Verify numbers WITHOUT running assemble**: replicate norm_numbers()+fold_words() in a scratch script, compare Counter(cn values) − Counter(ru values) per unit (cn_body = lines except «- 来源：»/成本标签; ru_body = except §SRC§). All-empty diff = verify numbers pass.
+**Rule of thumb**: if CN shows a digit (incl. X 万/X 亿), RU MUST carry the same value somewhere; a word number that folds to nothing counts as absent.
+
 ### 1. Legacy Field Labels
 **Problem**: Subagents sometimes use '- Выгода:' instead of '- Эффект:'
 **Impact**: Web parser regex `^- (?:收益|Эффект|Benefit)` doesn't match 'Выгода', causing 'Эффект' blocks to disappear from site

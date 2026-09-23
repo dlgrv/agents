@@ -93,6 +93,25 @@ Each translation task follows a standardized template:
 - **Field labels**: Correct mapping from CN to target language (e.g., 成本→Costo)
 - **Number completeness**: All numeric values from CN must appear in translation (missing numbers = FAIL)
 
+## Field Value Capitalization Rule
+
+**Rule**: Every field value must start with a capital letter. This applies to:
+- Cost/Price values
+- Simple explanation text
+- Benefit descriptions
+- Evidence grade levels
+- Notes/comments
+
+**Examples**: 
+- `- Cost: 5 000 yuanes` (correct, not `5 000 yuanes`)
+- `- Cost: 5 000 yuanes` (correct, not `5 000 yuanes`)
+- `- Evidence grade: B` (correct, not `b`)
+- `- Notes: This is important` (correct, not `this is important`)
+
+**Implementation**: Use regex `(?m)^- (?:Cost|In plain terms|Benefit|Evidence grade|Notes): ([^\W\d_])` to detect and fix lowercase starts across all languages.
+
+**Script**: `references/capitalization-fix-script.py` — automated fix tool for all units
+
 ## Common Pitfalls
 
 ### Number Formatting Errors
@@ -105,6 +124,14 @@ Each translation task follows a standardized template:
 - **Multiple numbers with same unit**: When several numbers share one unit (millions/billions), WRITE the unit at each number: '880,000 million and 808,000 million', not '880,000 and 808,000 million'
 - **Decimal commas in ES**: Replace all decimal dots with commas (0.14 → 0,14) — verify.py expects comma decimal format for ES
 - **Space separators in ES**: Replace all decimal dots with commas and comma-thousands with spaces (18.905 → 18 905; 0.14 → 0,14) — verify.py expects both space thousands and comma decimals
+
+### Field Value Capitalization Pitfalls
+
+- **Legacy translations**: Some older units may start values with lowercase letters
+- **Subagent consistency**: All subagents must enforce capitalization rule from start
+- **Verification**: Use regex to detect lowercase starts across all field values
+- **Scope**: Applies to all five field types: Cost/Price, Simple explanation, Benefit, Evidence grade, Notes
+- **Automation**: Use `references/capitalization-fix-script.py` for batch fixes
 
 ### Alignment and Revision Mapping Pitfalls
 
@@ -152,6 +179,7 @@ Each translation task follows a standardized template:
 - **Alignment maps**: `/tmp/align_map.json` (requires validation against actual content)
 - **ES decimal example**: `/root/htlb-run-es/30/units/05.md` - shows correct 18 905 (space thousands) and 0,14 (comma decimal)
 - **Revision mapping validation**: `references/revision-mapping-validation.md` (validate actual content changes before revision tasks)
+- **Capitalization fix script**: `references/capitalization-fix-script.py` (automated tool for field value capitalization)
 
 ## Multi-Language Coordination
 
