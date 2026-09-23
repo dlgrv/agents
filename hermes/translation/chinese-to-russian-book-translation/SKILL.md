@@ -54,6 +54,51 @@ When working with translated content, especially in domains like health, safety,
 5. **Cross-check with secondary sources** — Use Wayback/WARCs when live sites block access
 6. **Update sources section** — Replace TODO with full citation including DOI/URL
 
+### Upstream synchronization
+
+When syncing with upstream Chinese content (new chapters, infrastructure), follow the upstream sync protocol:
+
+1. **Never wholesale merge** — Upstream rewrites history (different root SHA), so standard merge fails. The fork is an independent overlay preserving English/Russian/Spanish wrappers.
+2. **Path-filtered sync only** — Use `git fetch upstream main` then `git cherry-pick` or path-specific copying for new content (book/*.md, docs/*.md), never `git merge`.
+3. **Preserve wrapper integrity** — Keep fork's English/Russian/Spanish site files (index.html, README.md, language pages, translations) untouched; never merge upstream Chinese content into wrapper branches.
+4. **Commit sync as separate commit** — Document exact upstream commit hash and filtered sync in commit message (e.g., "sync(upstream): pull 115 commits through dfebc18 — book/*.md + docs zh-mirror").
+5. **Verify content parity** — After sync, confirm Chinese chapters are byte-identical with upstream via `git diff fork/main upstream/main -- 'book/*.md'` (should be empty).
+
+### Why wholesale merge is forbidden
+
+- **History divergence:** Upstream has different root SHA, making merge impossible without conflicts
+- **Wrapper preservation:** Fork's main branch is an English/Russian/Spanish wrapper over Chinese content, not a translation of upstream
+- **Infrastructure separation:** Upstream may add EPUB, ads, or other infrastructure that doesn't belong in the fork's wrapper
+- **CI safety:** Fork's CI is for translations and site building; upstream CI may be specific to Chinese workflow
+
+### Sync procedure
+
+```bash
+# Fetch latest upstream
+git fetch upstream main
+
+# Cherry-pick new content (example)
+git cherry-pick upstream/main -- book/01-*.md docs/*.md
+
+# Or path-filtered copy (preferred)
+cp upstream/main/book/33-*.md book/
+cp upstream/main/docs/zh-mirror/* docs/
+
+# Commit with clear message
+git commit -m "sync(upstream): pull 115 commits through dfebc18 — book/*.md + docs zh-mirror"
+
+# Verify Chinese chapters match upstream
+git diff fork/main upstream/main -- 'book/*.md'
+# (empty = identical)
+```
+
+### Pitfalls
+
+- **Never use `git merge --allow-unrelated-histories`** — This merges entire upstream history, including infrastructure that breaks the fork's wrapper
+- **Never merge upstream Chinese content into wrapper branches** — The fork's main branch is an English/Russian/Spanish wrapper, not a translation repository
+- **Always verify byte-identity after sync** — Use `git diff` to confirm Chinese chapters are identical to upstream
+- **Document sync commits clearly** — Include upstream commit hash and filtered sync details for future reference
+
 ### Source verification protocol
 
 **Step 1: Identify and categorize TODO markers**
@@ -164,6 +209,7 @@ gh issue create --title "Fact-check verification" --body "Provide exact quote fr
 - **Spanish translation subagent errors:** Spanish subagents may translate numbers as words instead of digits (e.g., 'Treinta minutos' instead of '30 minutos'), breaking byte-identity gates. Always verify numeric preservation after Spanish translation and fix any word-form numbers to digit-form to match source.
 - **Spanish decade/era number preservation:** Spanish subagents may convert '1990 年代' to 'años noventa' instead of preserving '1990' as digits. Always verify that era numbers remain in digit form ('años 1990') to maintain byte-identity with source.
 - **Spanish numeric format consistency:** Spanish subagents may introduce word-form numbers in contexts requiring digit-form (e.g., 'mil' instead of '1000'). Always verify that all numeric values match the source exactly and replace word-form numbers with digit-form equivalents.
+- **Upstream synchronization:** Never use `git merge --allow-unrelated-histories` or wholesale merge upstream/main — this breaks fork wrapper integrity. Use path-filtered sync only (cherry-pick or selective copy) and preserve English/Russian/Spanish wrappers untouched. Always verify Chinese chapters are byte-identical with upstream after sync.
 
 ## Multi-language extension
 
