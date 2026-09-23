@@ -41,6 +41,17 @@
 - Body: CN 国食药监办〔2010〕432号 → ES (documento 〔2010〕 n.º 432)
 - Citations: Keep hanzi unchanged
 
+### Multiple Numbers with Same Unit
+
+**Problem**: When several numbers share one unit (millions/billions), verify fails if unit is written only once.
+
+**Example**:
+- CN: «880 000 万元和 808 000 万元»
+- Wrong: «880 000 y 808 000 millones de yuanes» → verify misses second number's unit
+- Correct: «880 000 millones y 808 000 millones de yuanes» → both numbers have units
+
+**Fix**: Write the unit at each number when they share the same unit.
+
 ## Verification Commands
 
 ```bash
@@ -58,4 +69,8 @@ done
 # Check comma-thousands forbidden in ES/RU
 grep -o "[0-9]\+,[0-9]\+" file.md
 # Should find no results
+
+# Check multiple numbers with same unit
+grep -o "[0-9]\+[ 0-9,]*\s*(?:millones|mil|millón)\s*y\s*[0-9]\+[ 0-9,]*\s*(?:millones|mil|millón)" file.md
+# Should find patterns where unit is repeated for each number
 ```

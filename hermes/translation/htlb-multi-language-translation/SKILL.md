@@ -3,9 +3,20 @@ name: htlb-multi-language-translation
 description: HTLB Chinese-to-multiple-language translation workflow.
 category: translation
 tags: [translation, chinese, spanish, english, russian, book]
+author: Hermes Agent
+license: MIT
+version: 1.1
+metadata:
+  hermes:
+    tags: [translation, chinese, spanish, english, russian, book, htlb]
+    related_skills: [htlb-es-translation, translation-chinese-to-russian]
 ---
 
 # HTLB Multi-Language Translation Workflow
+
+## When to Use
+
+Use this skill when translating HTLB (HowToLiveBetter) Chinese self-help book content into multiple languages (Russian, English, Spanish). This workflow handles fresh translations, revised units, quality gates, and verification across all target languages using a wave-based revision system.
 
 ## Overview
 
@@ -88,6 +99,8 @@ Each translation task follows a standardized template:
 - **RU**: Never use comma as thousands separator (10,676 → 10 676)
 - **All languages**: Preserve numeric values exactly; only change formatting
 - **Unit weights**: Add parenthetical gloss for weight figures (0.25 千克 → 0,25 kilogramos (250 gramos))
+- **Large numbers (亿)**: CN «X 亿元» = X/10 billion yuan (亿 = 100 million = 0.1 billion; 6234.86 亿元 = 623.486 billion yuan — NOT 6234.86 billion)
+- **Multiple numbers with same unit**: When several numbers share one unit (millions/billions), WRITE the unit at each number: '880,000 million and 808,000 million', not '880,000 and 808,000 million'
 
 ### Source Line Handling
 
@@ -121,6 +134,7 @@ Each translation task follows a standardized template:
 - **Consistent terminology**: Maintain glossaries across languages
 - **Shared quality gates**: Same verification scripts apply to all languages
 - **Wave synchronization**: All languages must complete a wave before moving to next
+- **Batch management**: Limit parallel subagents to 10 per wave to avoid hitting delegation limits; split larger batches into multiple calls
 
 ## Revision System
 
@@ -150,6 +164,8 @@ Each translation task follows a standardized template:
 - **Count preservation**: All heading/item/tag/DOI counts match
 - **Language compliance**: Number formatting follows language-specific rules
 - **Wave completion**: All chapters in a wave completed successfully
+- **Batch coordination**: Parallel subagents limited to 10 per wave to avoid delegation limits
+- **Multiple number handling**: When several numbers share one unit (millions/billions), write the unit at each number
 
 ## Integration with HTLB Infrastructure
 
