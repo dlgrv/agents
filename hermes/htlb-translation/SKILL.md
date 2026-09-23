@@ -15,6 +15,15 @@ metadata:
 
 README policy (fork dlgrv/HowToLiveBetter): `README.md` = English primary (from translation/en onward), `README.zh.md` = renamed Chinese original, `README.ru.md` = Russian; all three linked via a Languages: line. Commit 8126ee6. Workflow
 
+## When to Use
+
+Use this skill for:
+- Translating HTLB book from Chinese to Russian, English, or Spanish
+- Handling upstream content deltas and history rewrites
+- Managing chunked unit translation with quality gates
+- Coordinating multi-agent translation waves
+- Validating translation quality with automated judges and expert review
+
 Workflow for translating the HowToLiveBetter book from Chinese to Russian. Uses chunked units (not whole chapters) and incremental commits with explicit developer approval before any git/PR action.
 
 ## Core Principle
@@ -42,7 +51,7 @@ Each unit file must contain:
 4. §TAG§ placeholder (on its own line)
 5. §SRC§ placeholder (on its own line)
 
-## 2. Unit Translation
+## Unit Translation
 
 Translate each unit incrementally. Each unit must be written to its file immediately after translation (no JSON reports until all units are done).
 
@@ -57,6 +66,19 @@ Translate each unit incrementally. Each unit must be written to its file immedia
 # Write translated unit back to file immediately
 write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SRC§"
 ```
+
+### Pilot Wave Task Contract (2026-09-23)
+
+For pilot waves with multiple parallel subagents, enforce strict write-first contract:
+
+- **First tool call**: Must be `write_file` of the translated unit — no reading other units, no analysis, no planning
+- **Process**: Read CN unit → immediately write_file translated unit → next unit (no batch reading)
+- **No JSON reports**: Subagents must not return summaries; work = recorded files only
+- **Chapter intros (00.md)**: Special format with status line, back-link, and heading; no §TAG§/§SRC§ markers
+- **Glossary integration**: For chapters with glossaries (e.g., ch33), include pre-translated terms in task instructions
+- **Timeout prevention**: Contract prevents analysis paralysis; transcript shows write_file calls, not read_file loops
+- **Detection of stalled subagents**: Watch for transcripts with many `read_file` calls but 0 `write_file` calls — steer with "STOP READING. Write files first."
+- **Recovery for timeouts**: Reset pristine units, restart with HARD PROCESS RULE: first tool call = write_file
 
 ### Field Marker Rules
 
@@ -178,6 +200,17 @@ The watchdog:
 - **Recovery**: Reset pristine units from digest source, restart with HARD PROCESS RULE: first tool call must be `write_file` of the translated unit — no reading other units, no analysis, no planning
 - **Detection**: Check transcript for ≥10 lines with only `read_file` and 0 `write_file` calls; check file timestamps for last write >15 minutes ago
 - **Prevention**: In every task prompt, enforce: "your FIRST tool call must be a write_file of the translated NN.md. You may NOT read any unit other than the one you are currently translating in this same step."
+
+### Pilot Wave Timeout Prevention (2026-09-23)
+
+For multi-language pilot waves, implement additional timeout safeguards:
+
+- **Task contract**: Every pilot task includes explicit write-first rule: "your FIRST tool call must be a write_file of the translated NN.md. You may NOT read any unit other than the one you are currently translating in this same step."
+- **No batch reading**: Subagents must not read all units first — this causes timeout before any writes
+- **Immediate write**: Each unit translation must result in immediate write_file call; no accumulation or planning
+- **Transcript monitoring**: Watch for patterns: many `read_file` calls with 0 `write_file` calls indicates analysis paralysis
+- **Cron watchdog**: For long pilot waves, use cron watchdog to alert on stalled chapters (40+ minutes without writes)
+- **Recovery protocol**: If subagent stalls, restart with pristine units and stricter write-first instructions
 
 ## Localization and Realia Handling
 
@@ -358,6 +391,21 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Quality assurance**: Use same parallel subagent verification approach as RU/EN for natural flow and consistency
 - **Critical Pitfalls from Wave 1**: Never insert `<!-- 成本标签 ... -->` comment lines into units — the assembler injects them via §TAG§; a hand-inserted copy breaks the gate and causes duplication. Never write numbers as words («Treinta» → «30», «años noventa» → «años 1990») — always use digits with Spanish formatting (80 300, 17,4).
 
+### Pilot Wave Protocol (2026-09-23)
+
+- **Pilot wave**: Always start with chapters 01 (smallest), 13 (largest), and 33 (new) to test all pipeline components for each language
+- **Pilot tasks**: 9 parallel subagents, each translating one chapter (01/13/33) × ru/en/es with strict write-first contract
+- **Task format**: Each subagent receives a complete TZ with:
+  - Field label rules and number formatting per language
+  - List of unit files (00-36 for ch01, 00-41 for ch13, 00-20 for ch33)
+  - Special handling for chapter intros (00.md) with status lines and back-links
+  - Glossary for ch33 with pre-translated terms
+  - Contract: first tool call = write_file, no analysis, no JSON reports
+- **Quality gates**: After pilot wave, run assemble.py/verify.py ×9 to validate byte-identity, field markers, and no Chinese leaks
+- **Wave planning**: Pilot validates pipeline before mass translation; group remaining chapters by unit count (5 chapters per wave)
+- **Critical success factor**: Pilot must complete all 9 subagents without timeout or analysis paralysis
+- **Pilot validation checklist**: Verify assembly output, verify.py OK status, and no Chinese characters in visible text for all 9 languages × chapters
+
 ## Expert Review Integration (2026-09-19)
 
 - **Before publication**, run independent adversarial evaluations of the pipeline
@@ -455,19 +503,46 @@ When working with Russian web interfaces (index.html), be aware of layout constr
 - **Автоматизировать**: watchdog для stalled chapters (40+ минут без writes)
 - **Резерв**: при провале GLM-судьи — локальный Qwen3-30B-A3B или Gemma 3 27B (Mac M5 Pro 48GB)
 
-## Upstream Sync Verification (проверка дельты апстрима, 2026-09-21)
+## Upstream Sync Delta Handling Workflow
 
-Апстрим может переписывать историю (recreate), поэтому **сравнивать коммиты бесполезно — сравнивать контент**: `git diff main origin/main -- 'book/*.md'` (пусто = CN-база идентична), счёт `^### ` по затронутым главам CN=RU=EN, `git diff` по `docs/核实记录/` (у нас только НАШИ добавленные файлы = ок).
+When upstream recreates history or makes non-linear changes:
 
-Порядок сверки новой порции записей апстрима (проверено на 6e15cdf, дельта = 0):
-1. CN-база: diff `book/*.md` (исключая ru/en) — пустой → записи уже взяты.
-2. Переводы: grep ключевых терминов новых записей в book/ru, book/en; гейт `tools/verify.py NN --lang ru|en` — OK, lost=0.
-3. Глоссарий: новые термины (напр. eGFR) во всех трёх README + счётчик «N терминов/条术语/terms» в summary согласован с таблицей.
-4. Статистика (528 条, A 347) совпадает с апстримом.
-5. 核实记录: новые файлы верификации — байт-в-байт через `git diff main origin/main -- 'docs/核实记录/<файл>'`.
-6. Ожидаемые «ложные» различия: README.zh.md vs README.md (наша EN-primary политика), инфраструктура апстрима, которую мы не зеркалим (epub workflow, реклама/ads, sitemap, sync-stats.ps1).
+### 1. Delta Detection
+```bash
+cd ~/github/HowToLiveBetter
+git diff main origin/main -- 'book/*.md'  # Must be empty for CN sync
+grep -c '^### ' book/*.md  # Count headings per chapter
+grep -c '条术语/terms' README.*.md  # Glossary count consistency
+```
 
-Если дельта = 0 — субагентов НЕ создавать, честно отчитаться с пруфами. Не изготавливать работу, когда проверка показала, что её нет.
+### 2. Delta Mapping
+```bash
+cp book/*.md /tmp/zh_full/
+for f in book/*.md; do
+  bn=$(basename "$f" .md)
+  diff <(grep '^### ' "$f") <(curl -s "https://raw.githubusercontent.com/eternity4719/HowToLiveBetter/main/book/$bn.md" | grep '^### ') > "/tmp/zh_delta/${bn#*-}.diff"
+done
+python3 scripts/delta_mapping.py
+```
+
+### 3. Fresh Digest Preparation
+```bash
+cp -r tools/digest/<NN>/units /root/htlb-run-<lang>/<NN>/
+# Overwrite old units with fresh CN source
+```
+
+### 4. Pilot Wave Validation
+```bash
+python3 scripts/pilot_wave_validator.py
+# Tests chapters 01, 13, 33 for all languages
+```
+
+### 5. Mass Translation
+- Translate affected chapters starting with pilot chapters
+- Use full retranslate strategy for affected chapters
+- Validate with existing quality gates
+
+See `references/upstream-sync-delta-handling.md` for detailed procedures and scripts.
 
 ## Clone & Publication Rules (2026-09-18)
 
