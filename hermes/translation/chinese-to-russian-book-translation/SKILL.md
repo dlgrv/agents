@@ -13,6 +13,7 @@ tags: [translation, chinese, russian, localization]
 - Localization required: country-specific facts (emergency numbers, government agencies, legal terms) must be adapted with functional equivalents or marked as source-specific.
 - Review with MQM rubric: focus on accuracy, terminology, and fluency (especially bureaucratic calques in Russian).
 - Apply ALL reviewer fixes, not only blockers; re-verify after each batch of edits.
+- **Number formatting**: RU uses space as thousands separator (10 676) and dot as decimal (0.001); never use comma as thousands separator (e.g. 10,676 is incorrect).
 
 ## Procedure
 
@@ -234,6 +235,11 @@ Based on Octoverse 2025 GitHub developer populations and audience overlap:
 - **Spanish:** High priority — one language covers 20+ countries, low English overlap in LatAm, significant real-world impact
 - **Hindi:** Secondary priority — massive user base, but most Indian GitHub users read English; broader audience appeal
 - **Other languages:** Portuguese (Brazil), Japanese (stable market) — evaluate on case-by-case basis
+- **Number formatting by language:**
+  - **ES:** space thousands (142 740), comma decimal (0,001)
+  - **RU:** space thousands (10 676), dot decimal (0.001)
+  - **EN:** comma thousands (142,740), dot decimal (0.001)
+  - **ZH:** comma thousands (142,740), dot decimal (0.001)
 
 ### Core workflow differences
 
