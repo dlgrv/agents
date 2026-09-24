@@ -84,6 +84,12 @@ For asymmetric pocket designs with simple geometry, use `references/simple-pocke
 - Inspect PDF with vision_analyze for layout errors
 - Test print alignment with registration marks
 
+## Wallet Patterns (bifold)
+- Closed seam path (perimeter loop): punch n = round(L/pitch) holes, NO +1 endpoint (a closed loop has no endpoints). Verify seam length against formula: 2*(W-4*SEAM) + 2*(H-4*SEAM) + 2*pi*SEAM for a rounded rect (arcs cut 2*SEAM per side, not 1*SEAM).
+- Polylines must be continuous: after building any outline/seam path, assert max segment length <= longest straight edge; a big max segment means an arc was drawn from the wrong center/angles (classic: top-right rounded corner is 0-90 deg, NOT 270-360; zigs appear when reusing bottom-corner angles).
+- Stacked-piece wallets (liner + 3 stepped card pockets on each half): punch ALL layers through one body markup — pieces don't need mirrored hole sets, they share the template. Bill sleeve separation: two compartments (one per half) via liner 'mouth' cutouts; a vertical divider cannot fit a bill folded once (78.5mm > half width).
+- Page layout: place pieces bottom-up on a fixed grid WITHOUT height compensation offsets; verify no piece top exceeds page height. When pixel-verifying renders, mask annotation text/arrows precisely or expect +/-2 component miscounts.
+
 ## Related Skills
 
 - `pdf`: PDF manipulation and form generation
