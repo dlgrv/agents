@@ -85,6 +85,12 @@ For asymmetric pocket designs with simple geometry, use `references/simple-pocke
 - Test print alignment with registration marks
 
 ## Wallet Patterns (bifold)
+- Wallet with card/bill pockets: seam must be U-shaped (bottom+sides), TOP OPEN. A closed perimeter seam seals the wallet shut — nothing can be inserted. The wallet v1 had exactly this bug.
+- EVERY piece carries its own hole marks matching its position on the body; LEFT and RIGHT halves need MIRRORED hole sets (mirror x -> piece_width - x, not body_width - x). One shared mark = wrong-side holes.
+- Keep ALL text (titles, dims) ≥5 mm from sheet edges: printers clip 3-5 mm. Cutting geometry can sit closer.
+- Cards fit a bill-height bifold ONLY horizontally (card 85.6 long side along pocket width); vertical (88.6 with leather) exceeds 79 mm closed height. State card orientation in instructions explicitly.
+- Instruction/schema drawings: never fill polygons (fc="none" everywhere) — fills kill label contrast and waste toner.
+- Bill divider wall doesn't work: folded bill half-height ≈ 78.5 mm > any interior pocket half. Use two bill compartments (behind each card stack) instead.
 - Closed seam path (perimeter loop): punch n = round(L/pitch) holes, NO +1 endpoint (a closed loop has no endpoints). Verify seam length against formula: 2*(W-4*SEAM) + 2*(H-4*SEAM) + 2*pi*SEAM for a rounded rect (arcs cut 2*SEAM per side, not 1*SEAM).
 - Polylines must be continuous: after building any outline/seam path, assert max segment length <= longest straight edge; a big max segment means an arc was drawn from the wrong center/angles (classic: top-right rounded corner is 0-90 deg, NOT 270-360; zigs appear when reusing bottom-corner angles).
 - Stacked-piece wallets (liner + 3 stepped card pockets on each half): punch ALL layers through one body markup — pieces don't need mirrored hole sets, they share the template. Bill sleeve separation: two compartments (one per half) via liner 'mouth' cutouts; a vertical divider cannot fit a bill folded once (78.5mm > half width).
