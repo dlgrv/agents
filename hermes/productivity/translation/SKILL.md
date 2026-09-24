@@ -35,4 +35,14 @@ description: Use when translating books/docs or reviewing translations.
 - When verifying byte-faithful preservation (citation lines, DOIs, etc.), strip field labels and leading whitespace before comparison — source uses `：`, translation uses `:`; raw colon-split comparison creates false positives.
 - Always run verification scripts BEFORE committing — manual counts are error-prone; grep the source for actual item/heading/tag/doi counts and match against translation, never trust stated counts.
 
+## verify.py number-check fixes (HTLB)
+
+When fixing number parsing in `tools/verify.py` (norm_numbers: thousands/decimal separators, scale words, ranges):
+
+1. **A/B corpus diff is the gate, not unit tests.** Before editing, run verify across all `book/{ru,en,es}/*.md` chapters and save per-chapter FAIL/WARN counts; re-run and diff after the edit. Unit tests do not catch a rule that fixes one case but flips a real chapter from OK to FAIL — the corpus diff does (this caught an ES regression unit tests missed).
+2. **Corpus census before ambiguity decisions.** For an ambiguous token form (comma-numbers like `1,134`), grep the corpus for that pattern's contexts per language — never decide from grammar intuition or copy a rule between language branches. Corpus facts: **ES body comma = decimal** (thousands use space «25 871»; comma-thousands occur only in «- Fuentes:» source-quote lines, which the number check excludes); **RU comma-groups = thousands** («1,040 человек», «44,573»; ratios use a dot «1.134»).
+3. **Distributive ranges**: clone a scale word back to the range's first end («100,000 to 1 million») only when the bare ends are of compatible magnitude (same order); otherwise you fabricate phantom values.
+4. **expectedFailure ledger**: adversarial agents file found-but-unfixed bugs as `@unittest.expectedFailure`; after fixing one, strip the marker from the now-passing tests in the same commit — leftover markers silently mask regressions.
+5. **Verify delegated commits**: after a subagent reports done, check `git log`/`git status` yourself — they sometimes forget to commit.
+
 GitHub mechanics (fork, issues, PRs) → `github` skill.
