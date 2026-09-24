@@ -61,3 +61,20 @@ note(ax, sub, (0.5, -0.26), color=MUTED, fs=13.5, style="italic")  # sub-caption
 **Problem:** Text placed directly on curves becomes unreadable; leader lines crossing whitespace cause clutter.
 
 **Fix:** Place annotations in empty quadrants with leader lines only when necessary. For computed values (e.g., "пик ≈ 0.39"), add a white background rect if it overlaps data.
+
+## Subagent dispatch discipline (figure/visual tasks)
+
+- **A subagent given qualitative-only instructions stalls.** Dispatches framed as "analyze and fix the overlap" produced transcripts of geometric deliberation with ZERO commits — twice in a row, different tasks. The dispatch context must contain: exact file paths, the element to move (line/selector), old→new coordinates, and the verification command. If you cannot supply those numbers yet, compute them yourself first — or do the edit yourself instead of delegating.
+- **Verify a delegated background task's claims with git, not the summary.** After a subagent reports "committed and pushed", run `git status --short` + `git log --oneline -N` in the target worktree before telling the user anything shipped — a stalled child's self-report says "done" with an empty worktree.
+- **A stalled/duplicate-dispatch cleanup:** before re-dispatching a failed task, confirm the first attempt left nothing behind (`git status --short` empty, no stray branches/commits) so the retry starts from a clean base.
+
+## Cosmetic edits to existing SVGs (no generator)
+
+Some merged figures have NO generator script in repo history — do not burn time searching for one. Hand-edit the SVG XML directly with patch:
+
+- **Compute geometry arithmetically, not by eye.** A label is `<g id="text_N" transform="translate(x y)">`; its width ≈ the last tspan's x offset. Markers are `<use x= y=>` plus half the symbol size from `<defs>` (~±5 units). Write out the text's bbox and the nearest markers/line as numbers BEFORE choosing a shift; shift only the group's `translate`, never tspans.
+- **Leader lines** from a floating annotation to its data point: add a `<line>` with stroke #666 and the same stroke-width as the file's tick marks.
+- **Regenerate the PNG twin with sharp** (already a repo dependency): `node -e "require('sharp')('f.svg',{density:D}).png().toFile('f.png')"` — pick D so PNG pixel size matches the original PNG-to-viewBox ratio.
+- **Delegating to a subagent requires ready-made numbers.** An abstract task like «подвинь текст, чтобы не перекрывалось» sends the model into endless geometric deliberation — zero commits, verified twice. Either compute the exact from→to coordinates and offsets yourself and hand them over, or skip delegation and edit it yourself.
+- **Branch topology for figure fixes:** cosmetic fixes to already-merged figures go on a fresh branch off main in their own worktree; new figures for articles living on a feature branch go into that same feature branch's worktree. Never mix the two in one branch.
+- **Worktree for figure work needs the full toolchain** — `npm ci` (sharp etc.), then `node scripts/build-blog-pages.mjs` + `npm run check` before pushing.
