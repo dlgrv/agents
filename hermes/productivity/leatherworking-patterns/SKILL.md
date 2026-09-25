@@ -164,9 +164,25 @@ When debugging complex wallet patterns, use independent validation to avoid blin
 - `pdf`: PDF manipulation and form generation
 - `product-price-monitor`: Track material costs for leather projects
 
+## AirTag Donut Pattern
+
+For specialized circular AirTag holders, see the complete workflow guide at `references/airtag-donut-workflow.md`. This covers:
+
+- Circular geometry with grip calculations (15.4% perimeter compression)
+- 24-hole stitch grid with 5.11 mm pitch
+- Automated test suite (23/23 tests)
+- Vector and pixel validation for PDF accuracy
+- Assembly instructions for wallet and laptop sleeve integration
+- Common pitfalls and troubleshooting guide
+- Integration patterns for different use cases
+
+The pattern uses skin tension grip (no glue/velcro) and is designed as a single piece that attaches to existing leather goods.
+
 ## Automated Validation Scripts
 
 - `references/bifold-wallet-audit.py`: Comprehensive geometry and print margin validation for wallet patterns
 - `references/wallet-test-suite.py`: Full test suite for wallet pattern generation (coverage: 70+ tests including hole alignment, seam length, pocket usability, scale accuracy)
 - `references/multi-tier-wallet-audit.py`: Automated audit for complex multi-tier wallet patterns with center seams and independent validation
 - `references/multi-tier-debugging-workflow.md`: Systematic debugging workflow for resolving critical issues in complex wallet patterns
+- `references/test-airtag-donut.py`: Complete test suite for AirTag donut patterns (23 tests covering parameters, hole grid, PDF accuracy, and assembly)
+- `references/airtag-donut-workflow.md`: Complete workflow for AirTag donut pattern generation with troubleshooting guide
