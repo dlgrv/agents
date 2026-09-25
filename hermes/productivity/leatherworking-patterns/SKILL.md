@@ -99,6 +99,36 @@ For asymmetric pocket designs with simple geometry, use `references/simple-pocke
 - Page layout: place pieces bottom-up on a fixed grid WITHOUT height compensation offsets; verify no piece top exceeds page height. When pixel-verifying renders, mask annotation text/arrows precisely or expect +/-2 component miscounts.- **Multi-page patterns on one sheet:** for items like bifolds with many components, use a single A3 sheet (42×29.7 cm) not split A4 pages. Position all pieces with ≥3mm margins from edges (printers clip 3–5mm). Use pixel-level checks (numpy array of render) to confirm all content lies within safe zones.
 - **Thread consumption calculation:** For stitching, thread length ≈ 3.5 × total seam length (accounting for knots, backstitching, and waste). Include a note on pattern PDF with estimated thread usage and assembly time. **Pitfall:** Underestimating thread length leads to mid-project stops; overestimation wastes material. Use actual stitch pitch (not just edge distance) to compute total holes and multiply by pitch × 3.5 for realistic estimate.
 
+## Fold/Cut Patterns (No-Sew Wallets)
+
+For wallets made from a single piece of leather with no stitching (fold/cut designs):
+
+- **Tandy Stitchless Minimalist Wallet**: Classic fold/cut pattern from Tandy Leather. One piece, 3-4 oz vegetable tanned cowhide, folded along 3 main creases + 2 diagonal gouge lines, secured with one snap button. PDF pattern available at https://leathercraftlibrary.storage.googleapis.com/Archives/PDFs/Minimal-Wallet-Pattern.pdf. Validate with `pypdf` and `vision_analyze` to confirm fold lines and snap button holes.
+- **Sailrite Wrap Wallet**: Similar fold/cut design but uses rivets instead of snaps. Pattern available at https://www.sailrite.com/leather-wallet-pattern. Requires rivet installation tools.
+- **Origami-style wallets**: Complex multi-fold designs that create pockets through folding alone. These often require precise scoring/fold lines and may use decorative stitching only for aesthetics, not function.
+
+**Key differences from sewn patterns:**
+- No seam holes — fold lines and snap/rivet holes only
+- Gouge lines (score lines on the back) for clean folding
+- Single piece layout with fold indicators
+- Button/rivet placement critical for functionality
+
+**Validation workflow for fold/cut patterns:**
+1. Download PDF pattern
+2. Convert to PNG with `pymupdf` for visual inspection
+3. Use `vision_analyze` to identify:
+   - Fold lines (dashed or dotted lines)
+   - Button/rivet hole positions
+   - Single-piece contour (no separate panels)
+   - Gouge lines (diagonal scoring lines on back)
+4. Verify dimensions match expected wallet size
+
+**Common pitfalls:**
+- Misinterpreting fold lines as sewing lines
+- Missing gouge line indicators (critical for clean folds)
+- Incorrect button hole placement (causes misalignment when folded)
+- Assuming all "minimalist wallet" patterns are no-sew (many use hidden stitching)
+
 ## Multi-Tier Wallet Patterns
 
 For wallets with multiple tiers (e.g., 3-tier card holder with stepped pockets):
