@@ -13,7 +13,19 @@ metadata:
 
 # HTLB Translation
 
-README policy (fork dlgrv/HowToLiveBetter): `README.md` = English primary (from translation/en onward), `README.zh.md` = renamed Chinese original, `README.ru.md` = Russian; all three linked via a Languages: line. Commit 8126ee6. Workflow
+## Repo architecture (2026-09-26)
+
+- **Repo**: `dlgrv/HowToLiveBetter` — English-primary fork of `eternity4719/HowToLiveBetter`.
+- **CN source**: `book/*.md` — read-only, synced from upstream via `make sync-upstream` (see `AGENTS.md`, `docs/upstream-sync.md`).
+- **Translations**: `book/{ru,en,es}/NN-slug.md` — one file per chapter.
+- **Pipeline entry**: `make help` lists all commands. Topology: `pipeline.yaml`.
+- **Status**: `translations.json` — single source of truth. `waves.json` — wave plan (1-3 chapters each).
+- **Run state**: gitignored — `run/`, `tools/digest/`, `tools/.status/`, `tools/runs/`.
+- **Tools CLI**: `--json` for structured output. Exit codes: 0=pass, 1=FAIL, 2=WARN.
+- **Commit policy**: branch → MR → squash-merge to `main`. Never push directly to `main`.
+- **AGENTS.md** is the first file an AI agent should read — repo rules, not content rules.
+
+README policy: `README.md` = English primary, `README.zh.md` = renamed Chinese original, `README.ru.md` = Russian, `README.es.md` = Spanish; all linked via a Languages: line.
 
 ## When to Use
 
@@ -37,9 +49,12 @@ Each chapter is split into units by `tools/digest.py`. Units are stored in `/roo
 ```bash
 # Prepare run directory for a chapter (e.g. chapter 16)
 cd ~/github/HowToLiveBetter
-mkdir -p /root/htlb-run/16/units
-cp tools/digest/16/units/*.md /root/htlb-run/16/units/
-for n in 00 01 02 03 04 05 06 07; do echo "§TAG§" >> /root/htlb-run/16/units/$n.md; echo "§SRC§" >> /root/htlb-run/16/units/$n.md; done
+make digest CH=16
+# Units land in tools/digest/16/units/
+# Copy to working dir and append §TAG§/§SRC§:
+mkdir -p run/ru/16/units
+cp tools/digest/16/units/*.md run/ru/16/units/
+for f in run/ru/16/units/*.md; do echo '§TAG§' >> "$f"; echo '§SRC§' >> "$f"; done
 ```
 
 ### Unit File Structure
@@ -64,7 +79,7 @@ Translate each unit incrementally. Each unit must be written to its file immedia
 # - §TAG§ and §SRC§ lines (placeholders, leave untouched)
 
 # Write translated unit back to file immediately
-write_file /root/htlb-run/16/units/01.md "translated content...\n\n§TAG§\n§SRC§"
+write_file run/ru/16/units/01.md "translated content...\n\n§TAG§\n§SRC§"
 ```
 
 ### Pilot Wave Task Contract (2026-09-23)
@@ -135,7 +150,7 @@ When all units of a chapter are translated, use `assemble.py` to inject sources 
 
 ```bash
 cd ~/github/HowToLiveBetter
-python3 tools/assemble.py /root/htlb-run/16
+python3 tools/assemble.py 16 run/ru/16 book/ru/$(ls book/ru/ | grep '^16-')
 ```
 
 This script:
@@ -632,7 +647,7 @@ print('New units:', new_units)
 grep -r "../docs/" book/{ru,en,es}/ | cut -d: -f1 | sort | uniq
 # Repair in run units before assembly
 for lang in ru en es; do
-  for p in /root/htlb-run-$lang/02/units/*.md; do
+  for p in run/$lang/02/units/*.md; do
     sed -i 's#\.\./docs/#\.\./\.\./docs/#g' "$p"
   done
 done
@@ -655,21 +670,21 @@ done
 for lang in ru en es; do
   for f in book/$lang/[0-9][0-9]-*.md; do
     ch=${f:10:2}
-    mkdir -p /root/htlb-run-$lang/$ch/units
+    mkdir -p run/$lang/$ch/units
     python3 -c "
 import re, os
 with open('$f', encoding='utf-8') as t:
     parts = re.split(r'(?m)^(?=### \\d+\. )', t.read())
     header, items = parts[0], parts[1:]
-    os.makedirs('/root/htlb-run-$lang/$ch/units', exist_ok=True)
-    open('/root/htlb-run-$lang/$ch/units/00.md', 'w', encoding='utf-8').write(header.strip() + '\\n')
+    os.makedirs('run/$lang/$ch/units', exist_ok=True)
+    open('run/$lang/$ch/units/00.md', 'w', encoding='utf-8').write(header.strip() + '\\n')
     for it in items:
         nn = int(re.match(r'### (\\d+)\\.', it).group(1))
         body = re.sub(r'(?m)^<!-- 成本标签.*-->\\n', '', it.rstrip())
         body = re.sub(r'(?m)^- (?:Источники|Sources|Fuentes):.*\\n?', '', body)
         lines = body.splitlines()
         unit = lines[0] + '\\n§TAG§\\n' + '\\n'.join(lines[1:]).strip('\\n') + '\\n\\n§SRC§\\n'
-        open(f'/root/htlb-run-$lang/$ch/units/{nn:02d}.md', 'w', encoding='utf-8').write(unit)
+        open('run/$lang/$ch/units/{nn:02d}.md', 'w', encoding='utf-8').write(unit)
     print(f'$lang $ch: {len(items)} units restored')
 "
 done
@@ -680,7 +695,7 @@ done
 for lang in ru en es; do
   for f in book/$lang/[0-9][0-9]-*.md; do
     ch=${f:10:2}
-    python3 tools/assemble_$lang.py $ch /root/htlb-run-$lang/$ch /tmp/recovered-$lang-$ch.md
+    python3 tools/assemble.py $ch run/$lang/$ch /tmp/recovered-$lang-$ch.md
     python3 tools/verify.py $ch --lang $lang --file /tmp/recovered-$lang-$ch.md
   done
 done

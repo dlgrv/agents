@@ -14,6 +14,10 @@ metadata:
 
 End-to-end validation for translation pipelines, combining automated judge review, golden set testing, and expert adversarial evaluation. Used for HTLB project pipeline v2.
 
+## Repo context (2026-09-26)
+
+Quality tools live under `tools/validate/` in `dlgrv/HowToLiveBetter`. Repo orchestration: `pipeline.yaml`, `Makefile`, `translations.json`, `waves.json`, `AGENTS.md`. See `htlb-translation` for overall workflow.
+
 ## Scope
 
 - **Task 1:** Blind judge validation (golden set)
@@ -64,7 +68,7 @@ python3 tools/validate/judge_blind_run.py --subset tools/validate/results/golden
 **Pitfalls:**
 - **Concurrent run protection**: Always use `--workers` to avoid file race conditions; two concurrent runs into the same outdir corrupt results (see flock guard in judge_blind_run.py)
 - **Resume safety**: Error files (`{"error":...}`) are not counted as valid; only files with `decoded` field count as completed
-- **Key export**: ZAI_API_KEY must be exported from /root/.hermes/.env before running (judges use z.ai GLM-5.3-Flash)
+- **Key export**: ZAI_API_KEY or equivalent must be available (check `.env` in repo root). (judges use z.ai GLM-5.3-Flash)
 - **Human judge comparison**: After blind run, calculate κ between judge and human ratings to establish inter-rater reliability
 - **Stale verdicts**: Always archive v1 judge verdicts before v2 runs (they reference old manifest); move `golden_verdicts_batch*.json` to `golden_verdicts_v1_archive/`
 - **Subset randomness**: Use fixed random seed (e.g., 77) for reproducible markup subsets

@@ -32,10 +32,7 @@ HTLB (HowToLiveBetter) is a Chinese self-help book translated into multiple lang
 
 ## Wave Structure
 
-- **W1**: Fresh translation of chapters 2-31 (excluding chapters with existing translations)
-- **W2**: Fresh translation of chapters 32-33 + standalone docs
-- **W3**: Revision of existing units in chapters 10, 14, 15, 16, 17, 18, 19, 22, 24, 25, 26, 27, 28, 29, 32
-- **Language support**: RU, EN, ES for each wave/chapter combination
+Waves are defined in `waves.json` (repo root). 1-3 chapters per wave: 16 fresh waves + 8 revise waves. Load `waves.json` for exact chapter lists.
 
 ## Language Number Formatting Rules
 
@@ -187,8 +184,8 @@ Each translation task follows a standardized template:
 
 ## Reference Files
 
-- **Sample translations**: `/root/htlb-run-{lang}/{chapter}/units/05.md` (for formatting reference)
-- **Source digest**: `/root/github/htlb-ru/tools/digest/{chapter}/units/NN.md`
+- **Sample translations**: `run/{lang}/{chapter}/units/05.md` (for formatting reference)
+- **Source digest**: `tools/digest/{chapter}/units/NN.md`
 - **Task specifications**: `/tmp/wave_specs.json`
 - **Unit counts**: `/tmp/zh_counts_head.json`
 - **Alignment maps**: `/tmp/align_map.json` (requires validation against actual content)
@@ -243,8 +240,8 @@ Each translation task follows a standardized template:
 
 ## Integration with HTLB Infrastructure
 
-- **Run directories**: `/root/htlb-run-{lang}/{chapter}/units/`
-- **Digest source**: `/root/github/htlb-ru/tools/digest/{chapter}/units/`
+- **Run directories**: `run/{lang}/{chapter}/units/`
+- **Digest source**: `tools/digest/{chapter}/units/`
 - **Verification tools**: `tools/verify.py`, `tools/assemble_{lang}.py`, `tools/wave_pipeline.py`
 - **Deployment**: Copy to `book/{lang}/` with status lines and back-links
 - **Repository management**: Commit to fork branches with descriptive messages

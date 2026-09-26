@@ -17,11 +17,11 @@ description: HTLB Spanish translation workflow and conventions.
 ## Procedure
 
 1. **Stage chapter 32 and docs** if missing:
-   - Chapter 32: 12 units in `/root/htlb-run-es/32/units/` (00.md intro, 01-11.md units)
-   - Standalone docs: `/root/htlb-run-es/docs/` (Home-Emergency-Kit.md, What-Licenses-A-Platform-Needs.md, Should-You-Stop-To-Help-A-Stranger.md, Is-Marriage-Worth-It.md)
+   - Chapter 32: 12 units in `run/es/32/units/` (00.md intro, 01-11.md units)
+   - Standalone docs: `run/es/docs/` (Home-Emergency-Kit.md, What-Licenses-A-Platform-Needs.md, Should-You-Stop-To-Help-A-Stranger.md, Is-Marriage-Worth-It.md)
 2. **Delegate translation** — one subagent per chapter (25-31), one for ch32, one for docs (4 files). Each subagent follows strict unit translation rules (see below).
 3. **Verify with assemble.py + verify.py**:
-   - `python3 tools/assemble_es.py <chapter> /root/htlb-run-es/<chapter> book/es/out-<chapter>.md`
+   - `python3 tools/assemble.py <chapter> run/es/<chapter> book/es/out-<chapter>.md es`
    - `python3 tools/verify.py <chapter> --lang es --file book/es/out-<chapter>.md`
    - Verify: assemble byte-identical, verify OK (numbers lost=0, no extra items)
 4. **Deploy to book/es/**:
