@@ -209,6 +209,8 @@ def create_cyrillic_pdf(output_path):
 - **Markdown parsing**: Handle `&`, `<`, `>` escaping in HTML conversion
 - **Table borders**: Set explicit TableStyle for professional appearance
 - **Leading values**: Too low causes text clipping, too high wastes space
+- **Code block overflow**: Long code lines (especially URLs) may exceed available width. Break them manually or use `Preformatted` with automatic wrapping.
+- **Multi-file packages**: When building PDFs from multiple markdown files, ensure consistent font registration across all files.
 
 ## Verification
 
@@ -225,3 +227,40 @@ Use this skill with the main `pdf` skill when:
 - Creating professional reports with Russian content
 - Building tables with long Russian descriptions
 - Ensuring PDF compatibility across different systems
+
+## Multi-File Package Building
+
+For assembling PDFs from multiple markdown files (research reports, audit documents, instruction packages), use the `scripts/build_package_pdf.py` helper. It:
+- Combines multiple MD files into one PDF with part headers
+- Handles code block overflow by breaking long lines
+- Applies consistent styling across all sections
+- Includes automatic footer with page numbers
+
+Example:
+```python
+from scripts.build_package_pdf import build_package_pdf
+
+sources = [
+    "/path/to/research.md",
+    "/path/to/audit.md",
+    "/path/to/instruction.md"
+]
+parts = [
+    ("ЧАСТЬ I. Исследование", "#7a1010"),
+    ("ЧАСТЬ II. Аудит", "#7a1010"),
+    ("ЧАСТЬ III. Инструкция", "#7a1010")
+]
+build_package_pdf(sources, "/output/package.pdf", parts)
+```
+
+## Verification Scripts
+
+Use `scripts/check_pdf_layout.py` to verify PDF quality:
+```bash
+python scripts/check_pdf_layout.py package.pdf
+```
+Checks:
+- All expected content present
+- Code blocks don't overflow page width
+- File size reasonable
+- Page count matches expectations
