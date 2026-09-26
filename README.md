@@ -82,6 +82,7 @@ subfolders, each pinned to the upstream commit it was copied from.
 | image-to-code | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) `skills/image-to-code-skill` | see upstream | `ccbc156` |
 | omo-frontend (local build) | [code-yeongyu/oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) — SKILL.md из `packages/skills-loader-core/.../frontend`, references из `packages/shared-skills/skills/frontend/references` (design/designpowers/perfection); Layer A taste-файлы — симлинки на скиллы из этого хаба; брендовые Layer B (Open Design) — заглушки | see upstream | local |
 | drawio-skill | [Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) `skills/drawio-skill` | MIT | `cfe6131` |
+| improve-agent-harness-token-efficiency | [X: @ericzakariasson](https://x.com/ericzakariasson) — промпт из твита (Cursor learnings), не репо; зеркало [telegra.ph](https://telegra.ph/EHkonomim-tokeny-09-25) | see author | tweet (transcribed) |
 
 ## Update a skill from upstream
 
