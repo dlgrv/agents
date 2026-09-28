@@ -27,6 +27,7 @@ metadata:
   Reminders, Birthdays, Праздники России, Siri Suggestions) is
   service-generated — never write events there.
 - Duration unspecified → 1 hour; the user states exceptions explicitly.
+- «Английский» (his English lesson) → 1.5 hours by default.
 - Local tool calls are one event per tool_call — batching several
   create_event entries into one call is rejected.
 
