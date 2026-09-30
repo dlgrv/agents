@@ -88,6 +88,41 @@ Run: `python3 references/macbook-topload-sleeve.py`
 
 For asymmetric pocket designs with simple geometry, use `references/simple-pocket-pattern.py`.
 
+## Document Folder/Envelope Patterns
+
+For leather document folders and envelopes (A4 paper storage), use a single-piece design with a bottom fold for structural integrity:
+
+- **One-piece construction:** Create a single rectangular piece with a bottom fold line. The fold becomes the bottom of the assembled folder, eliminating the need for a separate back panel.
+- **Paper capacity calculation:** Always calculate the interior width to accommodate paper thickness. For 200 sheets of 80 g/m² A4 paper (stack height ~2.0 cm), interior width should be at least 23.2 cm (paper 21.0 cm + stack 2.0 cm + clearance 0.2 cm). **Pitfall:** Assuming interior width equals paper width leads to insufficient capacity; always add stack height to paper dimensions.
+- **Flap design:** Add a top flap (6.0 cm height) that covers the stack when closed. The flap should be positioned so that when closed, it overlaps the paper stack by 4-5 cm for secure closure.
+- **Button placement:** Place the button on the flap, 2.5 cm from the free edge. The corresponding button socket should be positioned 3.5 cm above the bottom fold line (which becomes the top edge of the front panel when assembled). This ensures proper alignment when the folder is closed.
+- **Stitching layout:** Use two vertical seams (one on each side) running from the bottom fold line to the base of the flap. Do NOT stitch the top flap edge, bottom fold line, or paper entry edge. **Pitfall:** Stitching the top flap edge prevents it from functioning as a closure; the flap must remain free to fold over the paper.
+- **Hole alignment:** For two-panel designs (front and back), ensure hole sets are mirror images across the fold line. For one-piece designs with bottom fold, ensure holes on the front and back panels align when folded by mirroring y-coordinates relative to the fold line.
+- **Interior dimensions:** Calculate interior height as panel height minus seam allowance. For a panel height of 31.7 cm, interior height should be 30.6 cm after 1.1 cm total seam allowance (0.55 cm per side). This provides sufficient depth for A4 paper (29.7 cm) with 0.9 cm of space above the paper.
+
+**Example workflow:** Use `references/document-folder-a4-v2.py` to generate a complete one-piece A4 document folder pattern with:
+
+- Single-piece layout (24.3 cm × 69.4 cm)
+- Bottom fold line at 31.7 cm (becomes the bottom of the assembled folder)
+- Top flap (6.0 cm) with button placement
+- Two vertical seams (front and back panels)
+- Stitch hole guides with 5 mm spacing
+- Mirror hole alignment across fold line
+- Interior dimensions calculated for 200 sheets of 80 g/m² paper
+
+Run: `python3 references/document-folder-a4-v2.py`
+
+Output: PDF pattern with flat layout and folded assembly view for visual verification.
+
+## Validation for Document Folders
+
+- Verify interior width accommodates paper stack: interior_width >= paper_width + stack_height + clearance
+- Check that flap overlap is sufficient: flap_height - (interior_height - paper_height) >= 4.0 cm
+- Confirm button alignment: button socket position + flap_height = button position + fold_line_offset
+- Validate hole alignment: holes on front and back panels should align when folded (mirror y-coordinates across fold line)
+- Check seam path: only stitch the two vertical sides; do not stitch top flap, bottom fold, or paper entry edge
+- Verify scale: 1 cm in drawing = 39.37 pixels in output (fig.dpi = 100)
+
 ## Verification
 
 - Check all pages are exactly 29.7 x 21.0 cm using pypdf
