@@ -59,6 +59,7 @@ Generate precise PDF patterns for leather goods (sleeves, wallets, bags, cases) 
 - **Finger notch depth:** User may prefer shallow notches for easier insertion. Always clarify notch depth: 6 mm (shallow, wide opening) vs. 10 mm (deep, semi-circle). Use constants `NOTCH_DEPTH` and `NOTCH_OPENING` for clarity, and update the visual annotation to show actual depth. **Pitfall:** Shallow notches with 6mm depth require a larger opening (24mm) to maintain usability, while deep notches use 20mm opening. Always calculate notch radius as ρ = (opening²/4 + depth²)/(2×depth) to ensure the arc geometry matches the intended depth.
 - **Seam path direction:** When generating arc segments for notches or curves, ensure the arc direction matches the contour flow. Downward-arching notches should be drawn from bottom to top (through the deepest point), not top to bottom, to avoid jagged geometry in the PDF output.
 - **Corner radius matching:** For realistic design, match the corner radius of the leather pattern to the actual object's corners (e.g. MacBook Pro 16" uses ~15mm radius). Use a single radius constant for both panel corners and finger notch to maintain design consistency and user preference for unified aesthetics. **Pitfall:** Apple doesn't publish corner radii in specifications; research from third-party templates and physical measurements shows newer square-body laptops use ~15mm radius, while older models use 11-12mm. Always verify against actual device if possible.
+- **Top-loading entry design:** For cases where the device enters from the wide side (top edge), keep the top edge straight with 90° corners and no rounding. This creates a clean entry without unnecessary curve complexity. **Pitfall:** When switching from side-loading to top-loading, ensure that the top edge remains straight and only the bottom corners retain radius. Users often expect clean, straight entry edges for easy device insertion, while bottom corners can remain rounded for comfort and fit. **Fix:** Modify the outline function to use 90° angles at the top corners and only apply radius to bottom corners, maintaining the same overall panel dimensions.
 
 ## Example: MacBook Leather Sleeve Pattern
 
@@ -74,6 +75,16 @@ Use the ready-to-run script `references/pocket-sleeve-pattern.py` to generate a 
 Run: `python3 references/pocket-sleeve-pattern.py`
 
 Output: PDF patterns for A2 (both panels), A3 (one panel per page), or A4 (single panel) ready for printing and assembly.
+
+For top-loading designs with straight top edge (90° corners) and rounded bottom corners, use `references/macbook-topload-sleeve.py`. This pattern:
+
+- Single panel design (cut ×2 for front and back)
+- Straight top edge with 90° corners for clean device entry
+- Rounded bottom corners (R15mm) for comfort
+- Finger notch at top center
+- A3 output with 1:1 scale verification
+
+Run: `python3 references/macbook-topload-sleeve.py`
 
 For asymmetric pocket designs with simple geometry, use `references/simple-pocket-pattern.py`.
 
