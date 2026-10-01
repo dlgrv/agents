@@ -60,6 +60,13 @@ Generate precise PDF patterns for leather goods (sleeves, wallets, bags, cases) 
 - **Seam path direction:** When generating arc segments for notches or curves, ensure the arc direction matches the contour flow. Downward-arching notches should be drawn from bottom to top (through the deepest point), not top to bottom, to avoid jagged geometry in the PDF output.
 - **Corner radius matching:** For realistic design, match the corner radius of the leather pattern to the actual object's corners (e.g. MacBook Pro 16" uses ~15mm radius). Use a single radius constant for both panel corners and finger notch to maintain design consistency and user preference for unified aesthetics. **Pitfall:** Apple doesn't publish corner radii in specifications; research from third-party templates and physical measurements shows newer square-body laptops use ~15mm radius, while older models use 11-12mm. Always verify against actual device if possible.
 - **Top-loading entry design:** For cases where the device enters from the wide side (top edge), keep the top edge straight with 90° corners and no rounding. This creates a clean entry without unnecessary curve complexity. **Pitfall:** When switching from side-loading to top-loading, ensure that the top edge remains straight and only the bottom corners retain radius. Users often expect clean, straight entry edges for easy device insertion, while bottom corners can remain rounded for comfort and fit. **Fix:** Modify the outline function to use 90° angles at the top corners and only apply radius to bottom corners, maintaining the same overall panel dimensions.
+- **UAG case compatibility:** When designing for laptops with protective cases (like UAG), always add the case dimensions to the laptop dimensions and include additional slack. **Pitfall:** Assuming naked laptop dimensions leads to insufficient interior space. Always calculate: interior_width >= laptop_width + case_width + thickness + slack. **Fix:** Use separate constants for laptop and case dimensions, then calculate total dimensions with appropriate slack allowances.
+- **Single-piece construction:** For sleeves with no separate back panel, use a single piece with a fold line. The fold becomes the structural back, eliminating the need for a separate panel. **Pitfall:** Forgetting to account for fold thickness in interior dimensions. **Fix:** Calculate interior dimensions as panel_height - fold_thickness - seam_allowance, not just panel_height - seam_allowance.
+- **Entry from narrow side:** When the device enters from the narrow side (height dimension), ensure the pattern width accommodates the device's width plus case and slack, while the pattern depth accommodates the device's length plus case and slack. **Pitfall:** Swapping width and depth calculations leads to incorrect device orientation. **Fix:** Use clear variable names: `DEVICE_WIDTH` (narrow side), `DEVICE_LENGTH` (long side), and ensure pattern dimensions match the intended orientation.
+- **Button placement on flap:** Position buttons on the flap edge, not on the flap face, to ensure proper alignment when closed. **Pitfall:** Placing buttons too close to the fold line causes misalignment with the socket. **Fix:** Use a minimum distance of 2.5 cm from the flap edge to ensure proper closure alignment.
+- **Mirror hole alignment for single-piece construction:** When using a single piece folded at the bottom, holes on the left and right sides must be mirror images across the fold line. **Pitfall:** Using the same y-coordinates for both sides instead of mirroring. **Fix:** For left side holes at (x, y), use (PW-x, y) for right side holes to ensure proper alignment when folded.
+- **A2 multi-page patterns:** For patterns larger than A4, split across multiple A2 pages with registration marks. **Pitfall:** Incorrect page overlap calculation. **Fix:** Use a standard overlap of 4 cm and place registration crosses at the overlap boundaries to ensure precise alignment during assembly.
+- **Physical capacity validation:** Always verify that interior dimensions can accommodate the actual device with case and any additional items (like cables or documents). **Pitfall:** Calculating interior dimensions without accounting for stack height or item thickness. **Fix:** Test with actual device measurements and include safety margins for insertion/removal.
 
 ## Example: MacBook Leather Sleeve Pattern
 
@@ -85,6 +92,19 @@ For top-loading designs with straight top edge (90° corners) and rounded bottom
 - A3 output with 1:1 scale verification
 
 Run: `python3 references/macbook-topload-sleeve.py`
+
+For MacBook Pro 16" with UAG case (thicker and wider than naked laptop), use `references/macbook-sleeve-uag-pattern.py`. This pattern:
+
+- Single-piece design (one cut, fold at bottom)
+- Entry from narrow side (24.81 cm)
+- UAG case dimensions: 35.97 × 25.21 × 2.50 cm
+- Interior slack: +1.6 cm width (prevents jamming), +0.9 cm depth
+- Button closure on flap (2.5 cm from edge)
+- Mirror hole alignment for sewing
+- A2 PDF output with registration marks
+- Automated test suite
+
+Run: `python3 references/macbook-sleeve-uag-pattern.py`
 
 For asymmetric pocket designs with simple geometry, use `references/simple-pocket-pattern.py`.
 
@@ -113,6 +133,73 @@ For leather document folders and envelopes (A4 paper storage), use a single-piec
 Run: `python3 references/document-folder-a4-v2.py`
 
 Output: PDF pattern with flat layout and folded assembly view for visual verification.
+
+## MacBook Sleeve Patterns
+
+For MacBook and laptop sleeves, consider the following design approaches:
+
+### Single-Piece Construction with Bottom Fold
+- Use a single piece of leather with a fold line at the bottom
+- The fold creates the back panel, eliminating separate back panel
+- Interior dimensions: panel_height - fold_thickness - seam_allowance
+- Registration marks ensure precise folding alignment
+- Suitable for MacBook Pro 16" with UAG case compatibility
+
+### Two-Panel Construction
+- Separate front and back panels sewn together on three sides
+- Entry from narrow side (24.81 cm) or wide side (35.97 cm)
+- Mirror hole alignment for proper sewing alignment
+- Finger notch for easy device removal
+- Suitable for thinner cases or naked laptops
+
+### Design Guidelines
+
+#### UAG Case Compatibility
+- Always add case dimensions to laptop dimensions
+- MacBook Pro 16" + UAG: 35.57 × 24.81 × 1.68 + 0.40 × 0.40 × 0.82 = 35.97 × 25.21 × 2.50 cm
+- Include slack: +1.6 cm width (prevents jamming), +0.9 cm depth
+- Interior width >= laptop_width + case_width + thickness + slack
+- Interior depth >= laptop_length + case_length + depth_slack
+
+#### Entry Orientation
+- **Narrow side entry**: Device enters from the 24.81 cm side
+  - Pattern width: device_width + case_width + thickness + slack
+  - Pattern depth: device_length + case_length + depth_slack
+- **Wide side entry**: Device enters from the 35.97 cm side
+  - Pattern width: device_length + case_length + thickness + slack
+  - Pattern depth: device_width + case_width + depth_slack
+
+#### Button and Socket Placement
+- Button on flap: 2.5 cm from flap edge, centered horizontally
+- Socket on front panel: 5.5 cm above entry edge, centered horizontally
+- Ensure button distance from flap edge equals socket distance from entry edge
+
+#### Hole Alignment
+- **Mirror alignment**: For single-piece construction, holes on left and right sides must be mirror images across the fold line
+- **Spacing**: 5 mm between holes, 4 mm from edges
+- **Count**: Ensure even number of holes for proper pairing when panels are sewn
+- **Placement**: Place holes at both endpoints of seam paths to avoid offset
+
+#### Print Layout
+- **A2 format**: 42.0 × 59.4 cm for single-piece patterns
+- **Registration marks**: Place crosses at page overlap boundaries for multi-page patterns
+- **Overlap**: 4 cm standard overlap for A2 multi-page patterns
+- **Scale reference**: Include 10 cm reference line for manual verification
+
+**Example workflow:** Use `references/macbook-sleeve-uag-pattern.py` to generate a complete single-piece pattern for MacBook Pro 16" with UAG case:
+
+- Single-piece design (one cut, fold at bottom)
+- Entry from narrow side (24.81 cm)
+- UAG case dimensions: 35.97 × 25.21 × 2.50 cm
+- Interior slack: +1.6 cm width (prevents jamming), +0.9 cm depth
+- Button closure on flap (2.5 cm from edge)
+- Mirror hole alignment for sewing
+- A2 PDF output with registration marks
+- Automated test suite
+
+Run: `python3 references/macbook-sleeve-uag-pattern.py`
+
+See `references/macbook-sleeve-guidelines.md` for detailed design principles, calculations, and troubleshooting.
 
 ## Validation for Document Folders
 
@@ -232,3 +319,5 @@ The pattern uses skin tension grip (no glue/velcro) and is designed as a single 
 - `references/multi-tier-debugging-workflow.md`: Systematic debugging workflow for resolving critical issues in complex wallet patterns
 - `references/test-airtag-donut.py`: Complete test suite for AirTag donut patterns (23 tests covering parameters, hole grid, PDF accuracy, and assembly)
 - `references/airtag-donut-workflow.md`: Complete workflow for AirTag donut pattern generation with troubleshooting guide
+- `references/macbook-sleeve-uag-pattern.py`: MacBook Pro 16" + UAG case sleeve pattern (single-piece, entry from narrow side)
+- `references/macbook-sleeve-uag-test.py`: Test suite for MacBook UAG sleeve pattern (43 tests covering geometry, hole alignment, button placement, and print dimensions)
