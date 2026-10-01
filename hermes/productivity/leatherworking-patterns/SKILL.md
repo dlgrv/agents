@@ -316,6 +316,19 @@ When debugging complex wallet patterns, use independent validation to avoid blin
 - `pdf`: PDF manipulation and form generation
 - `product-price-monitor`: Track material costs for leather projects
 
+## MacBook Sleeve with Flap Designs
+
+For MacBook sleeves with secure flap closures, see `references/macbook-sleeve-flap-guidelines.md` for comprehensive design guidelines covering:
+
+- Single-piece construction with integrated flap
+- Button and socket placement for secure closure
+- Mirror hole alignment across fold lines
+- Wide-side vs narrow-side entry orientation
+- Print layout optimization for A2/A3 formats
+- Common pitfalls and troubleshooting solutions
+
+The guidelines include detailed dimension calculations, hole generation algorithms, and validation procedures for flap-based MacBook sleeve patterns.
+
 ## AirTag Donut Pattern
 
 For specialized circular AirTag holders, see the complete workflow guide at `references/airtag-donut-workflow.md`. This covers:
@@ -340,3 +353,6 @@ The pattern uses skin tension grip (no glue/velcro) and is designed as a single 
 - `references/airtag-donut-workflow.md`: Complete workflow for AirTag donut pattern generation with troubleshooting guide
 - `references/macbook-sleeve-uag-pattern.py`: MacBook Pro 16" + UAG case sleeve pattern (single-piece, entry from narrow side)
 - `references/macbook-sleeve-uag-test.py`: Test suite for MacBook UAG sleeve pattern (43 tests covering geometry, hole alignment, button placement, and print dimensions)
+- `references/macbook-sleeve-flap-guidelines.md`: Comprehensive design guidelines for MacBook sleeves with secure flap closures
+- `references/macbook-sleeve-testing.md`: Complete testing procedures and validation workflows for MacBook sleeve patterns
+- `references/macbook-sleeve-pattern-generator.py`: Complete script for generating MacBook sleeve patterns with configurable entry orientation and flap options
