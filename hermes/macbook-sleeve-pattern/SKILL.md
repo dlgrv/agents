@@ -45,6 +45,46 @@ Use when generating custom leather/fabric sleeve patterns for MacBook Pro laptop
      - No punch holes on top edge (for top-loading sleeves)
      - Seam holes count matches calculation (typically 180 for standard size)
 
+5. **Multi-page layout for large patterns**
+   - For patterns exceeding A3 dimensions, split across multiple A2 pages with 4 cm overlap
+   - Place registration crosses at page boundaries for precise alignment during assembly
+   - Include scale reference lines across pages for manual verification
+   - Ensure pattern continuity across pages (no gaps or overlaps in critical geometry)
+
+6. **Case compatibility handling**
+   - For laptops with protective cases (like UAG), add case dimensions to laptop dimensions
+   - Calculate interior dimensions with slack: interior_width >= laptop_width + case_width + thickness + slack
+   - Use single-piece construction with bottom fold for structural integrity
+   - Mirror hole alignment across fold line for proper sewing alignment
+
+7. **Entry orientation design**
+   - For top-loading with wide side first: pattern width = device_length + case_length + thickness + slack
+   - Pattern depth = device_width + case_width + depth_slack
+   - Ensure entry edge has straight 90° corners and no rounding for clean device insertion
+   - For entry from narrow side: swap width and depth calculations accordingly
+
+8. **Button and closure system**
+   - Position button on flap edge, 2.5 cm from free edge
+   - Position socket on front panel, aligned with button when closed
+   - Ensure button distance from flap edge equals socket distance from entry edge
+   - Use snap buttons (size 16 or 18) for secure closure
+
+9. **Automated testing**
+   - Run comprehensive test suites to validate geometry, hole alignment, and print dimensions
+   - Verify physical capacity with actual device measurements
+   - Test mirror hole alignment across fold lines for single-piece constructions
+   - Validate PDF page dimensions match target format (A2, A3, A4)
+
+10. **Assembly instructions**
+    - Print pattern at 100% scale on appropriate paper size
+    - Cut leather precisely along pattern lines
+    - Mark holes using pattern as guide
+    - Sew seams starting from bottom corners, working up
+    - Install snaps at marked positions
+    - Fold at designated fold line to create back panel
+    - Test fit with device and case
+    - Apply finish (conditioner, edge sealant)
+
 ## Pitfalls
 
 - **Thickness wrap-around**: Do not use raw MacBook height. Account for quarter-circle wrap-around of lower edge (+π×thickness/4) or sleeve will be too tight.
