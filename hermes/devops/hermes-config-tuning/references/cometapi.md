@@ -57,7 +57,10 @@ don't silently treat the smoke-test timeout as a broken endpoint.
   kimi-k3, qwen3.8-max/3.8-flash/3.5-plus with price labels, Gemini×5,
   GPT×3, DeepSeek×2), `cometapi-claude` (7 models, default claude-sonnet-5:
   fable-5-1, fable-5, opus-5, opus-4-8, sonnet-5, sonnet-4-6, haiku-4-5 —
-  refreshed 2026-09-07; fable-5-1/fable-5/sonnet-4-6 smoke-tested OK).
+  refreshed 2026-10-03: sonnet-5-5 (+thinking) and opus-5-5 (+thinking) added
+  and smoke-tested OK; sonnet-5/5-thinking, opus-5, opus-4-8 removed;
+  default = claude-sonnet-5-5. Kept: fable-5-1, fable-5, sonnet-4-6,
+  haiku-4-5-20251001).
   `kimi-k2.7-code` deliberately NOT added (thought-only, 40s+ TTFT).
 - All aux tasks pinned to `cometapi-openai/glm-5.3-flash` (14 of 15 sections
   set 2026-08-28; `auxiliary.review.*` left at default — enumerate from
