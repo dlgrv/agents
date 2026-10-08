@@ -27,28 +27,33 @@ Don't use for: one-time pricing lookups (web search is faster), or when the user
 
 ## Prerequisites
 
-- Access to Hermes' `state.db` (`~/.hermes/state.db`)
+- Access to Hermes' `state.db`: `~/.hermes/state.db` on the Mac, `/root/.hermes/state.db` on the VPS
+- Cursor (if auditing editor usage): `~/Library/Application Support/Cursor/User/globalStorage/conversation-search.db`
 - Optional: provider-specific API keys for live pricing checks
 - Optional: provider dashboard access (CometAPI, Anthropic, etc.)
 
+Before writing any SQL, probe the schema — table names and column layouts differ between installs and Hermes versions:
+
+```python
+db.execute("select name from pragma_table_info('sessions')").fetchall()
+```
+
+On current local installs the `sessions` table already carries per-session sums (`input_tokens`, `output_tokens`, `cache_read_tokens`, `api_call_count`) — there is no `session_model_usage` table on macOS desktop installs. `started_at`/`timestamp` are **unix epoch floats, not ISO strings**: use `strftime('%Y-%m', started_at, 'unixepoch')`, never `substr(started_at,1,7)` — string slicing on an epoch number silently returns zero rows.
+
 ## How to Run
 
-```bash
-# Quick audit of last 7 days' usage
-terminal(command="sqlite3 ~/.hermes/state.db 'SELECT model, SUM(estimated_cost_usd), SUM(input_tokens), SUM(output_tokens), SUM(cache_read_tokens) FROM session_model_usage WHERE last_seen > strftime(\"%s\",\"now\",\-7 days\") GROUP BY model'", timeout=60)
+Monthly/daily Hermes usage (verified working query pattern):
 
-# Full usage breakdown with provider context
-terminal(command="python3 -c \"
-import sqlite3
-import json
-from collections import defaultdict
-
-db = sqlite3.connect('/root/.hermes/state.db')
-rows = db.execute('''SELECT model, billing_provider, SUM(estimated_cost_usd), SUM(input_tokens), SUM(output_tokens), SUM(cache_read_tokens) FROM session_model_usage GROUP BY model, billing_provider''').fetchall()
-for m,p,c,i,o,cr in rows:
-    print(f'{m:30} {p:15} ${c:.2f} in={i/1e6:.1f}M out={o/1e6:.2f}M cache={cr/1e6:.1f}M')
-\"", timeout=60)
+```sql
+SELECT strftime('%Y-%m', started_at, 'unixepoch') m, count(*) sessions,
+       round(sum(input_tokens)/1e6,1) inM, round(sum(output_tokens)/1e6,1) outM,
+       round(sum(cache_read_tokens)/1e6,1) cacheM, sum(api_call_count) calls
+FROM sessions GROUP BY m ORDER BY m;
 ```
+
+Interaction frequency (real user activity, not session starts): count `role='user'` rows in `messages` grouped by day — sessions overcount automated/cron work, messages reflect actual prompts.
+
+Editor (Cursor) usage: see `references/usage-data-sources.md` — Cursor's workspace `composer.composerData` keys do NOT contain per-chat data (migrated); the reliable source is `conversation-search.db`.
 
 ## Procedure
 
@@ -83,15 +88,17 @@ for m,p,c,i,o,cr in rows:
 
 | Task | Command |
 |------|---------|
-| Check 7-day usage | `sqlite3 ~/.hermes/state.db 'SELECT ... WHERE last_seen > ...'` |
-| Full usage breakdown | `python3 -c "import sqlite3; ..."` |
-| Compare API vs subscription | Calculate: `(input×rate_in) + (output×rate_out)` vs subscription fee |
+| Monthly Hermes usage | `SELECT strftime('%Y-%m', started_at, 'unixepoch'), sum(input_tokens), sum(cache_read_tokens), sum(api_call_count) FROM sessions GROUP BY 1` |
+| Prompts per day | `SELECT strftime('%Y-%m-%d', timestamp, 'unixepoch'), count(*) FROM messages WHERE role='user' GROUP BY 1` |
+| Cursor chat frequency | `conversation-search.db` → `conversations.updated_at` (see references/usage-data-sources.md) |
+| Compare API vs subscription | Calculate: `(input×rate_in) + (output×rate_out)` vs subscription fee; include cache reads |
 | Check compression settings | `hermes config get compression` |
 | Optimize context | Reduce history length, enable compression at 200k tokens |
 
 ## Pitfalls
 
-- **Subscription ≠ API access**: Claude Pro/Max cannot be used in Hermes' gateway — only in claude.com and Claude Code CLI. This is a common misconception that leads to wrong cost comparisons.
+- **Epoch timestamps**: Hermes `sessions.started_at` / `messages.timestamp` are unix epoch floats. Filter with `strftime('%s','now','-30 day')` comparisons or `strftime(..., 'unixepoch')` formatting — string functions (`substr`, `date()`) on the raw column return empty result sets, which looks like 'no usage' if you don't check.
+- **Subscription ≠ API access**: coding-plan subscriptions are endpoint-scoped, not protocol-scoped — they work in Hermes only if the plan exposes an Anthropic-compatible endpoint (e.g. Z.ai GLM Coding Plan), and editor subscriptions like Cursor's billing are separate from any provider plan being evaluated. Confirm which surface the plan actually covers before claiming it fits the user's workflow.
 - **Token inflation**: New models (Sonnet 5) may be less efficient than older ones (Sonnet 4.6) — same text = more tokens, increasing API cost.
 - **Cache read costs**: Long sessions with cached context can have massive cache-read token counts that significantly impact cost.
 - **Provider-specific quirks**: Some providers (CometAPI) offer different pricing than official APIs — always verify current rates.
