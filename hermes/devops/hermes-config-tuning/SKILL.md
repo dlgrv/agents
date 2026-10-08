@@ -82,12 +82,21 @@ never hand-edit config.yaml (a stray indent corrupts it and breaks the live gate
 - **Cache-read tokens dominate agent workloads (measured ~10× fresh input):
   a comparison that omits the cached-input rate can flip the winner.**
   Monthly projection = span total × (30 / span_days).
-- **Coding Plan vs PAYG:** Z.ai Coding Plans (Lite $18, Pro $56-80) include
-  credit quotas that reset weekly. Compare your real credit usage (not token
-  count) against plan tiers. If your usage is near the edge, PAYG is often
-  cheaper due to the rigidity of credit windows. Always model usage over
-  several billing cycles before switching — Lite may seem cheap but is often
-  insufficient for real workloads.
+- **Coding Plan vs PAYG:** Z.ai Coding Plans (Lite $18, Pro $72, Max $160) use
+  a credits system with 5-hour and weekly windows; monthly token allowance ≈
+  15–30× the fee at API rates (verify against current docs, models have
+  different credit multipliers — full GLM burns ~3× Flash's credits).
+  Compare real usage (cache-read-dominated) against the plan's weekly token
+  table before switching; heavy days can exhaust 5-hour prompt limits even
+  when monthly totals fit.
+- **Coding Plan endpoints (NOT the pay-as-you-go one):** OpenAI protocol
+  `https://api.z.ai/api/coding/paas/v4`, Anthropic protocol
+  `https://api.z.ai/api/anthropic`. The standard `zai` provider plugin targets
+  `api/paas/v4` — subscription quota is NOT consumed there. To spend plan
+  quota from Hermes, set an alias/custom provider with the coding base_url.
+  Z.ai ToS restricts plans to officially supported tools (Claude Code, Cline,
+  …) — using them in Hermes is technically fine but a ToS gray zone; tell the
+  user.
 
 ## Price-performance model selection
 
@@ -119,6 +128,27 @@ never hand-edit config.yaml (a stray indent corrupts it and breaks the live gate
 | Aux (background) calls | `auxiliary.transient_retries: 2`; each task pinned SEPARATELY via `auxiliary.<task>.provider` + `auxiliary.<task>.model` — there is NO global `auxiliary.model` key (v0.20.5 rejects it) | same |
 | Jittered backoff | Built in (`agent/retry_utils.py`): jitter, Retry-After parsing, anti-thundering-herd lock | code |
 | Retry DELAYS | NOT configurable — no config key. Hardcoded `jittered_backoff(...)` call sites in `agent/conversation_loop.py`: API errors base 5s cap 120s, empty responses base 5s cap 60s, rate limits base 2s (or server Retry-After). Shortening them = source patch (lost on `hermes update`) or upstream PR | code |
+
+## Repointing ALL traffic off a mirror provider (full migration recipe)
+
+When the user says a relay/mirror provider must be demoted to backup-only,
+check every role it occupies — the default model is only one of them:
+
+1. Enumerate usages: `hermes config get model` (default + aliases),
+   `hermes config get delegation`, `hermes config get auxiliary` (grep for
+   the provider name — there are ~14 aux tasks, 8+ may be pinned to it).
+2. Repoint each: `hermes config set auxiliary.<task>.provider <direct>` +
+   `.model <cheap-model>`; `model.default`, `model.provider`, aliases via
+   `model.aliases.<name> "<provider>/<model>"`.
+3. Add a fallback chain (top-level `fallback_providers` list in config.yaml,
+   e.g. `[{provider: <mirror>, model: <old-model>}]` — write it with the
+   venv python + PyYAML; `hermes fallback add` refuses non-TTY sessions).
+   A mirror used as the ONLY provider means zero failover — after demoting
+   it, it becomes the fallback.
+4. Verify: `hermes doctor` (aux routing line should show zero hits for the
+   old provider), then one live `hermes chat -q` smoke test.
+5. Aliases pointing at the demoted provider break silently — repoint them
+   to real providers or tell the user which are gone.
 
 ## Stability tuning recipe
 

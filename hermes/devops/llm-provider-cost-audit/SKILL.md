@@ -57,6 +57,13 @@ Editor (Cursor) usage: see `references/usage-data-sources.md` — Cursor's works
 
 ## Procedure
 
+0. **Audit cross-tool activity when asked 'will limits suffice'**: the user
+   runs multiple AI surfaces (Hermes + Cursor). Pull per-tool daily activity
+   (Hermes: `messages WHERE role='user'` per day; Cursor:
+   `conversation-search.db` `conversations.updated_at`) and report both
+   separately — average per day, active days, and peak days. Only agent
+   traffic counts against a coding plan; editor billing is separate.
+
 1. **Extract actual usage from state.db**:
    - Run the SQL queries above to get your real token consumption
    - Note which models are being used and their volumes
@@ -65,12 +72,19 @@ Editor (Cursor) usage: see `references/usage-data-sources.md` — Cursor's works
 2. **Gather current pricing**:
    - For each provider, fetch live pricing from their API or website
    - Include input, output, and cache-read rates per million tokens
-   - Note subscription plans and their token equivalents
+   - Note subscription plans and their token equivalents (Z.ai's official
+     formula: monthly plan quota ≈ 15–30× the fee at API rates; user-made
+     back-of-envelope estimates often UNDERSTATE this — check the docs)
 
 3. **Compare API vs subscription**:
    - Calculate what your usage would cost via API at current rates
-   - Compare to subscription flat fees (Pro $20, Max 5x $100, Max 20x $200)
-   - Check if subscriptions include models you use
+   - Compare to subscription flat fees, using the provider's own published
+     quota-conversion numbers where available
+   - Check if subscriptions include the models the user actually uses
+     (e.g. Z.ai plans cover the whole GLM family including top models, with
+     per-model credit multipliers — cheap models stretch the quota ~3× further)
+   - Audit DAILY activity peaks (sessions/messages per day, token spikes),
+     not just monthly totals — windowed plan limits bite on peak days
 
 4. **Analyze optimization opportunities**:
    - Context compression savings (auto-compress at 200k tokens)
@@ -98,7 +112,9 @@ Editor (Cursor) usage: see `references/usage-data-sources.md` — Cursor's works
 ## Pitfalls
 
 - **Epoch timestamps**: Hermes `sessions.started_at` / `messages.timestamp` are unix epoch floats. Filter with `strftime('%s','now','-30 day')` comparisons or `strftime(..., 'unixepoch')` formatting — string functions (`substr`, `date()`) on the raw column return empty result sets, which looks like 'no usage' if you don't check.
-- **Subscription ≠ API access**: coding-plan subscriptions are endpoint-scoped, not protocol-scoped — they work in Hermes only if the plan exposes an Anthropic-compatible endpoint (e.g. Z.ai GLM Coding Plan), and editor subscriptions like Cursor's billing are separate from any provider plan being evaluated. Confirm which surface the plan actually covers before claiming it fits the user's workflow.
+- **Subscription ≠ API access**: coding-plan subscriptions are endpoint-scoped, not protocol-scoped — they work in Hermes only via the plan's dedicated coding endpoint (e.g. Z.ai GLM Coding Plan: `api.z.ai/api/coding/paas/v4` for OpenAI protocol, `api.z.ai/api/anthropic` for Anthropic), and editor subscriptions like Cursor's billing are separate from any provider plan being evaluated. Confirm which surface the plan actually covers before claiming it fits the user's workflow.
+- **Plan quotas are windowed, not just monthly**: Z.ai plans also cap prompts per 5 hours and per week. A workload whose MONTHLY token total fits the plan can still hit the 5-hour limit on heavy days — audit daily peaks, not just monthly sums, before recommending a tier.
+- **One subscription can't cover both agent and editor**: Cursor usage belongs on its own billing; never fold editor sessions into the provider-plan fit calculation.
 - **Token inflation**: New models (Sonnet 5) may be less efficient than older ones (Sonnet 4.6) — same text = more tokens, increasing API cost.
 - **Cache read costs**: Long sessions with cached context can have massive cache-read token counts that significantly impact cost.
 - **Provider-specific quirks**: Some providers (CometAPI) offer different pricing than official APIs — always verify current rates.
