@@ -39,6 +39,17 @@ Context: Leonid is planning his own SSP + Ad Exchange (Go-only stack). Colleague
 
 There is NO mature open-source 'SSP under key' — the market is closed because the margin IS the product. The viable Go assembly is: own thin layer (admin, publisher cabinet, VAST endpoint, billing) + Prebid Server (Go, Apache-2.0) as the auction core + prebid/openrtb for protocol types. Details and per-project verdicts: references/go-oss-landscape.md
 
+## Anti-fraud evasion testing (traffic generators)
+
+When the task is making a test traffic generator (bid + VAST playback) indistinguishable from real users:
+
+- Split the traffic into TWO planes and never mix them: **S2S plane** (bid request, nurl/win notice) legitimately goes server-direct — TCP-source ≠ device.ip is market norm, proxied bids are wasted money AND wrong. **User plane** (impression pixels, tracking, VAST wrappers, media) must be consistent: request IP = device.ip, request UA = device.ua, Accept-Language = geo of exit IP.
+- Ad-fraud detection is CROSS-LAYER consistency (IP↔ASN↔geo↔language↔UA↔TLS↔behavior) plus behavioral distributions (completion rate, frequency, daypart), not single fields. Audit a generator by checking pairwise consistency of planes, not field quality.
+- Kill one-shot identity: new user.id/ifa every attempt with a shared IP pool is a textbook bot pattern. Give each profile (device+ifa+user.id+sticky IP) a lifecycle of hours with long-tail frequency; this also cuts residential-proxy cost (fewer unique IPs per volume).
+- Residential proxy economics: media is 99%+ of bytes. Save via lowest rendition choice, range requests with player-like buffer curve and early stop (players rarely fetch the full file), and 15-30% abandon profiles (simultaneously fixes suspicious 100% completion rate). Never proxy the S2S plane.
+- Perfect zeros are signals: CTR=0, error-rate=0, jitter=0, flat 24/7 traffic. Real traffic has realistic zeros AND realistic non-zeros.
+- Subagent fan-out pattern that worked: one agent inventories the generator's emitted signals from code (each signal: file:line, value source, static/random), another compiles detection signals from public sources only (MRC IVT/SIVT, OpenRTB, VAST, vendor blogs), then synthesize the gap matrix. Verbatim-verify load-bearing findings (file:line) in the main thread before reporting.
+
 ## Communication style for this user
 
 Explain in plain Russian, step by step, with concrete numbers (latencies, revshare %, timelines). ASCII diagrams of money/data flow work well. Answer the actual question ('what do we build, how does it earn') before any tooling detail.
