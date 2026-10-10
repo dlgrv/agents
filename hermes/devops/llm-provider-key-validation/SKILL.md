@@ -43,3 +43,8 @@ General rule: never validate a credential with a public/unauthenticated
 endpoint. Always exercise the authenticated code path you actually depend on.
 
 See references/openrouter.md for the full false-positive transcript and free-model notes.
+
+## Benchmarking speed
+After a key validates, measure TTFT + real tok/s with streaming SSE —
+recipe and pitfalls (usage-chunk IndexError, heartbeat lines, proxy
+buffering inflating tok/s) in `references/benchmark-speed.md`.
