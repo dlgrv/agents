@@ -111,6 +111,32 @@ look for:
   you did recover)
 - A sitemap (`/sitemap.xml`) revealing canonical URLs that may not be gated
 
+## Hard IP bans vs JS challenges — identify the wall first
+
+Before choosing a route, classify what is blocking you:
+
+- **JS challenge** (Cloudflare, Qrator): serves an obfuscated challenge
+  script, sets a short-lived cookie (`cf_clearance`, `qrator_jsr`), then
+  reloads. A real browser that waits and lets the script run can pass. Retry
+  in the browser tool with a wait before concluding you're blocked.
+- **Hard IP ban**: serves a plain 403 HTML body ("Access forbidden",
+  Qrator "Guru meditation") with NO challenge script and no cookie. No
+  client-side trick passes it — the block is on your network, not your
+  fingerprint. Don't burn attempts on UA strings, header replay, or cookie
+  crafting; go straight to fallbacks (archives, API pivot) or tell the user
+  the site must be reached from their own network/device.
+
+Before crediting a proxy as a workaround, verify it actually changes the
+egress IP — a local proxy that exits via the same address reproduces the
+same ban:
+
+```bash
+curl -s --max-time 10 https://ifconfig.me; echo
+curl -s --max-time 10 -x http://127.0.0.1:17890 https://ifconfig.me; echo
+```
+
+If both print the same IP, skip the proxy route entirely.
+
 ## Fake successes — routes that LIE
 
 These return HTTP 200 with a plausible body that is NOT the page. The script

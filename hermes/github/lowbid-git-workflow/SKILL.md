@@ -15,6 +15,8 @@ metadata:
 
 Project-specific git conventions for the **lowbid** repos — `sfsef/krutilka` (local `~/aezly/krutilka`) and `dlgrv/lowbid-ssp` (local `~/aezly/lowbid-ssp`). New lowbid repos are created under the **`dlgrv`** account — `sfsef` is a personal account, not an organization. This is NOT the general `github-pr-workflow` skill — those git/gh mechanics still apply, this skill only fixes the naming/format rules and the permission gate specific to these repos.
 
+> Code-side conventions for lowbid-ssp (structure, lint contour, test pyramid, delivery loop) live in the `programmatic-adtech` skill + the repo's `docs/CODE-STANDARD.md`; this file stays git-only.
+
 ## ⚠️ Hard gate — read first
 
 **Never create a branch, commit, or PR in this repo unless the developer explicitly asks for it in the current turn.** Writing/patching files is fine on request; committing/branching/PR-ing is not implied just because files changed. If the user asks you to "implement X" without saying "commit"/"create a branch"/"open a PR", stop after the code changes and ask, or wait for an explicit follow-up instruction. This overrides any general assumption that finishing a task means shipping a commit.
@@ -86,4 +88,5 @@ gh pr create --title "feat(lowbid-11): add parameter help tooltips on campaigns 
 - Don't reuse generic branch names like `feat/add-user-authentication` (that's the general-skill example) — always include `lowbid-<n>`.
 - Don't skip `lowbid-00` when there's no issue — an unscoped branch/commit breaks the convention's grep-ability.
 - **Commits stay local until an explicit in-turn ask — and this now includes subagent/delegation cycles.** Before dispatching an implementation subagent, put the no-commit/no-push rule verbatim into its task context: a delegated agent treated 'implement week 1' as license to commit on its own (2026-10-10), which is exactly what the hard gate exists to prevent. When a cycle IS authorized, still keep push gated: commit `feat(lowbid-NN): …` locally, push only on the user's command.
+- **Install the hook, don't just ship the script:** after landing `scripts/pre-commit`, run `chmod +x scripts/pre-commit && ln -sf ../../scripts/pre-commit .git/hooks/pre-commit` — a CI-only lint gate does not protect local commits, and an uninstalled hook is invisible until the first bad commit.
 - **Load this skill before any git/PR operation.** The format is strict and project-specific; working from memory of general conventions will produce wrong names (e.g. `refactor: desc` instead of `refactor(lowbid-00): desc`). The skill was NOT loaded when branch and PR #47 were created, and they had to be renamed post-hoc.
