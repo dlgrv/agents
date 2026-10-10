@@ -1,6 +1,6 @@
 ---
 name: programmatic-adtech
-version: 1.0.0
+version: 1.1.0
 author: hermes
 license: MIT
 description: Use when researching or building SSP/DSP/RTB ad-tech.
@@ -18,6 +18,16 @@ Use for programmatic ad-tech tasks: explaining or building SSP/DSP/Ad Exchange, 
 
 Context: Leonid is planning his own SSP + Ad Exchange (Go-only stack). Colleagues referenced Bidster/Stack (stack.bidster.net) as the demo platform and 'start with VAST/VPAID like AdFox' as the MVP scope.
 
+## lowbid-ssp project (own SSP, in progress)
+
+- Repo `dlgrv/lowbid-ssp` (private, `main`), local `~/aezly/lowbid-ssp` (sibling of `~/aezly/krutilka`). New lowbid repos go under the `dlgrv` account — `sfsef` is a personal account, not an org, so cross-account wiring is limited.
+- Approved MVP decisions: no PBS, no auction in MVP — direct campaigns + VAST tag serving first; 3 binaries (`gateway`, `consumer`, `adminctl`); Kafka (franz-go) between gateway and consumer; Postgres for money/state, ClickHouse for events (monthly partitions, TTL 90d, dedup by `bid_id`+event); React+Vite+TS frontend embedded in the Go binary via `go:embed`. prebid/openrtb is a Go library, not a service — protocol types only; PBS enters at phase 2 as a demand source + public `/openrtb2/auction`.
+- Auth decision: `gorilla/sessions` + bcrypt hashes in Postgres for MVP; GitHub OAuth (`golang.org/x/oauth2`) as a phase-2 feature flag on top of sessions. Do NOT pull Ory Kratos/Hydra or PocketBase — separate services are overkill for a handful of internal users.
+- UI: dark minimal admin modeled on Stack by Bidster; design tokens + extracted CSS bundles live in `docs/design-reference/` (DESIGN.md = token/component/section spec). Frontend stack: shadcn/ui + Tailwind v4, lucide-react icons (never hand-draw), TanStack Table, Recharts, RHF+zod; shadcn-admin as scaffold. Sections MVP: Статистика, Кампании, Зоны, Настройки.
+- Code standard: `docs/CODE-STANDARD.md` is binding for every coding task — golangci-lint v2 (depguard layer rules, gocognit ≤15, funlen, sloglint, nolintlint), gofumpt+goimports, DI via constructors, domain layer imports no infra (no sql/http/kafka/redis), wrap errors `%w` + sentinel errors, context first arg, table tests + golden VAST files, `go test -race` in CI. Enforce from the first commit — a linter contour added after code exists produces a red wall nobody wants to fix.
+- Docs on disk: `docs/plan-mvp.md` (~700 lines, reviewer-APPROVED), `docs/plan-final.md` (final plan; where it consciously diverges from plan-mvp it carries an explicit 'supersedes plan-mvp §…' note — without such a note plan-mvp wins), `docs/integration-krutilka.md`, `docs/CODE-STANDARD.md`, `docs/design-reference/`. Git conventions + commit gate: `lowbid-git-workflow` skill. Working mode: everything stays local until the user explicitly asks for a commit/push (applies to subagent cycles too — put the no-commit rule in every delegated task's context).
+- Delivery loop that works: plan → delegate a read-only reviewer (GO/NO-GO verdict + blockers) → delegate one fixer applying the full findings list → verify findings programmatically → convert plan to a task list → delegate week-sized implementation batches to subagents (each gets: repo path, doc list, CODE-STANDARD as binding, verification criterion `go build ./... && go vet ./...`, explicit no-commit rule). Run reviewers and fixers as separate agents — a reviewer that also edits loses its read-only skepticism.
+
 ## Domain primer (always-on)
 
 - SSP = sell side (publisher traffic in, auction out); DSP = buy side (campaigns in, bids out); Ad Exchange = the RTB auction between them. One product often plays several roles — classify by which side the user enters, not by marketing labels.
@@ -34,6 +44,7 @@ Context: Leonid is planning his own SSP + Ad Exchange (Go-only stack). Colleague
 4. License gate BEFORE recommending: AGPL/GPL forces opening your modifications when run as a service; licenses that say 'personal/internal use only' (e.g. sspserver) are unusable for commercial work; `spdx_id: NOASSERTION` means read the LICENSE file manually before trusting it.
 5. Verify org-wide too (`/orgs/{org}/repos`) — the flagship repo often has sibling UI/campaign-manager repos that complete the picture.
 6. Star counts < 15 mean zero production users: treat as unproven regardless of feature list; check that 'planned' integrations are not just empty interfaces.
+7. When two sources disagree on a library choice, decide by repo ACTIVITY (commit cadence, open-issue backlog age), not star count — segmentio/kafka-go has more stars but a half-year-dead cadence and a 266-issue backlog; franz-go commits daily. Record the divergence as an explicit 'supersedes' note in the doc that wins, or implementers will pull different libs from different docs.
 
 ## Key landscape finding
 
@@ -49,6 +60,22 @@ When the task is making a test traffic generator (bid + VAST playback) indisting
 - Residential proxy economics: media is 99%+ of bytes. Save via lowest rendition choice, range requests with player-like buffer curve and early stop (players rarely fetch the full file), and 15-30% abandon profiles (simultaneously fixes suspicious 100% completion rate). Never proxy the S2S plane.
 - Perfect zeros are signals: CTR=0, error-rate=0, jitter=0, flat 24/7 traffic. Real traffic has realistic zeros AND realistic non-zeros.
 - Subagent fan-out pattern that worked: one agent inventories the generator's emitted signals from code (each signal: file:line, value source, static/random), another compiles detection signals from public sources only (MRC IVT/SIVT, OpenRTB, VAST, vendor blogs), then synthesize the gap matrix. Verbatim-verify load-bearing findings (file:line) in the main thread before reporting.
+
+### Spec-compliance gate (run BEFORE implementing)
+
+- Validate any improvement plan against OpenRTB 2.6 + VAST 4.3 before coding — plausible fixes can silently violate specs. Delegated check, citations to spec sections required, verdict per task: compliant / partial / violation.
+- VAST error codes (§2.3.6.3): 201/203 are TRAFFICKING mismatches (wrong linearity/size), not fetch failures. Wrapper-fetch failure → 300 (general) / 301 (VAST URI timeout) / 303 (no response after wrappers); media failure → 401 (not found) / 402 (timeout); 405 only for 'fetched but cannot render'. Fire the Error URI of EVERY Wrapper level where present plus InLine, one call per level, [ERRORCODE] percent-encoded (RFC 3986).
+- ORTB device enums come from AdCOM 1.0, not the 2.6 doc: devicetype 1–8 (7=STB, 8=OOH — CTV matters), connectiontype 1–7. device.language = ISO-639-1-alpha-2 only ('pt', never 'pt-BR'); country variants go to langb/BCP-47, mutually exclusive with language.
+- Never send test=1 to live exchanges (§3.2.2): non-billable auction, DSPs may not respond or respond non-competitively — defeats realistic testing. test=1 only against own mock SSP.
+- Do not synthesize sua (§3.2.29) for CTV/app-level (Dalvik) traffic: Sec-CH client hints don't exist there — a synthesized sua diverges from what real clients send.
+- nurl macros (§4.4): resolve the full common set (PRICE/ID/BID_ID/CURRENCY/IMP_ID/SEAT_ID/AD_ID); AUCTION_PRICE passes through raw with NO reformatting (same currency/units as bid); missing value → empty string (never leave the macro literal); support the `:X` encoding suffix.
+
+### Executing the plan via subagent waves (SDD)
+
+- Use `subagent-driven-development` (in ~/.agents/skills) as the controller skeleton: implementer per task → task-review after each → final whole-branch review + verification-before-completion. Audit step first: for each task check (a) standalone dispatchability, (b) file-overlap conflicts, (c) natural TDD cycle.
+- Gate parallelism on FILE overlap, not task independence: tasks touching the same flow file run strictly sequentially in SEMANTIC order, not plan order — e.g. abandon-semantics (abandon fires NO error) must land before error-firing tasks that edit the same exception paths, or the exception-handling changes conflict.
+- Narrow each task's scope to existing infrastructure: if it depends on a component from a deferred task (e.g. media fetcher → media error codes), keep only the implementable part and mark the rest TODO — never let an implementer stub half a subsystem.
+- Stochastic/behavioral tasks need seed-fixation and range asserts over N runs (e.g. completion 60–85% over 200 runs), never exact values; use tdd-red-phase-pitfalls for distribution-assert pitfalls.
 
 ## Communication style for this user
 

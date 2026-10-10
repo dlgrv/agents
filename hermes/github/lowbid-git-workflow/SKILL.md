@@ -13,7 +13,7 @@ metadata:
 
 # lowbid (krutilka) Git Workflow
 
-Project-specific git conventions for the **lowbid** repo (`sfsef/krutilka`, local path `~/aezly/krutilka`). This is NOT the general `github-pr-workflow` skill — those git/gh mechanics still apply, this skill only fixes the naming/format rules and the permission gate specific to this repo.
+Project-specific git conventions for the **lowbid** repos — `sfsef/krutilka` (local `~/aezly/krutilka`) and `dlgrv/lowbid-ssp` (local `~/aezly/lowbid-ssp`). New lowbid repos are created under the **`dlgrv`** account — `sfsef` is a personal account, not an organization. This is NOT the general `github-pr-workflow` skill — those git/gh mechanics still apply, this skill only fixes the naming/format rules and the permission gate specific to these repos.
 
 ## ⚠️ Hard gate — read first
 
@@ -85,5 +85,5 @@ gh pr create --title "feat(lowbid-11): add parameter help tooltips on campaigns 
 
 - Don't reuse generic branch names like `feat/add-user-authentication` (that's the general-skill example) — always include `lowbid-<n>`.
 - Don't skip `lowbid-00` when there's no issue — an unscoped branch/commit breaks the convention's grep-ability.
-- Don't infer permission to commit/branch/PR from "the task is done" — always require an explicit ask in-turn (see hard gate above).
+- **Commits stay local until an explicit in-turn ask — and this now includes subagent/delegation cycles.** Before dispatching an implementation subagent, put the no-commit/no-push rule verbatim into its task context: a delegated agent treated 'implement week 1' as license to commit on its own (2026-10-10), which is exactly what the hard gate exists to prevent. When a cycle IS authorized, still keep push gated: commit `feat(lowbid-NN): …` locally, push only on the user's command.
 - **Load this skill before any git/PR operation.** The format is strict and project-specific; working from memory of general conventions will produce wrong names (e.g. `refactor: desc` instead of `refactor(lowbid-00): desc`). The skill was NOT loaded when branch and PR #47 were created, and they had to be renamed post-hoc.
