@@ -1,0 +1,12 @@
+# Spec-compliance gate (run BEFORE implementing)
+
+Depth reference for `programmatic-adtech`: validate any improvement plan against OpenRTB 2.6 + VAST 4.3 before coding — plausible fixes can silently violate specs. Run as a delegated check with citations to spec sections, verdict per task: compliant / partial / violation.
+
+- VAST error codes (§2.3.6.3): 201/203 are TRAFFICKING mismatches (wrong linearity/size), not fetch failures. Wrapper-fetch failure → 300 (general) / 301 (VAST URI timeout) / 303 (no response after wrappers); media failure → 401 (not found) / 402 (timeout); 405 only for 'fetched but cannot render'. Fire the Error URI of EVERY Wrapper level where present plus InLine, one call per level, [ERRORCODE] percent-encoded (RFC 3986). Put the wrapper into the level list BEFORE fetching its URI so its own Error fires on its failure.
+- Retry tracking pixels only on network-level failures (asyncio.TimeoutError / aiohttp.ClientConnectionError, detected via exc.__cause__), max 1 retry, never on HTTP responses — retrying a delivered pixel is double counting (§3.14.2); keep the cause chain ('raise ... from exc') or cause-based detection silently breaks.
+- ORTB device enums come from AdCOM 1.0, not the 2.6 doc: devicetype 1–8 (7=STB, 8=OOH — CTV matters), connectiontype 1–7. device.language = ISO-639-1-alpha-2 only ('pt', never 'pt-BR'); country variants go to langb/BCP-47, mutually exclusive with language.
+- Never send test=1 to live exchanges (§3.2.2): non-billable auction, DSPs may not respond or respond non-competitively — defeats realistic testing. test=1 only against own mock SSP.
+- Do not synthesize sua (§3.2.29) for CTV/app-level (Dalvik) traffic: Sec-CH client hints don't exist there — a synthesized sua diverges from what real clients send.
+- nurl macros (§4.4): resolve the full common set (PRICE/ID/BID_ID/CURRENCY/IMP_ID/SEAT_ID/AD_ID); AUCTION_PRICE passes through raw with NO reformatting (same currency/units as bid); missing value → empty string (never leave the macro literal); support the `:X` encoding suffix.
+- Float prices via str() render scientific notation for micro-prices (str(1e-05) = '1e-05', but the exchange's JSON said '0.00001'): format floats via format(v,'f') + strip trailing zeros/dot, pass strings through untouched.
+- Never log the RESOLVED nurl in request-error paths — the substituted clearing price leaks into logs/monitoring; log the raw nurl with literal macros.

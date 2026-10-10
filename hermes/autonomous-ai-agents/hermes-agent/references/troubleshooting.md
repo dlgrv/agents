@@ -76,6 +76,15 @@ hermes config set auxiliary.vision.provider <your_provider>
 hermes config set auxiliary.vision.model <model_name>
 ```
 
+### Desktop native notifications never appear (macOS)
+Diagnostics, cheapest first:
+1. **App-level pref** — desktop notification kinds (approval, turnDone, turnError, backgroundDone) default to ON. The toggle is stored as `hermes:native-notifications` in Electron localStorage (`~/Library/Application Support/Hermes/Local Storage/leveldb/`). `grep -c "hermes:native-notifications" .../leveldb/*.ldb` returning 0 means defaults are in effect — do NOT conclude notifications are disabled.
+2. **OS-level permission** — grep the app's bundle id in `~/Library/Preferences/com.apple.ncprefs.plist` (`plutil -convert xml1 -o /tmp/nc.plist <file>` first). Absent = the app never triggered the macOS permission prompt, and macOS silently drops notifications — this is the usual root cause, not an app setting.
+
+Enabling the OS permission is user-interactive and cannot be done programmatically:
+- Have the user click **Settings → Notifications → Test** in the desktop app (`sendTestNativeNotification`); the first send fires macOS's "Allow notifications?" dialog which the user must click.
+- Fallback: open System Settings → Notifications directly (`open 'x-apple.systempreferences:com.apple.Notifications-Settings.extension'` via terminal — the browser tool cannot read a native Settings window) and have the user toggle the app there.
+
 ### "Reset permissions" / auto-approving everything
 See `references/security-privacy.md` — wipe the "Always allow" stores, don't touch yolo mode.
 

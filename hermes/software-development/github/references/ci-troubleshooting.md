@@ -156,6 +156,56 @@ COPY failed: file not found in build context
 
 ---
 
+### No Runs Created At All (Actions Blocked Platform-Side)
+
+**Signatures:**
+```
+workflow_dispatch via REST -> HTTP 422 {"message":"Actions has been disabled for this repository."}
+GET /repos/OWNER/REPO/actions/permissions -> {"enabled":true,...}  (contradicts the 422)
+Run stuck in "queued" with 0 jobs; cancel -> 409; DELETE run -> 403
+Pushes to trigger-matching paths create no runs
+```
+
+This is a GitHub-controlled disabled/locked state, NOT a settings problem:
+toggling Actions on/off via API or re-enabling workflows will NOT clear it.
+Do not burn time on settings toggles beyond one confirmation read.
+
+**Probe matrix (run before escalating — distinguishes scope):**
+1. Dispatch any workflow on the affected repo -> confirms the block.
+2. Dispatch on a fresh throwaway repo on the SAME account -> runs there = repo-scoped
+   block (most common); fails there too = account-level flag.
+3. Anonymous (unauthenticated) GET of the repo/API -> 403/abuse message = abuse flag;
+   200 = clean.
+4. If the repo is a FORK: check the parent repo runs Actions today -> parent fine =
+   fork-specific state.
+5. Storage: list active artifacts (`gh api repos/OWNER/REPO/actions/artifacts`) —
+   a bloated quota can silently disable Actions, but on public repos minutes/storage
+   are free, so treat quota as cause only for private repos.
+6. Try the close/reopen-PR workaround for a stuck-queued run before escalating.
+
+If probes show repo-scoped block with account clean: it is platform-side. File a
+GitHub Support ticket (see below) — do not keep retrying client-side mechanisms.
+
+**Filing the support ticket (help.github.com, logged in):**
+- Product flow: Repositories -> category **"Migration and locked state"** (it has
+  the locked-repo-URL + unlock-request fields that match this state), issue type
+  **"Errors, problems; plus API rate-limits, Actions workflow issues"**.
+- Answering the virtual-assistant "solution" page is fine — click **"Continue to
+  create a ticket"** on it; the ticket submitted through the full form flow is a
+  real one, tickets steered into the chat-assistant path get closed as template
+  answers.
+- Ticket body = the probe matrix output: exact 422 text + timestamp, permissions
+  JSON, stuck run ID, what was ruled out (account clean, parent works, not billing),
+  and the two asks: clear the disabled state + purge the orphaned run.
+- Verify creation under https://help.github.com/support/tickets (status Open, note
+  the ticket number for the user).
+
+**Artifact cleanup while there (safe on CI-regenerated artifacts):**
+List then DELETE via `gh api` (raw curl with the `gho_` OAuth token is rejected —
+use `gh api -X DELETE`); optionally keep the newest artifact per workflow/language.
+
+---
+
 ## Auto-Fix Decision Tree
 
 ```

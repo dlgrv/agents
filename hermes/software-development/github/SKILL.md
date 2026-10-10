@@ -30,6 +30,7 @@ starting that workflow, the body below only routes.
 | Carry an ISSUE to a verified PR (full delivery loop) | `references/issue-to-pr.md` |
 | Review someone's PR: diffs, inline comments, verdict | `references/code-review.md` |
 | Clone/create/fork repos, remotes, releases | `references/repo-management.md` |
+| No CI runs created at all / "Actions has been disabled" 422 / support ticket | `references/ci-troubleshooting.md` |
 
 Supporting assets: `scripts/gh-env.sh` + `scripts/git-credential-token.py`
 (auth helpers), `templates/` (PR bodies, bug report, feature request),
