@@ -1,0 +1,45 @@
+# Plugins — catalog, install, config
+
+Hermes has a plugin catalog (`hermes plugins search <keyword>`, ~550 entries).
+Plugins add agent tools, REST endpoints, dashboard/desktop UI, and hooks.
+
+## Always-on rules
+
+- **Search the catalog BEFORE writing a custom plugin.** The user prefers a
+  maintained open-source plugin over self-written code — check stars
+  (`gh api repos/<owner>/<repo> --jq '.stargazers_count'`) and pick the
+  popular one. Writing a plugin from scratch and only then discovering the
+  catalog equivalent wastes the whole build.
+- **Read security-scanner flags yourself before `--force`.** The scanner
+  often flags keyword/classification lists as "HIGH exfiltration" — grep the
+  flagged lines; a list of legitimate provider endpoint URLs is a false
+  positive. Never blind-force, never blind-refuse: review the flagged code,
+  then decide.
+- **Tool registrations are DEFERRED.** After `install --enable` the gateway
+  reloads: gateway_commands/hooks are live immediately, new agent **tools
+  appear next session** (`/reset` or restart). Don't test the new tool in
+  the same session; smoke-test via the plugin's own CLI instead.
+- Plugin config lives in `~/.hermes/plugins/config.json`; provider keys/secrets
+  in `~/.hermes/.env`. Secrets are never printed by `setup.py status`.
+
+## web-search-plus (robbyczgw, installed, self-hosted preset)
+
+Multi-provider search/extract replacement; auto-routing falls back through
+the configured pool when a provider fails/times out.
+
+1. `setup.py setup --preset self-hosted` → SearXNG + keyless Keenable, no
+   paid keys. Add Brave/Serper/Exa keys later for type-based routing.
+2. **Run setup.py with a Python ≥3.10** (system 3.9 dies on `str | None`
+   typing): use `~/.hermes/tools/python-3.14.*/bin/python3`.
+3. Self-hosted SearXNG on a private/Tailscale IP needs BOTH:
+   `SEARXNG_ALLOW_PRIVATE=1` in `~/.hermes/.env` AND `searxng.base_url` set
+   in `~/.hermes/plugins/config.json` (`SEARXNG_URL` env alone is not picked
+   up as the provider base_url).
+4. Smoke-test: `search.py --query ... --provider auto` — verify the fallback
+   path (`"trying_next"` in output) actually returns results when the local
+   instance is down; that is the feature the plugin was installed for.
+
+## GitHub stars via gh
+
+`gh api -X PUT user/starred/<owner>/<repo>` — the `repos/<o>/<r>/star`
+endpoint 404s; `user/starred/...` returns 204. Verify with `-i` status line.

@@ -55,14 +55,21 @@ asyncio.run(main())
 
 Note the import paths — they differ from what the file layout suggests: engine factory is `app.utils.default.database.get_async_engine(params=settings.db, application_name=...)` (needs both args), session factory is plain `async_sessionmaker`, not a helper in `app.database`. `app.database.session` does not exist. Check `backend/app/api/lifespan.py` for the canonical wiring before scripting against the DB.
 
+## Frontend conventions (verified in repo)
+
+- **Two content modules, split by purpose**: visible chrome labels (tabs, buttons) live in `src/content/uiStrings.ts` (English), per-field help tooltips live in `src/content/campaignFieldHelp.ts` (Russian). When adding a control you usually need both; never hardcode the label string in the component. The user flags mixed-language chrome (e.g. a Russian tab next to English `Runtime`/`Settings`) as a bug.
+- **Tests import the shared strings, not literals**: a Playwright spec that clicks `getByRole('tab', { name: 'Калькулятор' })` breaks on the next label change; import from `uiStrings`/`campaignFieldHelp` like the components do. After changing any label or dialog, grep the test tree for the old string.
+- **Actions that apply/overwrite settings open the repo's existing `ConfirmDialog` first** (title + what-will-change description + Apply/Cancel) — the user asked for this pattern on "apply recommendations"-style buttons; treat it as the default for destructive or bulk-apply actions.
+
 ## Gotchas
 
 - **Backend dep change → rebuild image**: `docker compose up -d --build api`. A plain `up -d` keeps the stale image (happened with `itsdangerous` after auth feature). Same for workers if they share requirements.
 - **Port 8000 conflicts**: stray `python -m http.server` processes from other sessions occupy it. Check `lsof -i :8000` before blaming docker.
 - **Postgres queries**: `docker compose exec postgres_db` may report "not running" even when the container is up — use `docker exec lowbid_postgres_db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "..."'`.
-- Full test suite (backend): run `cd backend && uv run python -m pytest tests -q`. 900+ tests as of the identity/profiles wave; coverage ~75% (new modules 88-99%). `pytest-cov` is NOT in deps — `uv pip install pytest-cov` for a coverage run. e2e Playwright needs docker services up (webServer 120s timeout otherwise fails — infra, not code).
+- Full test suite (backend): run `cd backend && uv run python -m pytest tests -q`. 1000+ tests as of the adversarial-fixes wave; coverage ~75% (new modules 88-99%). `pytest-cov` is NOT in deps — `uv pip install pytest-cov` for a coverage run. e2e Playwright needs docker services up (webServer 120s timeout otherwise fails — infra, not code).
 - **Chaos/integration tests run against LIVE Redis db15** (docker `lowbid_redis`), by repo convention (see `test_profile_store.py` for the db15 + pool-id isolation pattern) — FakeRedis only where the repo already uses it. The whole suite passes against the live store; run it with the compose stack up.
 - "The new UI settings are missing" reports: verify the SERVED bundle first (grep the frontend container's output for the new symbol) before debugging code — the usual cause is a cached browser bundle or the user looking in the wrong place (settings live inside the campaign detail form, not on the campaign list); then have the user hard-refresh.
+- **Alembic `server_default` with a SQL expression must be wrapped in `sa.text()`** (e.g. `server_default=sa.text("'{}'::json")`) — a plain string is sent by asyncpg as a bound parameter, so expression defaults like `'{}'::json` fail the migration with invalid-json, while the same code works on psycopg. When a migration fails on the live stack, run `docker compose exec api ... alembic upgrade head` again after fixing and confirm the version table advanced.
 
 ## Verified happy path
 
