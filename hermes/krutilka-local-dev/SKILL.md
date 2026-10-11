@@ -60,9 +60,14 @@ Note the import paths — they differ from what the file layout suggests: engine
 - **Backend dep change → rebuild image**: `docker compose up -d --build api`. A plain `up -d` keeps the stale image (happened with `itsdangerous` after auth feature). Same for workers if they share requirements.
 - **Port 8000 conflicts**: stray `python -m http.server` processes from other sessions occupy it. Check `lsof -i :8000` before blaming docker.
 - **Postgres queries**: `docker compose exec postgres_db` may report "not running" even when the container is up — use `docker exec lowbid_postgres_db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "..."'`.
-- Full test suite (backend): ~200+ tests; e2e Playwright needs docker services up (webServer 120s timeout otherwise fails — infra, not code).
+- Full test suite (backend): run `cd backend && uv run python -m pytest tests -q`. 900+ tests as of the identity/profiles wave; coverage ~75% (new modules 88-99%). `pytest-cov` is NOT in deps — `uv pip install pytest-cov` for a coverage run. e2e Playwright needs docker services up (webServer 120s timeout otherwise fails — infra, not code).
+- **Chaos/integration tests run against LIVE Redis db15** (docker `lowbid_redis`), by repo convention (see `test_profile_store.py` for the db15 + pool-id isolation pattern) — FakeRedis only where the repo already uses it. The whole suite passes against the live store; run it with the compose stack up.
 - "The new UI settings are missing" reports: verify the SERVED bundle first (grep the frontend container's output for the new symbol) before debugging code — the usual cause is a cached browser bundle or the user looking in the wrong place (settings live inside the campaign detail form, not on the campaign list); then have the user hard-refresh.
 
 ## Verified happy path
 
 `docker compose up -d --build api` → all 7 containers Up/healthy → curl 200 on :8000/docs, :5173, :8091/docs.
+
+## Test/fix workflow for this repo (proven)
+
+Delegated waves (test-writers, implementers, reviewers) via subagent-driven-development; plan files in `.hermes/plans/`. Bugs found by adversarial tests are pinned as strict-xfail with BUG-ids — a fix commit's acceptance criterion is "xfails removed AND green". See `programmatic-adtech` skill (anti-fraud evasion + SDD sections) for the per-task dispatch protocol; `lowbid-git-workflow` for the commit gate (fix commits: `fix(lowbid-NN): ...`, never push without an explicit ask).

@@ -32,6 +32,34 @@ Full human reference (every export, area payloads, backend, security):
   dashboard, a command) without modifying the app itself.
 - You want to surface data you compute (via gateway RPC) inside the app.
 
+## Check the catalog BEFORE hand-writing a plugin
+
+For any "show me X / track X / widget for X" ask, search the official Hermes
+plugin catalog first (catalog browse / `manage_catalog` / `hermes plugins`) —
+popular classes (usage/quota displays, tickers, trackers) usually already have
+a maintained community plugin, often with providers and edge cases you would
+rediscover the hard way. Writing a custom plugin is the fallback, not the
+default. Known example: the catalog `quota` plugin (per-provider usage: z.ai
+Coding Plan session/weekly windows, OpenRouter wallet, Claude accounts, …)
+installs as a unified package (`hermes plugins install quota --enable`),
+adds `hermes quota refresh|status` CLI commands, ships its own desktop half
+(see the TWO on-disk doors above), and verifies with
+`hermes plugins doctor quota --ci`.
+
+Enumerate the catalog programmatically ("which plugins are popular?",
+"list everything supporting X"): the whole catalog is one JSON at
+`https://hermes-agent.nousresearch.com/docs/api/plugin-catalog.json`
+(curl needs `-L`; ~550 entries with `name`, `repo` (GitHub URL),
+`category`, `description`). The GitHub API allows only 60 unauthenticated
+calls/hour — pull stars/forks/pushed_at per repo via the authenticated
+`gh api repos/<owner>/<repo> --jq '.stargazers_count'` in a thread pool
+instead of raw urllib. When several plugins cover the need, present
+stars/forks/last-push side by side and let the user pick: the user
+prefers popular maintained community plugins over hand-written ones and
+will ask to remove the custom plugin when a catalog one wins — remove
+its folder AND its `plugins.enabled` entry, then verify with
+`hermes plugins list`.
+
 ## Prerequisites
 
 - The Hermes desktop app (it loads plugins; the CLI/gateway alone does not).

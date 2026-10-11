@@ -128,6 +128,18 @@ plumbing. Squash commits hide RED phases from git history entirely — preserve
 the RED output in the implementer's report/transcript as the evidence of
 discipline instead of relying on history to show it.
 
+## 13. Strict-xfail is the ledger for adversarial bug-hunting waves
+
+When the goal is "find bugs with tests" (not TDD for a known feature), delegate test-writer agents that create ONLY new test files and never touch product code — a bug found and fixed by the same agent is unverified and unreviewable. Pin each reproduced bug as `xfail(strict=True)` with a BUG-id in the marker reason: the suite stays green, the bug cannot silently "pass" later, and XPASS-on-fix is the fix wave's acceptance criterion (remove the marker in the same commit as the fix). Record bugs in the report as file:line + repro + expected-vs-actual, not prose. Property/fuzz/chaos tests (boundary values, garbage input, concurrency stress, seeded randomness) find an order of magnitude more real bugs than coverage-chasing tests on legacy code — do not sell the user coverage numbers.
+
+## 14. A probability gate in product code flakes deterministic tests
+
+Any `random.uniform(...) >= chance` gate in a flow makes every deterministic test downstream flaky at rate (1-chance) — a default below 100% means ~1 in N runs fails with no code change. In tests, force the probability to a fixed endpoint (0 or 100) via the config seam, or seed the RNG; to test the gate itself, assert the AGGREGATE property over seeded runs (e.g. "50 seeded runs, zero fully-empty cascades at chance=95 with 2+ levels"), never a single run's outcome.
+
+## 15. MagicMock(spec=...) returns Mocks for un-stubbed seam methods
+
+A spec'd mock satisfies attribute checks but every un-stubbed method returns a Mock — code doing `len()`, iteration, or truthiness on the result fails with confusing Mock errors far from the seam. Old seam tests built on spec'd registries break when new production code calls a seam method the mock never stubbed. When adding a call to an existing seam, grep the test tree for spec'd fakes of that seam and stub the new method explicitly — do not assume spec protects you.
+
 ## See also
 
 - `test-driven-development` (bundled) for the RED-GREEN-REFACTOR cycle itself.

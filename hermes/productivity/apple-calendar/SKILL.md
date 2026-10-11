@@ -61,6 +61,8 @@ metadata:
   move `start` to the meeting time, then `create_event` the travel hour
   in the freed slot. Verify by re-listing the whole day, not by exit
   status.
+- No emoji in event titles — the user strips them («Peak: GLM кредиты
+  x2», not «⚡ Peak: …»). Plain text only.
 - The user's stated day/time doesn't match the calendar: widen the read
   window ±3 days BEFORE concluding "nothing that day" and match by
   content (title/venue/notes) — weekday recollection drifts. On a
@@ -201,3 +203,7 @@ end tell
   duplicates), simple reads stay fast while the specific write hangs —
   don't conclude the app is frozen. Isolate the failing operation and
   check the read path (`count of events whose …`) before escalating.
+- Sidebar order of calendars (which calendar's events draw on top) is a
+  UI-only preference — no AppleScript or EventKit API sets it. When the
+  user asks «сделай календарь X поверх Y», say so directly and point to
+  drag-and-drop in the sidebar instead of attempting `move`.
