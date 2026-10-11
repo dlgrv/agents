@@ -19,8 +19,30 @@ Plugins add agent tools, REST endpoints, dashboard/desktop UI, and hooks.
   reloads: gateway_commands/hooks are live immediately, new agent **tools
   appear next session** (`/reset` or restart). Don't test the new tool in
   the same session; smoke-test via the plugin's own CLI instead.
-- Plugin config lives in `~/.hermes/plugins/config.json`; provider keys/secrets
-  in `~/.hermes/.env`. Secrets are never printed by `setup.py status`.
+Plugin config lives in `~/.hermes/plugins/config.json`; provider keys/secrets
+in `~/.hermes/.env`. Secrets are never printed by `setup.py status`.
+
+## quota (rarf) — per-provider usage widget
+
+Unified package: `hermes plugins install quota --enable` installs the Python
+half and the desktop half; verify with `hermes plugins doctor quota --ci` and
+`hermes quota refresh|status` (live API reads land in `quota_cache.json`, the
+widget never does network I/O). Two enable switches exist and BOTH default
+to off: `plugins.enabled` in config.yaml AND the desktop-half toggle in
+Capabilities → Plugins — a "restarted the app, nothing appeared" report means
+the second toggle, not a broken install.
+
+- **Provider list comes from `~/.hermes/auth.json` credential_pool, not from
+  what the user actually uses.** Hermes auto-imports ambient credentials:
+  a logged-in `gh` CLI token lands in the pool as a `copilot` entry
+  (source `gh_cli`) and the widget then shows Copilot even for a user with
+  no Copilot subscription. Before explaining a surprise provider, read the
+  pool entries (labels/sources only, never print tokens).
+- **Hide an unused provider with the plugin's own cherry-picker** — the
+  panel settings have per-provider toggle chips (`disabledProviders`,
+  persisted in the plugin's `ctx.storage`). Prefer this over deleting the
+  pool credential (`hermes auth remove <provider> <index>`): the pool entry
+  may serve other consumers, and the gh token itself is the user's gh login.
 
 ## web-search-plus (robbyczgw, self-hosted preset)
 

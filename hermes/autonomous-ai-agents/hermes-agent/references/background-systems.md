@@ -36,11 +36,19 @@ the `cronjob` tool, the `hermes cron` CLI (`list`, `add`, `edit`,
   job), `context_from` (chain job A's output into job B), `workdir`
   (run in a specific dir with its `AGENTS.md` / `CLAUDE.md` loaded),
   multi-platform delivery.
-- **Invariants:** 3-minute hard interrupt per run, `.tick.lock` file
+- Invariants: 3-minute hard interrupt per run, `.tick.lock` file
   prevents duplicate ticks across processes, cron sessions pass
   `skip_memory=True` by default, and cron deliveries are framed with a
   header/footer instead of being mirrored into the target gateway
   session (keeps role alternation intact).
+- **The scheduler lives in a gateway process — but the desktop app spawns
+  its own.** When the user runs desktop-only (launchd/systemd gateway
+  stopped), cron does NOT die: the Electron app starts a builtin
+  scheduler (`Desktop cron scheduler started, provider=builtin` in
+  gui.log) and owns its jobs while the app is open. Before declaring
+  mac-side cron jobs lost after stopping a gateway, check the desktop
+  app's gui.log for that line; jobs the launchd gateway owned must be
+  re-created/moved explicitly, they don't migrate by themselves.
 
 User docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/cron
 

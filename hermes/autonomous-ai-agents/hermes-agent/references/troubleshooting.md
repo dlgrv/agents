@@ -15,6 +15,12 @@
 2. `hermes auth` — re-authenticate OAuth providers (or `hermes auth add <provider>`)
 3. Check `.env` has the right API key
 4. **Copilot 403**: `gh auth login` tokens do NOT work for Copilot API. You must use the Copilot-specific OAuth device code flow via `hermes model` → GitHub Copilot.
+5. **Surprise "copilot" provider in credential pool / quota widgets**: Hermes
+   auto-imports an ambient `gh` CLI token into `auth.json` credential_pool
+   (entry source `gh_cli`). A plain gh token CAN pass a bearer probe against
+   `api.githubcopilot.com` (HTTP 200) without any Copilot subscription — a
+   successful curl there proves nothing about an actual plan. Identify the
+   source from the pool entry's label/source fields, never print tokens.
 
 ### Changes not taking effect
 - **Tools/skills:** `/reset` starts a new session with updated toolset
