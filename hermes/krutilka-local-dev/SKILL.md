@@ -61,6 +61,7 @@ Note the import paths — they differ from what the file layout suggests: engine
 - **Port 8000 conflicts**: stray `python -m http.server` processes from other sessions occupy it. Check `lsof -i :8000` before blaming docker.
 - **Postgres queries**: `docker compose exec postgres_db` may report "not running" even when the container is up — use `docker exec lowbid_postgres_db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "..."'`.
 - Full test suite (backend): ~200+ tests; e2e Playwright needs docker services up (webServer 120s timeout otherwise fails — infra, not code).
+- "The new UI settings are missing" reports: verify the SERVED bundle first (grep the frontend container's output for the new symbol) before debugging code — the usual cause is a cached browser bundle or the user looking in the wrong place (settings live inside the campaign detail form, not on the campaign list); then have the user hard-refresh.
 
 ## Verified happy path
 

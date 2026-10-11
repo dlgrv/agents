@@ -24,8 +24,14 @@ metadata:
   this session, don't stall — fall back to raw JSON-RPC (Remote, below)
   or Calendar.app AppleScript.
 - User's personal calendar is **"Life"**. Everything else (Scheduled
-  Reminders, Birthdays, Праздники России, Siri Suggestions) is
-  service-generated — never write events there.
+  Reminders, Birthdays, Праздники России, Siri Suggestions, one-off
+  utility calendars like «Z.AI пиковые часы») is service- or
+  session-generated — never write personal events there; utility
+  calendars the user asked to create are fine to write to.
+- MCP `calendarId` is the **UUID from `list_calendars`**, never the
+  title — a title string fails with "No calendar with that identifier
+  exists" even though the calendar exists and Calendar.app shows the
+  name.
 - Duration unspecified → 1 hour; the user states exceptions explicitly.
 - «Английский» (his English lesson) → 1.5 hours by default.
 - Local tool calls are one event per tool_call — batching several
@@ -92,6 +98,59 @@ directly.
 - Deferred tools are invoked as `{"name": ..., "arguments": ...}` — a bare
   arguments object fails with "requires a 'name'".
 
+## Create a NEW calendar (AppleScript only — MCP has no create_calendar)
+
+The MCP tools only write events; a new calendar (user: «по аналогии с
+Life») requires osascript. Robust shape:
+
+1. Check existence first — `get name of every calendar` — and create
+   only when missing. A create script that errors midway (e.g. on a
+   later `set color`) can still have created the calendar; blindly
+   re-running the whole script then fails in the delete/existence loop
+   (-1728). Exit-code non-zero ≠ not created.
+2. Do NOT set the calendar's `color of` — assigning a color name or
+   RGB triple throws (-1700, not coercible) and aborts the rest of the
+   script. Create with `{name:...}` only and let Calendar pick the
+   color; the user can recolor in the UI in two clicks.
+3. Then add events into it by name: `set cal to calendar "<имя>"`,
+   build dates per the recipe below, and for a weekly recurring block
+   set `recurrence of ev to "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"`.
+4. Verify with the MCP `list_events` (UUID calendarId) over the first
+   week of the recurrence — confirms both the calendar and the RRULE
+   expanded to every weekday.
+5. A freshly AppleScript-created calendar may be MISSING from
+   `list_calendars`/EventKit for a while (indexing lag) — its calendarId
+   is then not usable by MCP. Don't treat the MCP "No calendar with that
+   identifier exists" error as proof the calendar is absent: check with
+   AppleScript `get name of every calendar` (and `events of calendar
+   "<имя>"`), and use AppleScript for writes until MCP sees it. Quitting
+   and reopening Calendar.app can nudge the sync.
+
+## Deleting events (especially recurring ones)
+
+- NEVER delete inside an AppleScript `whose`-filter
+  (`delete (events of cal whose …)`) — it can hang the script in a
+  background loop. Fetch first, then delete one event by reference/uid,
+  each statement under its own terminal timeout so a hang can't eat the
+  session.
+- `delete` on a recurring iCloud (CalDAV) event can return success while
+  the event survives — re-read (`count of events whose uid is …`) after a
+  10–20 s wait; if it's still there, repeating the same delete won't
+  help either.
+- Working programmatic fallback: NEUTRALIZE instead of delete —
+  `set recurrence of ev to ""`, move start/end into the past, rename to
+  «УДАЛИТЬ ВРУЧНУЮ …» — so it stops appearing in the future, then tell
+  the user to delete the leftover with one click in Calendar.app.
+  Present this honestly as a leftover, never claim the event was removed.
+- If state looks stale or duplicated, quit Calendar.app (`tell app
+  "Calendar" to quit`, wait, reopen) before concluding anything.
+
+## Reverting (user: «верни как было»)
+
+Restore the EXACT prior state and clean up everything the abandoned
+attempt created — duplicates, moved copies, leftover calendars — verifying
+each removal by re-reading, not by the command's exit status.
+
 ## Create events via osascript (fallback)
 
 Send the script as `osascript <<'EOF' … EOF` — inline `-e` quoting breaks
@@ -134,3 +193,11 @@ end tell
   error -1743 means it was denied before → user approves in System
   Settings → Privacy & Security → Automation (and Calendars: Full Access,
   not Add Only, or writes fail).
+- MCP `calendarId` values are not stable across sessions — re-fetch them
+  with `list_calendars` every time instead of reusing a UUID from an
+  earlier conversation; a stale UUID fails with "No calendar with that
+  identifier exists".
+- When Calendar automation goes weird (events persisting, ghost
+  duplicates), simple reads stay fast while the specific write hangs —
+  don't conclude the app is frozen. Isolate the failing operation and
+  check the read path (`count of events whose …`) before escalating.
