@@ -22,10 +22,21 @@ Plugins add agent tools, REST endpoints, dashboard/desktop UI, and hooks.
 - Plugin config lives in `~/.hermes/plugins/config.json`; provider keys/secrets
   in `~/.hermes/.env`. Secrets are never printed by `setup.py status`.
 
-## web-search-plus (robbyczgw, installed, self-hosted preset)
+## web-search-plus (robbyczgw, self-hosted preset)
 
 Multi-provider search/extract replacement; auto-routing falls back through
 the configured pool when a provider fails/times out.
+
+**Production layout (user mandate: search load lives on the server, not the
+Mac):** the plugin is installed on the SERVER Hermes (hermes-vm) only. The
+Mac's Hermes uses the BUILT-IN web_search pointed at the server SearXNG
+(`web.search_backend: searxng`; SearXNG on 100.93.178.88:8080 over
+Tailscale, ~1 s per query) — no local plugin, no local daemons. Do NOT
+reinstall web-search-plus on the Mac; verify the mac side with
+`hermes config get web.search_backend` plus one curl of the server's
+`/search?q=…&format=json`. A mac-side session started before the SearXNG
+fix may still show stale fallback messages — a fresh session routes
+directly.
 
 1. `setup.py setup --preset self-hosted` → SearXNG + keyless Keenable, no
    paid keys. Add Brave/Serper/Exa keys later for type-based routing.
@@ -38,6 +49,14 @@ the configured pool when a provider fails/times out.
 4. Smoke-test: `search.py --query ... --provider auto` — verify the fallback
    path (`"trying_next"` in output) actually returns results when the local
    instance is down; that is the feature the plugin was installed for.
+5. A transient timeout puts the provider into a runtime COOLDOWN cache, so
+   `auto` keeps routing to the fallback even after the provider recovered.
+   Retest in a FRESH process (the cache dies with the process) before
+   concluding the provider is broken. Direct sanity probe: curl the SearXNG
+   URL exactly as the plugin builds it
+   (`<base>/search?q=…&format=json&language=en&safesearch=0`) — results in
+   ~1 s means the provider is fine and the miss was cooldown, not
+   connectivity. (Cooldown caches may also reset on provider success.)
 
 ## GitHub stars via gh
 

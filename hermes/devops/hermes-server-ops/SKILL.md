@@ -101,7 +101,49 @@ padding — the user rejects «запас на вырост» (same stance as vp
 - Tailnet route via DERP(hel) ~60-100ms, P2P not established (mac behind VPN/NAT) — fine. Server IP often blocked from RF; tailnet-over-443 is the workaround.
 - Tailscale policy: deny-by-default tailnet policy file, grants only mac↔server (both directions — A2A + SSH need each side to originate). Edited via Tailscale admin API: user supplies a scoped `tskey-api-…` key in chat; use it once, NEVER persist it in skill/memory/files. After apply: `tailscale status` on both machines + exercise one service per grant.
 
+## Offloading the Mac → hermes-vm (standing user goal: «нагрузка на сервере»)
+
+The user wants hermes-related background load on hermes-vm, not the Mac.
+VM has headroom: 7.6 GB RAM, load ~0.5 with gateway + SearXNG + Kuma +
+Honcho running.
+
+Already server-side — never re-do: Telegram bot (TELEGRAM_BOT_TOKEN exists
+ONLY in the server's ~/.hermes/.env; the mac gateway has none), SearXNG
+(:8080), Uptime-Kuma, Honcho, web-search-plus plugin.
+
+Movable with clear wins:
+- Cron jobs → server cron: runs 24/7 without waking the Mac from sleep.
+  Before moving, check the delivery target — a mac cron with `deliver all`
+  and no resolved target runs silently (see `hermes cron status` warning).
+- Non-macOS MCP servers (e.g. github via npx) → server config.yaml; they
+  need only their token.
+- Search stays built-in on the Mac but pointed at the server SearXNG
+  (`web.search_backend: searxng`) — zero local daemons.
+- Mac gateway: VERIFIED stoppable — the desktop app spawns its OWN backend
+  (`serve --host 127.0.0.1 --port 0`, parent = Hermes.app); the launchd
+  gateway (`gateway run`, no Telegram token) is redundant. Stopped +
+  autostart disabled: `launchctl bootout gui/$(id -u)/ai.hermes.gateway`,
+  then rename `~/Library/LaunchAgents/ai.hermes.gateway.plist` →
+  `.disabled` (keep, never delete — one rename back reverts). Tell the two
+  process types apart by PPID: the desktop backend's parent is Hermes.app.
+- Mac cron jobs (e.g. the HTLB Actions watchdog) lived in the mac gateway —
+  they stop running once it is unloaded; move any schedule the user still
+  needs to server cron instead of assuming it still fires.
+
+Never movable (macOS-bound or user-owned): Apple Calendar MCP (EventKit /
+Calendar.app), computer_use, the desktop app itself (the user's
+interface), the browser real profile (security policy).
+
+Method: inventory first (`ps aux | grep hermes`, `launchctl list | grep
+ai.dlgrv`, `hermes cron list`, `hermes mcp list` on BOTH machines), then
+present candidates as options+recommendation BEFORE changing anything —
+system/config changes need the user's pick (standing rule).
+
 ## Pitfalls
+- Catalog plugin installs: review the security scanner's HIGH hits in the
+  source before installing with `--force` — its flags can be false positives
+  (e.g. an 'exfiltration' hit on a request-classifier's plain keyword list),
+  and only a manual read distinguishes those from real leaks.
 - Telegram UI questions («как посмотреть X»): answer by grepping the Hermes
   telegram module / state.db on the server — command behavior like the
   /sessions limit is code, not docs; guessing syntax costs a round-trip.

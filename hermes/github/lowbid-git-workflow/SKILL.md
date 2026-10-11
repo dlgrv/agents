@@ -13,7 +13,7 @@ metadata:
 
 # lowbid (krutilka) Git Workflow
 
-Project-specific git conventions for the **lowbid** repos — `sfsef/krutilka` (local `~/aezly/krutilka`) and `dlgrv/lowbid-ssp` (local `~/aezly/lowbid-ssp`). New lowbid repos are created under the **`dlgrv`** account — `sfsef` is a personal account, not an organization. This is NOT the general `github-pr-workflow` skill — those git/gh mechanics still apply, this skill only fixes the naming/format rules and the permission gate specific to these repos.
+Project-specific git conventions for the **lowbid** repos — `sfsef/krutilka` (local `~/aezly/krutilka`) and the SSP repo **`ortblab/ssp`** (private, org repo; local `~/aezly/lowbid-ssp`, Go module `github.com/ortblab/ssp`). Repo PLACEMENT rule: `sfsef` is a personal account, not an organization — user-facing product repos go under the **`ortblab`** org with neutral names; the `lowbid` codename must NOT appear in repo names or repo CONTENT (user-scrubbed it everywhere: README, module path, cookies/env, docs). The commit/branch prefix `lowbid-NN` stays — it's the task-tracking convention and lives only in git history. This is NOT the general `github-pr-workflow` skill — those git/gh mechanics still apply, this skill only fixes the naming/format rules and the permission gate specific to these repos.
 
 > Code-side conventions for lowbid-ssp (structure, lint contour, test pyramid, delivery loop) live in the `programmatic-adtech` skill + the repo's `docs/CODE-STANDARD.md`; this file stays git-only.
 
@@ -83,8 +83,19 @@ git push -u origin HEAD
 gh pr create --title "feat(lowbid-11): add parameter help tooltips on campaigns page" --body "Closes #11"
 ```
 
+## Pre-merge gate (run before proposing a merge to main)
+
+When the user asks "are tests green / can we merge":
+
+1. Backend: full suite (`cd backend && uv run python -m pytest tests -q`) + the lint contour (black/flake8/ruff/import-linter, see repo docs).
+2. Frontend: `npm run check` (prettier+tsc+eslint), unit tests, e2e Playwright with the stack up.
+3. Triage e2e failures per the krutilka-local-dev flake rule (re-run failing specs in isolation before counting them as real) — report which failures are pre-existing flakes, with evidence, not a bare pass/fail number.
+4. Conflict/ff check: `git rev-list --count HEAD..origin/main` (0 = fast-forward possible) and `git log --oneline <base>..HEAD --not origin/main` for how many of ours actually ship.
+5. Working tree must be clean (`git status --short` minus untracked) before asking merge permission; then ask PR-vs-direct-push and deploy timing — the repo's history goes through PRs.
+
 ## Pitfalls
 
+- **Never `git add -A` / `git add .` in this repo.** Untracked scratch and subagent WIP (shadcn scaffolding, half-written modules under backend/app) sits in the worktree between delegated waves; stage explicit paths only, then verify `git status --short` shows nothing unrelated before committing.
 - Don't reuse generic branch names like `feat/add-user-authentication` (that's the general-skill example) — always include `lowbid-<n>`.
 - Don't skip `lowbid-00` when there's no issue — an unscoped branch/commit breaks the convention's grep-ability.
 - **Commits stay local until an explicit in-turn ask — and this now includes subagent/delegation cycles.** Before dispatching an implementation subagent, put the no-commit/no-push rule verbatim into its task context: a delegated agent treated 'implement week 1' as license to commit on its own (2026-10-10), which is exactly what the hard gate exists to prevent. When a cycle IS authorized, still keep push gated: commit `feat(lowbid-NN): …` locally, push only on the user's command.
