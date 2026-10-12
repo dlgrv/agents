@@ -1,5 +1,20 @@
 # Infra inventory & decision log
-Updated: 2026-09-02 (plan v2 — evening)
+Updated: 2026-10-12 (plan v3 «Восточный пояс» — утверждается)
+
+## ACTIVE PLAN: v3 «Восточный пояс» (2026-10-12)
+Контекст: окт.2026 — удары БПЛА по 3 ЦОДам Яндекса (Сасово/Калуга/Владимир);
+запад/центр ЕЧР = зона риска, Москва перегружена (миграции с Яндекса).
+Решения юзера: VM-only (дедик A и Chipcore E/F выводятся), основное NSK,
+латентность +50–70 мс ОК, бюджет ≤60к/мес, критичны PP/GitFlic/GitLab
+(primebpm — 1 VM без резерва), LB = 2× HAProxy+keepalived в ru-8 + DNS-DR.
+Канонический план + таблица 11 VM + этапы/риски:
+`~/.hermes/plans/2026-10-12_104942-east-belt-vm-migration.md`
+Каталог провайдеров востока/регионов (55 источников):
+`~/.hermes/cache/scratch/hostcat/catalog.md` (мб удалён — факты в плане).
+Ключевое: Selectel ru-8 = облако NSK («Нэкстремум»); EKACOD Екб (2×Tier III);
+Optibit Красноярск; RUVDS-гермозоны Казань/Екб/NSK/Самара/Вл-к; Adman NSK.
+etcd-судьи: W1(Selectel NSK)+J1(EKACOD)+J2(Optibit) — 3 региона/3 провайдера.
+Дедик A: окно расторжения до 05.11.2026 — не пропустить.
 
 ## Current estate
 | Host | What runs there |
