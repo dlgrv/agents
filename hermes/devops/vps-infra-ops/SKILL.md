@@ -43,6 +43,22 @@ questions. Never ask the user to re-state any of it.
 - Runner: user prefers ONE shared runner for both GitFlic instances, not
   per-instance.
 
+## Geographic distribution (user-checked — design gate)
+- **Не концентрировать большинство VM в одном городе**, even when the
+  provider menu pulls that way: user rejects any layout where one city holds
+  the majority of VMs. Standby/copies (GitLab-standby, DB-replica) разносить
+  в другие города/провайдеров даже у того же хостера — это дёшево и снимает
+  возражение.
+- Before defaulting everything to one location, show the full DC map of RU
+  regions (см. references/infra-inventory.md → ACTIVE PLAN: Selectel ru-8
+  NSK — единственное крупное облако на востоке; Adman NSK; EKACOD Екб — свои
+  2× Tier III; RUVDS-гермозоны Казань IT Park / Екб / Самара / Владивосток;
+  CloudX Казань/НН) и предложить раскладку по городам до финального плана.
+- Технические ограничения держать в голове при раскладке: LB-пара
+  (keepalived/VRRP) живёт только в одной L2-сети = один пул/город; etcd-судью
+  можно накладывать на существующую VM другого региона (standby-роль), чтобы
+  не плодить договоры с мелкими хостерами.
+
 ## Planning workflow for infra tasks
 1. **Inventory first** — references/infra-inventory.md; verify live state via
    user-pasted SSH output (audit mode: we never SSH ourselves).
