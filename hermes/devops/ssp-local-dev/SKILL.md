@@ -39,6 +39,13 @@ Gateway вшивает `frontend/dist` бинарём (`frontend/embed.go`). **�
 - Тесты геометрии: `frontend/sidebar-geometry.test.ts` (unit-инвариант высот) + `frontend/sidebar-geom-check.mjs` (живой замер Y иконок, допуск 1px).
 - Масштаб админки: body 17px (крупнее UMG). UX-аудит UMG ВНЕДРЁН ПОЛНОСТЬЮ: H1–H6, M1–M8, L2–L5 (L1 AI-ассистент отложен решением юзера; L2 = таблица «По дням» со sticky-строкой «Всего», агрегат один — `totals(rows)` в lib/stats.ts питает и KPI, и строку). Интеграция с Pacer/UMG: references/pacer-umg-integration.md.
 
+## OpenRTB / стыковка Pacer→SSP→UMG
+- Наш /rtb — формально сверен с официальной спекой OpenRTB 2.5 (рус. перевод bidvol.com/docs/oRTB-ru.pdf, 98 стр.). Контрактные тесты: 18 (krutilka) + 13 (спека) в `internal/app/rtb/rtb_test.go`: devicetype 1–7, unknown-поля, эхо id, price float CPM, no-bid 204 по §4.2.1.
+- Фиксы аудита: request.cur без RUB → 204 (не молча игнорить); в bid-ответе добавлены рекомендуемые `cid` + `adomain` (host ClickURL, опускается если пусто).
+- Типы: prebid/openrtb v20.3.0 = OpenRTB 2.6-типы, принимаем 2.5 (обратно совместимо).
+- Коммит `03c754e test(ssp-08)` — аудит спеки; на момент сохранения НЕ запушен (пуш после подтверждения юзера).
+- Стыковка Pacer→SSP→UMG: UMG тоже OpenRTB, конвертации не нужно — только dial-in (endpoint+auth) и бизнес-слой (наценка, таймаут-каскад). План: в Pacer 2 кампании — 10к/мин через наш SSP (UMG обёрнут), 50к/мин напрямую в UMG.
+
 ## Фронт-тесты: гоча
 - Файл с JSX в тесте называть `.test.tsx`, не `.test.ts` — иначе «Unterminated regular expression literal» (tsx в .ts не парсится).
 - В vitest-тестах читать файлы через `process.cwd() + '/src/...'`, не `new URL(..., import.meta.url)` — в jsdom-среде import.meta.url имеет http-схему и readFileSync падает «The URL must be of scheme file».
