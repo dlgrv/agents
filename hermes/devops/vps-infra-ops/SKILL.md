@@ -72,6 +72,14 @@ questions. Never ask the user to re-state any of it.
 5. Every migration keeps a rollback path: old server alive until new one is
    proven; final dumps → S3 → сверка before decommission.
 
+## SSH access discipline (user directive — applies to EVERY server)
+- **One failed SSH auth attempt = full stop.** Never retry with a second key, password, or user — sequential failures trip fail2ban and ban the user's IP, locking THEM out of their own server. Diagnose why the first attempt failed (wrong key path? wrong user?) before any second attempt, or hand back to the user.
+- Use only the key the user named for that server (e.g. a per-server `~/.ssh/<name>_id` key); `BatchMode=yes` so a missing key errors instead of hanging on a password prompt.
+- sudo without exposing the password: read it from the user-designated secrets file into a protected env (never print/echo it), then run remote commands as `sudo -A` with an SSH_ASKPASS-style helper script that reads that env var. The password never enters chat, command lines, or terminal scrollback. If the user hasn't provided a secrets file — ask them to run the privileged steps, don't improvise.
+
+## GitHub Actions deploy pattern (deployer user)
+Established on the games/adtech server (krutilka, then copied for ssp) and reusable anywhere: dedicated `deployer` user (docker group, owns `/home/deployer/<project>`), a deploy-only SSH keypair named `<project>_github_actions` whose pubkey sits in deployer's `authorized_keys` with comment `github-actions@…`, manual `workflow_dispatch` CD job that SSHes in and runs compose build + up. Env-specific compose overrides MUST live in the repo — the CD job's checkout replaces the working tree and silently reverts any override file that existed only on the server.
+
 ## Pitfalls
 - DNS failover is a **1–5 min window**, not instant (TTL 60 + healthcheck
   cadence). Seconds-level needs VRRP/IP Failover — paid, same-DC only.
