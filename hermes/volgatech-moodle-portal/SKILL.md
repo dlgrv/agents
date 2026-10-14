@@ -23,6 +23,7 @@ Teachers see «последний доступ к курсу» per student; empt
 1. Get the course list via the ajax service from any logged-in Moodle page: `fetch('/lib/ajax/service.php?sesskey=' + M.cfg.sesskey + '&info=...', POST)` with methodname `core_course_get_enrolled_courses_by_timeline_classification`, args `{offset:0, limit:200, classification:'all'}` — one call returns all enrolled courses.
 2. `goto_url` each `viewurl`, wait ~3 s, confirm the tab title starts with «Курс:» (proof the visit was served, not a redirect loop).
 3. This Moodle build does NOT return lastaccess in the course objects, so don't treat a missing field as failure — the page titles are the source of truth.
+Pitfall: the OAuth redirect can re-present the SAME Trusted.ID form after the first «ВОЙТИ» — check `document.querySelector('#inputUsername')` and, if present, fill the identifier + vault-fill + submit a second time. After submitting, poll `page_info()` until the URL contains `elearning` (up to ~30 s); a single `wait_for_load()` may return while still on auth.volgatech.net.
 Pitfall: if the browser daemon was restarted mid-session, the Moodle session dies with it — re-login before assuming anything about course state.
 
 ## File naming formula
@@ -34,6 +35,11 @@ Group lab works are declared identical by the instructor, so the deliverable is 
 2. docx: patch the title page — ФИО and «Выполнил(а) студент(ка) гр. ИТС-41(з)» — via run-level python-docx edits (keep formatting).
 3. ipynb: re-execute for fresh outputs/execution counts (resolve the venv's jupyter explicitly; bare `jupyter` may be off PATH), don't ship stale outputs under a new name.
 4. Name all files by the formula. Zip only when asked; show the result in Finder.
+
+## Identify a course / place its files
+1. Open `/course/view.php?id=<id>` (login above) and read `#region-main` innerText — section names (lecture titles, lab topics) identify the course.
+2. Before creating any folder, search `university/` for the course title: course folders are named `<Название курса> (<Фамилия И.О. препода>)` and usually already exist.
+3. To attribute unknown lab files (e.g. from Downloads) to a course: `json.load` each notebook and read the first ~8 cells' source, then match titles/topics against the Moodle course page's lab list — exact title+topic match identifies the course; don't create a new folder when attribution lands on an existing one, just offer to move the files in.
 
 ## Print jobs
 Print-ready files live in `university/на печать/` with formula names. Determine sheet format from the PDF mediabox (`mm = pt*25.4/72`: А2=594×420, А3=420×297, А4=210×297) and report the per-format print count — never trust the format in a filename.
