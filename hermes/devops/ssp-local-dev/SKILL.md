@@ -12,6 +12,8 @@ description: Use for ortblabs/ssp SSP work — run, deploy, branding.
 ## Деплой (как krutilka)
 - CD: GitHub Actions `cd.yaml`, SSH-ключ `ssp_github_actions` → `deployer@135.106.162.15:/home/deployer/ssp` (аналог `deployer_github_actions` у krutilka). Secrets в репо заполнены.
 - Цепочка: nginx (ssp.lowbid.net → 127.0.0.1:18080) → gateway-контейнер :8080. `deploy/docker-compose.vps.yaml` лежит В РЕПО (workflow распаковывает fresh-код и снесёт серверный override — не хранить его только на сервере).
+- Триггер CD вручную: `gh workflow run cd.yaml --ref main -f branch=main`, статус через ~4.5 мин: `gh run view <run-id> --json status,conclusion`. Живость прода: `curl -X POST https://ssp.lowbid.net/rtb -d '{}'` → 400 (валидация отвечает — сервер жив).
+- НЕ бандлить push + CD-триггер + sleep в один terminal-вызов: на запрос подтверждения не ответят за таймаут — отменится ВЕСЬ вызов, включая уже выполненные шаги. Сначала спросить юзера, потом push и триггер CD отдельными вызовами.
 
 ## КРИТИЧНО: go:embed
 Gateway вшивает `frontend/dist` бинарём (`frontend/embed.go`). **Пересобирать gateway СТРОГО после сборки фронта**, иначе на проде/локально отдаётся старый бандл. Проверка: `curl localhost:8080 | grep -o 'assets/index-[^"]*.js'` vs `ls frontend/dist/assets/`.
@@ -40,10 +42,9 @@ Gateway вшивает `frontend/dist` бинарём (`frontend/embed.go`). **�
 - Масштаб админки: body 17px (крупнее UMG). UX-аудит UMG ВНЕДРЁН ПОЛНОСТЬЮ: H1–H6, M1–M8, L2–L5 (L1 AI-ассистент отложен решением юзера; L2 = таблица «По дням» со sticky-строкой «Всего», агрегат один — `totals(rows)` в lib/stats.ts питает и KPI, и строку). Интеграция с Pacer/UMG: references/pacer-umg-integration.md.
 
 ## OpenRTB / стыковка Pacer→SSP→UMG
-- Наш /rtb — формально сверен с официальной спекой OpenRTB 2.5 (рус. перевод bidvol.com/docs/oRTB-ru.pdf, 98 стр.). Контрактные тесты: 18 (krutilka) + 13 (спека) в `internal/app/rtb/rtb_test.go`: devicetype 1–7, unknown-поля, эхо id, price float CPM, no-bid 204 по §4.2.1.
+- Наш /rtb — формально сверен с официальной спекой OpenRTB 2.5 (рус. перевод bidvol.com/docs/oRTB-ru.pdf, 98 стр.) — запушено и задеплоено (CD success). Для разбора PDF-спек: `pypdf` уже стоит — распарсить в scratch-txt и отдавать subagent-ам путь к тексту, а не PDF. Контрактные тесты: 18 (krutilka) + 13 (спека) в `internal/app/rtb/rtb_test.go`: devicetype 1–7, unknown-поля, эхо id, price float CPM, no-bid 204 по §4.2.1.
 - Фиксы аудита: request.cur без RUB → 204 (не молча игнорить); в bid-ответе добавлены рекомендуемые `cid` + `adomain` (host ClickURL, опускается если пусто).
 - Типы: prebid/openrtb v20.3.0 = OpenRTB 2.6-типы, принимаем 2.5 (обратно совместимо).
-- Коммит `03c754e test(ssp-08)` — аудит спеки; на момент сохранения НЕ запушен (пуш после подтверждения юзера).
 - Стыковка Pacer→SSP→UMG: UMG тоже OpenRTB, конвертации не нужно — только dial-in (endpoint+auth) и бизнес-слой (наценка, таймаут-каскад). План: в Pacer 2 кампании — 10к/мин через наш SSP (UMG обёрнут), 50к/мин напрямую в UMG.
 
 ## Фронт-тесты: гоча
