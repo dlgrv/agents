@@ -1,5 +1,5 @@
 # Infra inventory & decision log
-Updated: 2026-10-12 (plan v3 «Восточный пояс», вариант A — утверждён юзером)
+Updated: 2026-10-14 (added office NAS; план v3 от 2026-10-12 в силе)
 
 ## ACTIVE PLAN: v3 «Восточный пояс» вариант A (2026-10-12)
 Контекст: окт.2026 — удары БПЛА по 3 ЦОДам Яндекса (Сасово/Калуга/Владимир);
@@ -31,7 +31,20 @@ etcd-судьи: W1(NSK)+J1(Екб)+C2(Казань) — 3 региона/3 пр
 | 94.26.229.45 | PrimePilot: app/admin/api.primepilot.tech; license-service, репо ~/work/license-service (docker compose) |
 | 94.26.228.62 | PrimePilot configurator (страница /download); «там ничего не крутится» |
 
+## Office NAS (офис, за Tailscale — можно SSH напрямую)
+Полные данные: `~/work/infra/nas/README.md`. Кратко:
+- **Доступ:** `ssh nas` — алиас в MacBook `~/.ssh/config` → `kbbs@100.69.213.39`
+  (tailscale0), ключ `~/.ssh/id_ed25519_crbsit_ldolgirev`, пароль не нужен.
+  tailnet другого аккаунта (`arsen.sarkisyan02@`, хост `nas.tailaf23ba.ts.net`).
+- `kbbs` = полный sudo. Host key ED25519 уже в known_hosts.
+- Железо: X99M-H, 12 потоков, 30 GiB RAM, NVMe 256G под систему,
+  **2 × 4TB WD Purple (sda/sdb) не размечены** — кандидаты под RAID/ZFS
+  когда NAS начнёт использоваться по назначению.
+- В etcd-кворумах NAS запрещён (см. Postgres HA) — офис выключают.
+
 Audit mode: user pastes SSH command output; we do not SSH directly.
+Исключение: собственные машины юзера, доступные напрямую (офисный NAS по
+Tailscale) — туда SSH разрешён, включая sudo через пользователя.
 
 ## Target architecture (plan v2, 2026-09-02)
 - **Web VPS** (Selectel, СПб): 4 vCPU / 8GB / **300GB локальный NVMe** —

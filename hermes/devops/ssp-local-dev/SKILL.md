@@ -47,6 +47,13 @@ Gateway вшивает `frontend/dist` бинарём (`frontend/embed.go`). **�
 - Типы: prebid/openrtb v20.3.0 = OpenRTB 2.6-типы, принимаем 2.5 (обратно совместимо).
 - Стыковка Pacer→SSP→UMG: UMG тоже OpenRTB, конвертации не нужно — только dial-in (endpoint+auth) и бизнес-слой (наценка, таймаут-каскад). План: в Pacer 2 кампании — 10к/мин через наш SSP (UMG обёрнут), 50к/мин напрямую в UMG.
 
+## Observability и денежные инварианты (фиксы аудита)
+- Метрики: gateway отдаёт `/metrics` на своём :8080 (route до SPA), consumer — ОТДЕЛЬНЫЙ порт (`METRICS_ADDR`, :9090). Сверять target в `deploy/prometheus/prometheus.yml` с фактическим портом — «скрейпит в пустоту» не падает и незаметен без проверки `curl /metrics | grep ssp_`.
+- Деньги в CH: агрегаты статистики считать из raw events с дедупом по event_id (argMax) — count() поверх SummingMergeTree-MV задваивает spend при redelivery Kafka (commit-fail после инсерта). Тест: двойная вставка event_id → ровно 1 imp.
+- Бюджеты Redis: reserve = один EVAL-скрипт с meta-CAS (смена дневного лимита действует в тот же день, рестарт Redis не сбрасывает потраченное). НЕ lazy-init SetNX полного лимита — это оверспенд.
+- Auth: rate-limit логина fail-closed (ошибка Redis → 503); not-found логин сжигает bcrypt на dummy-хэше (анти-тайминг).
+- После subagent-раунда с усечённым отчётом (max_iterations) проверять `git status` — хвостовые lint-фиксы остаются некоммиченными; докоммитить и прогнать build/vet/lint самому перед push.
+
 ## Фронт-тесты: гоча
 - Файл с JSX в тесте называть `.test.tsx`, не `.test.ts` — иначе «Unterminated regular expression literal» (tsx в .ts не парсится).
 - В vitest-тестах читать файлы через `process.cwd() + '/src/...'`, не `new URL(..., import.meta.url)` — в jsdom-среде import.meta.url имеет http-схему и readFileSync падает «The URL must be of scheme file».
