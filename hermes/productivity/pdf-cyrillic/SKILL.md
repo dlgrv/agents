@@ -45,8 +45,12 @@ pdfmetrics.registerFont(TTFont("DVS-Bold", "/usr/share/fonts/truetype/dejavu/Dej
 pdfmetrics.registerFont(TTFont("DVSM", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"))
 registerFontFamily("DVS", normal="DVS", bold="DVS-Bold", italic="DVS", boldItalic="DVS-Bold")
 
-# macOS (Arial Unicode MS)
-pdfmetrics.registerFont(TTFont("ArialUnicodeMS", "/System/Library/Fonts/Arial Unicode.ttf"))
+# macOS — register a per-weight family from Supplemental/ (Arial Unicode MS is a SINGLE
+# face with no bold/italic file, so <b>/<i> markup silently renders regular weight):
+pdfmetrics.registerFont(TTFont("S", "/System/Library/Fonts/Supplemental/Verdana.ttf"))
+pdfmetrics.registerFont(TTFont("S-Bold", "/System/Library/Fonts/Supplemental/Verdana Bold.ttf"))
+pdfmetrics.registerFont(TTFont("S-It", "/System/Library/Fonts/Supplemental/Verdana Italic.ttf"))
+registerFontFamily("S", normal="S", bold="S-Bold", italic="S-It", boldItalic="S-Bold")
 
 # Windows (Arial)
 pdfmetrics.registerFont(TTFont("Arial", "C:/Windows/Fonts/arial.ttf"))
