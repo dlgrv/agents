@@ -154,21 +154,21 @@ Run: `python3 references/document-folder-a4-v2.py`
 
 Output: PDF pattern with flat layout and folded assembly view for visual verification.
 
-## Tote Bag Patterns
+## Tote and Duffle Bag Patterns
 
-For tote bags and handbags with gusset side panels and handle rolls, use `references/tote-bag-pattern.py`. This script generates complete PDF patterns for oversized leather totes with:
+For tote bags and handbags with gusset side panels and handle rolls, use `references/tote-bag-pattern.py`. For travel duffle bags with zipper closure, use `references/duffel-bag-pattern.py`. Both scripts generate complete PDF patterns for leather bags with:
 
-- **Main panels** (front/back): 57×42 cm, split across 2 pages with 4 cm overlap for assembly
-- **Gusset side panels**: 99×26 cm (22+55+22 cm side+bottom+side), split across 2 pages
-- **Handle rolls**: 37×12 cm strips, rolled to Ø~3.5 cm for comfortable grip
-- **Top fold construction**: 3 cm fold line with handles sandwiched inside for secure attachment
+- **Main panels** (front/back): Split across multiple pages with registration marks for assembly
+- **Gusset side panels**: Split across pages with overlap zones
+- **Handle rolls**: Strips rolled to Ø~3.5 cm for comfortable grip
 - **Stitch hole guides**: 5mm spacing from edges on all sewn sides
 - **Registration marks**: Red crosses for page alignment during assembly
 - **1:1 scale calibration**: Verified with pixel-to-cm transform
-- **Zone markings**: Blue labels for 'бок 22', 'дно 55', 'бок 22' sections
+- **Zone markings**: Color-coded assembly guides
 
 ### Design Parameters
-- **Oversized tote**: 55×38×22 cm (W×H×D)
+- **Tote**: 55×38×22 cm (W×H×D)
+- **Duffle**: 50×30×22 cm (W×H×D)
 - **Seam allowance**: 1 cm
 - **Handle roll diameter**: ~3.5 cm
 - **Page format**: A2 (42.0×59.4 cm) for optimal cutting layout
@@ -176,23 +176,28 @@ For tote bags and handbags with gusset side panels and handle rolls, use `refere
 
 ### Usage
 
+**Tote bag:**
 Run: `python3 references/tote-bag-pattern.py`
-
 Output: `tote-bag-pattern-A2.pdf` (5 pages)
 
+**Duffle bag:**
+Run: `python3 references/duffel-bag-pattern.py`
+Output: `lechalo_dorozhnaya_sumka_50x30x22_molnia_A2.pdf` (9 pages)
+
 ### Assembly Instructions
-1. **Panels**: Print pages 1-2, align using red registration crosses, tape overlap area
-2. **Gusset**: Print pages 3-4, align crosses, tape overlap
-3. **Handles**: Print page 5, cut ×2 strips
-4. **Sewing**: Sew panels to gusset on three sides (top remains open), attach handles inside top fold
-5. **Folding**: Fold top 3 cm inward, sandwich handles, stitch through all layers
+1. **Panels**: Print pages, align using red registration crosses, tape overlap area
+2. **Gusset**: Print and align gusset pages with registration marks
+3. **Handles**: Print handle strips with assembly instructions
+4. **Sewing**: Sew panels to gusset on three sides (top remains open for tote, zipper for duffle)
+5. **Folding**: Fold top inward, sandwich handles, stitch through all layers
 
 ### Common Pitfalls
-- **Handle roll diameter**: Use 37×12 cm strips for Ø~3.5 cm rolls; smaller strips create thin handles, larger ones are hard to roll
+- **Handle roll diameter**: Use correct strip dimensions for Ø~3.5 cm rolls; smaller strips create thin handles, larger ones are hard to roll
 - **Registration accuracy**: Misaligned crosses cause panel misalignment; always verify overlap matches 4 cm
 - **Hole spacing**: 5mm spacing ensures even stitch tension; irregular spacing causes puckering
 - **Top fold construction**: Handles must be fully enclosed in the fold; exposed stitching weakens the attachment
-- **Gusset zone marking**: Blue lines indicate assembly zones; ensure 'дно 55' aligns with panel bottoms
+- **Gusset zone marking**: Color lines indicate assembly zones; ensure alignment with panel bottoms
+- **Zipper installation**: For duffle bags, sew zipper between two top strips before attaching to main panels
 
 ### Validation
 
@@ -200,6 +205,10 @@ Output: `tote-bag-pattern-A2.pdf` (5 pages)
 - Check 1 cm in drawing = 39.37 pixels in output
 - Inspect PDF with vision_analyze for layout errors
 - Test print alignment with registration marks
+- Use pattern-specific validation scripts for geometry verification:
+  - `references/duffel-bag-validation.py` — Automated validation for duffle bag patterns
+  - `references/macbook-sleeve-uag-test.py` — Comprehensive test suite for MacBook sleeve patterns
+  - `references/bifold-wallet-audit.py` — Geometry validation for wallet patterns
 
 ## MacBook Sleeve Patterns
 
