@@ -27,8 +27,10 @@ Generate PDFs with proper Russian/Cyrillic text rendering and professional table
 ## Prerequisites
 
 ```bash
-python -m pip install reportlab
+python -m pip install reportlab pillow
 ```
+
+Pillow is mandatory, not optional: `reportlab.lib.utils` does `from PIL import Image` at import time, so building any document fails with ModuleNotFoundError when only reportlab is installed.
 
 ## Font Registration
 
@@ -110,7 +112,7 @@ import re
 
 def fmt(s: str) -> str:
     """Convert markdown to HTML for ReportLab"""
-    s = s.replace("&", "&amp;").replace("<", "&lt;").replace(>", ">gt;")
+    s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
     s = re.sub(r"(?<!\*)\*([^*\n]+)\*(?!\*)", r"<i>\1</i>", s)
     s = re.sub(r"`([^`]+)`", r'<font face="DVSM" size="7.6">\1</font>', s)
@@ -216,13 +218,26 @@ def create_cyrillic_pdf(output_path):
 - **Code block overflow**: Long code lines (especially URLs) may exceed available width. Break them manually or use `Preformatted` with automatic wrapping.
 - **Multi-file packages**: When building PDFs from multiple markdown files, ensure consistent font registration across all files.
 
+## Black-and-White Documents
+
+For official/printed documents the user asks for strictly black-and-white output. Never reuse the colored defaults for these — build styles with `textColor=colors.black`, grey (`#888888`) reserved for the subtitle line, table header background `#e8e8e8` with a 0.5 black GRID, and no ROWBACKGROUNDS tint. Prose that explains tool tables in the document (what each instrument is, where to get it, how to use it) works well as repeated labeled blocks: "Что это / Где взять / Что показывает / Как пользоваться / Зачем нужен".
+
 ## Verification
 
+Programmatic check instead of eyeballing viewers — extract text with pypdf and assert every section keyword is present (this catches both missing content and font fallback, which shows up as replaced characters):
+
+```python
+from pypdf import PdfReader
+r = PdfReader(path)
+txt = "".join(p.extract_text() for p in r.pages)
+print(len(r.pages), [kw for kw in keywords if kw not in txt])
+```
+
 After generating PDF:
-1. Check that Cyrillic characters display correctly (no squares or ?)
-2. Verify table text doesn't overflow column boundaries
-3. Confirm page margins are respected (text doesn't touch edges)
-4. Test PDF on different viewers (Adobe Reader, Chrome, Firefox)
+1. Run the pypdf keyword check above (all section headers and key terms present)
+2. Check that Cyrillic characters display correctly (no squares or ?)
+3. Verify table text doesn't overflow column boundaries
+4. Confirm page margins are respected (text doesn't touch edges)
 
 ## Integration
 
