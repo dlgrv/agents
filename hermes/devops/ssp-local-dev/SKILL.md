@@ -46,6 +46,8 @@ Gateway вшивает `frontend/dist` бинарём (`frontend/embed.go`). **�
 - Фиксы аудита: request.cur без RUB → 204 (не молча игнорить); в bid-ответе добавлены рекомендуемые `cid` + `adomain` (host ClickURL, опускается если пусто).
 - Типы: prebid/openrtb v20.3.0 = OpenRTB 2.6-типы, принимаем 2.5 (обратно совместимо).
 - Стыковка Pacer→SSP→UMG: UMG тоже OpenRTB, конвертации не нужно — только dial-in (endpoint+auth) и бизнес-слой (наценка, таймаут-каскад). План: в Pacer 2 кампании — 10к/мин через наш SSP (UMG обёрнут), 50к/мин напрямую в UMG.
+- Этап A реализован и задеплоен: домен Partner (миграция 0003), `demand.Source`, каскад в Auctioneer (партнёрский бид с наценкой → no-bid/таймаут → direct), UMG-адаптер (nurl при выигрыше, VAST-Wrapper с нашим трекингом), `partner_id` в событиях, метрики `umg_*`, adminctl partner-add/list/enable. Выключено фича-флагом `UMG_ENABLED=0` — включение: запись в таблице `partners` + env, потом тестовая кампания Pacer 10к/мин.
+- CH-миграции НЕ автоприменяются на прод: колонку `events.partner_id` добавлять руками через `docker exec ssp-clickhouse-1 clickhouse-client --query "ALTER TABLE ssp.events ADD COLUMN IF NOT EXISTS partner_id UInt64 DEFAULT 0"` до включения каскада.
 
 ## Observability и денежные инварианты (фиксы аудита)
 - Метрики: gateway отдаёт `/metrics` на своём :8080 (route до SPA), consumer — ОТДЕЛЬНЫЙ порт (`METRICS_ADDR`, :9090). Сверять target в `deploy/prometheus/prometheus.yml` с фактическим портом — «скрейпит в пустоту» не падает и незаметен без проверки `curl /metrics | grep ssp_`.
@@ -57,3 +59,9 @@ Gateway вшивает `frontend/dist` бинарём (`frontend/embed.go`). **�
 ## Фронт-тесты: гоча
 - Файл с JSX в тесте называть `.test.tsx`, не `.test.ts` — иначе «Unterminated regular expression literal» (tsx в .ts не парсится).
 - В vitest-тестах читать файлы через `process.cwd() + '/src/...'`, не `new URL(..., import.meta.url)` — в jsdom-среде import.meta.url имеет http-схему и readFileSync падает «The URL must be of scheme file».
+
+## Интеграционные тесты: гоча
+- Тестируя конкретный SQL-констрейнт (UNIQUE, FK), заполняй ВСЕ поля валидными значениями: zero-value struct (TimeoutMs: 0) упадёт по раннему CHECK-констрейнту вместо целевого UNIQUE — тест проверяет не то, что задуман, и ломается при любом изменении схемы.
+- Прогон integration на Mac флейкает через testcontainers/ryuk: перед прогоном чистить мёртвые контейнеры `docker rm -f $(docker ps -aq --filter status=created)`; медленный первый прогон после падения Docker (до ~15 мин).
+- Race в тестах таймаутов (tmax запроса == таймауту партнёра): дочерний ctx не должен наследовать родительский дедлайн 1-в-1 — иначе взаимная гонка «кто первый отменит» даёт флейк; тестируй поведение, а не точные тайминги.
+- Перед пушем после subagent-раунда: `go test -race ./...` + `go test -tags integration -count=1 ./...` прогонять самому — отчёт агента может быть усечён, а зелёный vitest не покрывает Go-тесты.

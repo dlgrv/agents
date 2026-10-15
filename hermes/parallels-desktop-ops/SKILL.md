@@ -23,6 +23,21 @@ Manage Parallels VMs entirely from the mac terminal with `prlctl`; no GUI needed
 ## Guest shell / desktop changes
 - prlctl exec runs in a service session with no interactive desktop: launching the guest shell (`start explorer.exe`) silently does nothing — verify with `tasklist /fi "IMAGENAME eq explorer.exe"`. To apply shell/desktop-affecting changes (e.g. a desktop-folder registry redirect), reboot the guest instead: `shutdown /r /t 5` via exec — it auto-logs back in.
 
+## Long-running guest commands
+- Never hold `prlctl exec` open across a long guest install (language packs, installers) — it stalls the mac-side terminal past its timeout and you lose the output anyway. Instead: write the .ps1 to the shared folder, have it redirect all output to a log file in that same folder, launch it detached (`start /b powershell -ExecutionPolicy Bypass -File \\Mac\<share>\x.ps1`), and poll the log file from the mac side. Even the detached-launch exec call can hang; treat any exec as fire-and-forget and verify via the log, not via exec's exit.
+- Delete the .ps1/_log files from the shared (desktop!) folder when done — the user sees that folder on both desktops.
+
+## Guest language / localization
+Set UI language + layout in one PowerShell script (run detached per the section above — the language-pack download takes minutes):
+```powershell
+Install-Language ru-RU -CopyToSettings   # downloads + installs the pack
+Set-WinUILanguageOverride -Language ru-RU
+Set-WinSystemLocale ru-RU
+Set-Culture ru-RU
+Set-WinHomeLocation -GeoId 203           # 203 = Russia
+```
+Add a layout alone via `Get-WinUserLanguageList` / `.Add('ru-RU')` / `Set-WinUserLanguageList -Force`. Reboot the guest afterwards (`shutdown /r /t 5`) — UI language applies only at next logon. Substitute the tag/GeoId for other languages.
+
 ## reg add pitfalls
 - Never end a quoted `/d` value with a backslash (`"Y:\"`): reg.exe's parser eats the closing quote, drops `/f`, and reg loops forever on the overwrite prompt — flooding gigabytes of output under prlctl. Use `"Y:"`; Windows accepts a drive root without the trailing slash in these values.
 - Redirect the guest desktop via both registry keys, then reboot:
@@ -33,5 +48,8 @@ Manage Parallels VMs entirely from the mac terminal with `prlctl`; no GUI needed
 ## Isolating a guest from mac files
 Fresh Parallels VMs mirror mac Desktop/Documents/Downloads into the guest (Shared Profile). To isolate the guest:
 1. Disable Shared Profile (VM Configuration → Options → Sharing).
-2. Create one dedicated mac folder and share only it into the guest; it appears at `\\Mac\<sharename>` in the guest and can be redirected to or mounted as a drive letter.
-3. Result: files dropped in that mac folder appear on the guest desktop and vice versa; all other mac files stay invisible to the guest (remaining mac home still reachable via `\\Mac\Home` if needed).
+2. Also disable **Shared Applications** in both directions (same Options → Sharing pane) — otherwise Windows apps keep publishing into macOS Spotlight/Launchpad, and mac apps into the guest Start menu. Parallels may already have created one shortcut per Windows app under `~/Applications` on the mac — delete those.
+3. Create one dedicated mac folder and share only it into the guest; it appears at `\\Mac\<sharename>` in the guest and can be redirected to or mounted as a drive letter.
+4. Result: files dropped in that mac folder appear on the guest desktop and vice versa; all other mac files stay invisible to the guest (remaining mac home still reachable via `\\Mac\Home` if needed).
+
+VM config changes (`prlctl set`) only apply on a stopped VM — resume a suspended VM, shut it down cleanly, edit config, then start again.
