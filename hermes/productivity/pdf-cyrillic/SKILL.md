@@ -222,6 +222,22 @@ def create_cyrillic_pdf(output_path):
 
 For official/printed documents the user asks for strictly black-and-white output. Never reuse the colored defaults for these — build styles with `textColor=colors.black`, grey (`#888888`) reserved for the subtitle line, table header background `#e8e8e8` with a 0.5 black GRID, and no ROWBACKGROUNDS tint. Prose that explains tool tables in the document (what each instrument is, where to get it, how to use it) works well as repeated labeled blocks: "Что это / Где взять / Что показывает / Как пользоваться / Зачем нужен".
 
+Exception: UI screenshots stay COLOR even in an otherwise monochrome document unless the user explicitly says otherwise — a greyscaled interface screenshot loses affordances the reader needs.
+
+## Light Brand Styling (brandbook-derived)
+
+When the user asks for a "light" branded look derived from a brandbook HTML file: grep the HTML for its palette (`grep -oE '#[0-9a-fA-F]{6}' брендбук.html | sort | uniq -c | sort -rn`) and take the accent + light tints from the top counts — never import the brandbook's full dark theme into a print document. Apply the accent ONLY on: a small bold brand mark above the title, section headers, a thin divider rule under the header block, a light-tint table header background, and the footer brand text. Body text stays black on white so the document prints cleanly; muted grey-violet from the palette for captions/notes.
+
+The brand name goes in two places: a small brand line above the document title (accent color, bold) and in every page footer (bold accent left, page number center).
+
+## Key/Value Tables Must Not Stretch
+
+A table of short labels (login / password / URL — «Ваши данные для входа» style) must NOT span full page width even though the rows fit: pass explicit `colWidths=[w1*mm, w2*mm]` (label column narrower than value column) and `hAlign="LEFT"`. A two-column table of short phrases stretched to ~180 mm reads as broken layout; the user will flag it, so size it narrow on the first build. Full-width fraction-based widths are fine only for tables whose cells hold sentences (troubleshooting tables).
+
+## One-Page Fitting Loop
+
+When the user wants the document on N pages: assert the page count with pypdf immediately after `build()` and iterate levers until it passes. Levers in order of least content loss: (1) shrink screenshots to ~55–62% of available width, computing height from the image's REAL aspect ratio via PIL (`PILImage.open(path).size`) — hardcoding a 16:9 ratio distorts non-16:9 screenshots; (2) narrow margins to 14–16 mm; (3) compress numbered step lists into paragraphs with a bold lead-in (`<b>Шаг 1.</b> текст...`); (4) drop body font to ~8.6 pt / 11.8 leading and tighten spaceBefore/After. A one-page overflow is usually one screenshot plus a few list lines — lever 1 alone often suffices.
+
 ## Verification
 
 Programmatic check instead of eyeballing viewers — extract text with pypdf and assert every section keyword is present (this catches both missing content and font fallback, which shows up as replaced characters):
@@ -238,6 +254,7 @@ After generating PDF:
 2. Check that Cyrillic characters display correctly (no squares or ?)
 3. Verify table text doesn't overflow column boundaries
 4. Confirm page margins are respected (text doesn't touch edges)
+5. Assert expected page count when the user asked for a compact layout
 
 ## Integration
 
