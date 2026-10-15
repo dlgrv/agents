@@ -20,8 +20,9 @@ Manage Parallels VMs entirely from the mac terminal with `prlctl`; no GUI needed
 - Double every backslash in cmd one-liners from the mac side (`\\\\Mac\\share`), or the mac shell eats them and the guest sees a mangled path. Verify reachability with `dir \\\\Mac\\<share>` first.
 - For quoting-heavy work, write a .bat into a shared folder from the mac side, then run it: `prlctl exec ... cmd /c "\\\\Mac\\<share>\\file.bat"`. This sidesteps all quote-escaping between two shells.
 
-## Guest shell / desktop changes
-- prlctl exec runs in a service session with no interactive desktop: launching the guest shell (`start explorer.exe`) silently does nothing — verify with `tasklist /fi "IMAGENAME eq explorer.exe"`. To apply shell/desktop-affecting changes (e.g. a desktop-folder registry redirect), reboot the guest instead: `shutdown /r /t 5` via exec — it auto-logs back in.
+## Guest shell / desktop / GUI apps
+- prlctl exec runs in a service session with no interactive desktop: launching GUI apps (explorer, browsers — anything `start`-ed) silently does nothing — verify with `tasklist /fi "IMAGENAME eq <name>.exe"`. To apply shell/desktop-affecting changes (e.g. a desktop-folder registry redirect), reboot the guest instead: `shutdown /r /t 5` via exec — it auto-logs back in.
+- When the user must launch a GUI app with specific arguments (e.g. a browser with a proxy flag), drop a .bat in the shared folder and have them double-click it — exec cannot start it, and this avoids dictating steps over chat.
 
 ## Long-running guest commands
 - Never hold `prlctl exec` open across a long guest install (language packs, installers) — it stalls the mac-side terminal past its timeout and you lose the output anyway. Instead: write the .ps1 to the shared folder, have it redirect all output to a log file in that same folder, launch it detached (`start /b powershell -ExecutionPolicy Bypass -File \\Mac\<share>\x.ps1`), and poll the log file from the mac side. Even the detached-launch exec call can hang; treat any exec as fire-and-forget and verify via the log, not via exec's exit.
@@ -53,3 +54,12 @@ Fresh Parallels VMs mirror mac Desktop/Documents/Downloads into the guest (Share
 4. Result: files dropped in that mac folder appear on the guest desktop and vice versa; all other mac files stay invisible to the guest (remaining mac home still reachable via `\\Mac\Home` if needed).
 
 VM config changes (`prlctl set`) only apply on a stopped VM — resume a suspended VM, shut it down cleanly, edit config, then start again.
+
+## Routing guest traffic through the mac's Clash proxy
+Geo-blocked downloads (MathWorks blocks RU IPs, etc.) work from the guest if its traffic goes through the user's Clash proxy. Never edit Clash's config or ports (user's hard rule) — add a separate relay instead:
+1. mihomo listens on localhost only, invisible from the guest. Run a small TCP forwarder on the mac bound to the Parallels host IP `10.211.55.2` on a free port (e.g. 17891), forwarding to the localhost Clash port (default 17890). Script lives at `~/Library/Scripts/clash_relay.sh`.
+2. Persist it with a LaunchAgent (`~/Library/LaunchAgents/`, `RunAtLoad` + `KeepAlive`) — otherwise the relay dies with the agent session and the guest loses ALL internet (its only route is the proxy). Verify with `launchctl print` + a `curl -x` from the guest.
+3. Enable the proxy in the guest via registry (`HKCU\...\Internet Settings`: `ProxyEnable=1`, `ProxyServer="10.211.55.2:17891"`) — survives guest reboots.
+4. Leave the user an escape hatch: a `_proxy_off.bat` in the shared folder that sets `ProxyEnable=0`, for when Clash is off and direct internet is needed.
+- Chromium browsers ignore a system proxy set after they started (background/Startup-boost processes survive window closes). Before testing, `taskkill /f /im msedge.exe`, then relaunch with the explicit flag: `msedge.exe --proxy-server="http://10.211.55.2:17891" <url>`.
+- Verify the chain per hop before blaming the proxy: relay listening (`lsof -iTCP:<port> -sTCP:LISTEN` on the mac), then `curl -s -x http://10.211.55.2:17891 <url>` via `prlctl exec` from the guest.
