@@ -18,6 +18,18 @@ or a bot-detection interstitial — don't give up and don't loop on the same
 URL. Third-party services often hold a **copy** of the page. Work down this
 ladder, cheapest first.
 
+## When to Use
+
+- "Alert me when this laptop drops below $1,000."
+- "Watch these flights for a fare under $500."
+- "Tell me when this hotel has a refundable room."
+- "Track ticket/listing availability."
+- A cron tick fires for an existing price watch (steps 4-6).
+- **Korean product research**: When brand sites are unreachable or lack purchase/shipping info, use Naver/Coupang as discovery and fallback.
+- **Korean edtech/device lookup**: For brands like Wordmelon, try Smart Store search when direct site fails.
+
+Don't use for: one-off "what does this cost right now" lookups (use `web_search`/`web_extract` directly).
+
 ## The ladder
 
 ```
@@ -25,7 +37,8 @@ ladder, cheapest first.
 2. archive.today    — domain rotation: archive.ph → .md → .li → .is
 3. Jina Reader      — only if JINA_API_KEY is set  (live server-side render)
 4. API-first pivot  — look for /api/, /graphql, .json, or RSS on the same host
-5. Real browser     — browser tool as the last, most expensive resort
+5. Browser automation — use browser tools when JS challenge scripts are present
+6. Korean e-commerce pivot — try Naver/Coupang/SmartStore for products, especially Korean brands
 ```
 
 Run it in one shot with the bundled script:
@@ -36,6 +49,12 @@ python3 scripts/recover_page.py "https://example.com/blocked-article" --json
 
 The script tries each route in order, validates every body (see "Fake
 successes" below), and prints the first genuine hit with its provenance.
+
+For JS-challenged pages that archives can't solve, use the browser script:
+
+```bash
+python3 scripts/browser_recovery.py "https://example.com/challenged" --wait 6
+```
 
 ## Provenance discipline (non-negotiable)
 
@@ -111,20 +130,41 @@ look for:
   you did recover)
 - A sitemap (`/sitemap.xml`) revealing canonical URLs that may not be gated
 
-## Hard IP bans vs JS challenges — identify the wall first
+### 5. Browser automation (JS challenges)
+
+When a page serves a JavaScript challenge (Cloudflare, Qrator) with a script that
+waits for execution and sets cookies (`cf_clearance`, `qrator_jsr`), a direct
+fetch or archive service will fail. The browser tool can pass these:
+
+- **Wait for challenge completion**: Let the page load fully — challenge scripts
+  often reload the page after setting cookies. Use `wait_for_load()` and
+  `time.sleep(6)` after navigation to let JS execute.
+- **Check for success signs**: After waiting, look for page content instead of
+  interstitials. `page_info()` and `document.body.innerText` reveal if you're
+  seeing the real page or still blocked.
+- **Provenance**: `live` — this is the actual page content, though it may be
+  delayed by challenge execution time.
+
+**Pitfall**: Do NOT conclude you're blocked until the challenge script has
+fully run. Many JS challenges serve a 200 status code but delay content
+delivery — waiting is required, not a sign of failure.
+
+### Hard IP bans vs JS challenges — identify the wall first
 
 Before choosing a route, classify what is blocking you:
 
 - **JS challenge** (Cloudflare, Qrator): serves an obfuscated challenge
   script, sets a short-lived cookie (`cf_clearance`, `qrator_jsr`), then
-  reloads. A real browser that waits and lets the script run can pass. Retry
-  in the browser tool with a wait before concluding you're blocked.
+  reloads. A real browser that waits and lets the script run can pass.
 - **Hard IP ban**: serves a plain 403 HTML body ("Access forbidden",
   Qrator "Guru meditation") with NO challenge script and no cookie. No
   client-side trick passes it — the block is on your network, not your
-  fingerprint. Don't burn attempts on UA strings, header replay, or cookie
-  crafting; go straight to fallbacks (archives, API pivot) or tell the user
-  the site must be reached from their own network/device.
+  fingerprint.
+
+**Pitfall**: Treat all 200 responses with interstitial content as JS challenges
+until proven otherwise. Never classify a page as "hard IP ban" based on
+content delay; only classify it as such if the response body is a static
+403/404 with no challenge script and no reload mechanism.
 
 Before crediting a proxy as a workaround, verify it actually changes the
 egress IP — a local proxy that exits via the same address reproduces the
