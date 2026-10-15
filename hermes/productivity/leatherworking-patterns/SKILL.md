@@ -26,6 +26,7 @@ Generate precise PDF patterns for leather goods (sleeves, wallets, bags, cases) 
 - **Single-piece construction** with bottom fold for document folders and sleeves with case compatibility
 - **Multi-page layout** for patterns exceeding standard page sizes with registration marks
 - **Automated testing** for geometry validation, hole alignment, and physical capacity
+- **Tote and handbag patterns** with gusset side panels, handle rolls, and top fold construction
 
 ## Prerequisites
 
@@ -152,6 +153,53 @@ For leather document folders and envelopes (A4 paper storage), use a single-piec
 Run: `python3 references/document-folder-a4-v2.py`
 
 Output: PDF pattern with flat layout and folded assembly view for visual verification.
+
+## Tote Bag Patterns
+
+For tote bags and handbags with gusset side panels and handle rolls, use `references/tote-bag-pattern.py`. This script generates complete PDF patterns for oversized leather totes with:
+
+- **Main panels** (front/back): 57×42 cm, split across 2 pages with 4 cm overlap for assembly
+- **Gusset side panels**: 99×26 cm (22+55+22 cm side+bottom+side), split across 2 pages
+- **Handle rolls**: 37×12 cm strips, rolled to Ø~3.5 cm for comfortable grip
+- **Top fold construction**: 3 cm fold line with handles sandwiched inside for secure attachment
+- **Stitch hole guides**: 5mm spacing from edges on all sewn sides
+- **Registration marks**: Red crosses for page alignment during assembly
+- **1:1 scale calibration**: Verified with pixel-to-cm transform
+- **Zone markings**: Blue labels for 'бок 22', 'дно 55', 'бок 22' sections
+
+### Design Parameters
+- **Oversized tote**: 55×38×22 cm (W×H×D)
+- **Seam allowance**: 1 cm
+- **Handle roll diameter**: ~3.5 cm
+- **Page format**: A2 (42.0×59.4 cm) for optimal cutting layout
+- **Overlap**: 4 cm standard for multi-page patterns
+
+### Usage
+
+Run: `python3 references/tote-bag-pattern.py`
+
+Output: `tote-bag-pattern-A2.pdf` (5 pages)
+
+### Assembly Instructions
+1. **Panels**: Print pages 1-2, align using red registration crosses, tape overlap area
+2. **Gusset**: Print pages 3-4, align crosses, tape overlap
+3. **Handles**: Print page 5, cut ×2 strips
+4. **Sewing**: Sew panels to gusset on three sides (top remains open), attach handles inside top fold
+5. **Folding**: Fold top 3 cm inward, sandwich handles, stitch through all layers
+
+### Common Pitfalls
+- **Handle roll diameter**: Use 37×12 cm strips for Ø~3.5 cm rolls; smaller strips create thin handles, larger ones are hard to roll
+- **Registration accuracy**: Misaligned crosses cause panel misalignment; always verify overlap matches 4 cm
+- **Hole spacing**: 5mm spacing ensures even stitch tension; irregular spacing causes puckering
+- **Top fold construction**: Handles must be fully enclosed in the fold; exposed stitching weakens the attachment
+- **Gusset zone marking**: Blue lines indicate assembly zones; ensure 'дно 55' aligns with panel bottoms
+
+### Validation
+
+- Verify all pages are exactly 42.0×59.4 cm using pypdf
+- Check 1 cm in drawing = 39.37 pixels in output
+- Inspect PDF with vision_analyze for layout errors
+- Test print alignment with registration marks
 
 ## MacBook Sleeve Patterns
 
