@@ -185,6 +185,17 @@ When auditing a machine with Cursor/VSCode installed, these are the recurring wi
 - **Python/uv projects**: set in User `settings.json` — `"python.defaultInterpreterPath": ".venv/bin/python"`, `"python.venvFolders": [".venv", "venv"]`, `"python.terminal.activateEnvironment": true` — stops per-workspace env autodetection.
 - **settings.json gotcha**: these settings files are JSONC (comments allowed) but the patch/write tooling validates strict JSON — a file with `//` comments or trailing commas will be refused. Cleanest fix is a full rewrite via write_file (comments dropped — they're usually dead code anyway).
 
+## Background services / login-items audit ("почему X работает в фоне"/"убей и чтобы не запускался" класс задач)
+
+- Closing an app's window does not stop its daemons — audit the process tree first: `ps -eo pid,ppid,user,command | grep -i <name>`; root daemons usually spawn under a user-space wrapper (ppid 1 wrapper → root service).
+- Map a live process to its launchd label: `launchctl print system | grep <pid>` (root daemons) or `launchctl print gui/$(id -u)` (user agents). The label, not the plist path, is what you bootout/disable.
+- `sfltool dumpbtm` lists Background Task Management entries (login items, legacy daemons, quicklook plugins) with dispositions — `disabled, allowed, notified` — these are what macOS Ventura+ "app running in background" notifications refer to. Use it to enumerate everything registered, not just currently running.
+- Kill now + prevent relaunch at boot in one shot: `launchctl bootout <domain>/<label>` then `launchctl disable <domain>/<label>`. Disable persists across reboots and survives app updates — prefer it over deleting the plist (apps reinstall their plists). Domains: `system/<label>` for root daemons, `gui/$(id -u)/<label>` for user LaunchAgents.
+- Verify the kill with a count (`ps aux | grep ... | grep -v grep | wc -l`) a few seconds after bootout — some wrappers take a moment to tear down children.
+- Root-domain bootout/disable needs sudo; non-interactive `sudo -n` fails — use the osascript administrator-privileges pattern (Full Uninstall pass 2) and warn the user the native password dialog will pop.
+- Parallels Desktop keeps ~6 processes (prl_disp_service, prl_naptd, watchdog) alive with the app closed, via label `com.parallels.desktop.launchdaemon` in the system domain (plist lives inside the app bundle). bootout+disable of that label stops autostart; the app and VMs still start manually — the service relaunches on demand when the app opens.
+- Apps that are the user's daily tools (browser etc.) are not "background waste" even at multi-GB RAM — confirm the role before listing something as a kill candidate; ask before disabling anything user-visible.
+
 ## Pitfalls
 
 - **Don't delete Apple system containers** — anything starting with `com.apple.` is system-level. Always filter these out.

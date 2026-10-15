@@ -55,6 +55,9 @@ Fresh Parallels VMs mirror mac Desktop/Documents/Downloads into the guest (Share
 
 VM config changes (`prlctl set`) only apply on a stopped VM — resume a suspended VM, shut it down cleanly, edit config, then start again.
 
+## Background service
+The `com.parallels.desktop.launchdaemon` (system domain) keeps ~6 processes (prl_disp_service, prl_naptd, watchdog) alive whenever the mac boots, even with the app closed and all VMs stopped. To stop it and prevent autostart: `launchctl bootout system/com.parallels.desktop.launchdaemon` + `launchctl disable system/com.parallels.desktop.launchdaemon` (sudo — use the osascript admin-privileges pattern). Manual app/VM launch still works; the service relaunches on demand.
+
 ## Routing guest traffic through the mac's Clash proxy
 Geo-blocked downloads (MathWorks blocks RU IPs, etc.) work from the guest if its traffic goes through the user's Clash proxy. Never edit Clash's config or ports (user's hard rule) — add a separate relay instead:
 1. mihomo listens on localhost only, invisible from the guest. Run a small TCP forwarder on the mac bound to the Parallels host IP `10.211.55.2` on a free port (e.g. 17891), forwarding to the localhost Clash port (default 17890). Script lives at `~/Library/Scripts/clash_relay.sh`.
