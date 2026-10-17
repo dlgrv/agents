@@ -41,6 +41,18 @@ the `cronjob` tool, the `hermes cron` CLI (`list`, `add`, `edit`,
   `skip_memory=True` by default, and cron deliveries are framed with a
   header/footer instead of being mirrored into the target gateway
   session (keeps role alternation intact).
+- **Watchdog pattern for "tell me when X changes" jobs** (blocked API,
+  stuck pipeline, price above threshold): pair a `script` monitor with a
+  tiny agent prompt. The script prints a few FIXED status lines, no
+  timestamps (the monitor diffs output — timestamps make every run a
+  change). Prompt rules: unchanged status → answer exactly `[SILENT]`;
+  changed or UNKNOWN → re-verify the condition with the authoritative
+  CLI before reporting, then report only what re-verification confirmed.
+  Make the probe itself use the most reliable client (e.g. `gh api`, not
+  raw `curl` for GitHub) — a flaky probe emits a third output state that
+  flips the diff and wakes the agent on false positives; if the probe
+  cannot be fixed, treat transport-level failures (HTTP 000) as
+  "unchanged", not as a change.
 - **The scheduler lives in a gateway process — but the desktop app spawns
   its own.** When the user runs desktop-only (launchd/systemd gateway
   stopped), cron does NOT die: the Electron app starts a builtin
