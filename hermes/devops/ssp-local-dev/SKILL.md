@@ -16,6 +16,7 @@ description: Use for ortblabs/ssp SSP work — run, deploy, branding.
 - НЕ бандлить push + CD-триггер + sleep в один terminal-вызов: на запрос подтверждения не ответят за таймаут — отменится ВЕСЬ вызов, включая уже выполненные шаги. Сначала спросить юзера, потом push и триггер CD отдельными вызовами.
 - Перед триггером CD убедиться, что коммит ФАКТИЧЕСКИ на main: merge мог пройти на ветке subagent'а — тогда push отвечает «Everything up-to-date», а CD уезжает со старым кодом. После merge проверить `git log --oneline -1` на main и что push реально двигал (`main -> <sha>`), и только потом `gh workflow run`.
 - Имена веток со скобками/спецсимволами (`feat(ssp-20)`) — всегда в кавычках в git-командах, иначе merge падает «not something we can merge».
+- **CD доставляет код, но долгоживущие процессы его не подхватывают.** Compose-сервисы SSP CD пересоздаёт, а systemd-воркеры krutilka (`lowbid_playback_worker@1/2`, `lowbid_bid_worker`, `lowbid_api`) — НЕТ: после «success» CD воркеры могут нести код месячной давности (парсер-фикс не действует до рестарта). После каждого деплоя: рестарт затронутых воркеров `ssh ssp-deploy 'sudo -n systemctl restart lowbid_playback_worker@1.service lowbid_playback_worker@2.service lowbid_bid_worker.service'`, затем верификация: свежий `ActiveEnterTimestamp` (`systemctl show <svc> -p ActiveEnterTimestamp`), 0 error/traceback в journalctl за пару минут, живой поток (например, рост пиксель-запросов в ssp-gateway логах). Рестарт системных сервисов — сторона, требующая подтверждения юзера (runtime-approval).
 
 ## КРИТИЧНО: go:embed
 Gateway вшивает `frontend/dist` бинарём (`frontend/embed.go`). **Пересобирать gateway СТРОГО после сборки фронта**, иначе на проде/локально отдаётся старый бандл. Проверка: `curl localhost:8080 | grep -o 'assets/index-[^"]*.js'` vs `ls frontend/dist/assets/`.
@@ -31,6 +32,7 @@ Consumer (franz-go) при отсутствующем topic МОЛЧА буфе�
 
 ## Сервер (135.106.162.15)
 - SSH: `ssh -i ~/.ssh/id_ed25519_lowbid dlgrv@...`; **одна неудачная попытка = стоп** (fail2ban). sudo через askpass (`SUDO_PASSWORD` в `~/.hermes/.env`, `sshpass -f /tmp/ap.secret sudo -A`).
+- Для деплой-операций есть алиас **`ssp-deploy`** (юзер deployer, NOPASSWD `sudo -n systemctl` для lowbid_*-сервисов) — рестарты воркеров и read-only проверки (`docker ps/logs`, `systemctl show`, `journalctl`) ходить через него; путь с askpass остался для админ-задач под dlgrv.
 - ClickHouse: у сервера нет IPv6 — healthcheck только `127.0.0.1` (не localhost → ::1), `listen_host=0.0.0.0`. Миграции/сиды — из контейнера, креды в `deploy/.env` на сервере.
 - GeoIP за CF+nginx: реальный IP юзера — **последний** XFF-хоп / `CF-Connecting-IP` (nginx `$proxy_add_x_forwarded_for` ставит CF-IP первым).
 
@@ -40,6 +42,10 @@ Consumer (franz-go) при отсутствующем topic МОЛЧА буфе�
 - Слово «ortblabs» на сайтах нигде не упоминается.
 
 ## Сайдбар / UX
+- Форматы в UI (решения юзера, единая точка `src/lib/format.ts`): даты «17.10» (графики) / «17.10.2026» (таблицы) — НИКОГДА ISO-обрезка `slice(5)`; валюта — ТОЛЬКО ₽ (аукцион в RUB; скопированный `$`-форматтер — живой баг). При смене формата отображения грепать тестовое дерево по старому шаблону (asserts матчат старую строку). Никаких локальных fmtMoney-дублей по страницам — только общий модуль.
+- campaign_id=0 в статистике — внешний спрос каскада (не наша кампания): метка «Внешний спрос · UMG», не «Кампания #0»; при новых партнёрах метку брать из Partner-домена.
+- Tailwind v4 preflight НЕ ставит cursor:pointer на button/combobox — глобальное правило в index.css (`button:not(:disabled), [role='button'], [role='combobox'] { cursor: pointer }`), не точечные классы.
+- Шапка карточки с контролем: `flex-row items-center`, заголовок с leading по высоте контрола (h-8) — иначе селект «висит» ниже заголовка.
 - Тема: тёмная по дефолту (zinc dark), светлая — zinc light; переключатель в подвале сайдбара НАД кнопкой сворачивания, выбор в localStorage, применяется до рендера (анти-мигание скриптом в index.html — страница не вспыхивает тёмным при светлой теме).
 - Сайдбар всегда видим (без мобильного Sheet), компакт 3.5rem / расширенный 16rem, состояние в localStorage, кнопка сворачивания внизу сайдбара.
 - Гоча: cva-вариант `size default h-8` перебивает базовый `h-10` — кнопки пинить в 40px в обоих состояниях (логотип `size="lg"` 48px тоже ломал геометрию).
@@ -69,6 +75,7 @@ Consumer (franz-go) при отсутствующем topic МОЛЧА буфе�
 - После subagent-раунда с усечённым отчётом (max_iterations) проверять `git status` — хвостовые lint-фиксы остаются некоммиченными; докоммитить и прогнать build/vet/lint самому перед push.
 
 ## Контрактная целостность (schema-drift)
+- Consumer round-trip ловит баги в ОБЕ стороны: прогон нашего артефакта через НАСТОЯЩИЙ парсер потребителя (не копию!) с инвариантами на распарсенные поля нашёл баг уже в самом парсере pacer: `if not child` на `ET.Element` — falsy для элементов без детей (deprecated `bool(Element)`), текстовые опциональные дети (`<AdSystem>ssp</AdSystem>`, AdTitle, Description) молча терялись при зелёных тестах. Правило Python: на `ET.Element` проверять `is None`, не truthiness. Раннер — `scripts/pacer_parse/parse.py` (импортирует настоящий парсер, отражает распарсенные поля в JSON). Свой зеленый тест на свой артефакт потребителя не проверяет — валидировать и XSD-эталоном, и round-trip'ом.
 - Kafka-событие живёт в 4 местах: `tracking/event.go` (producer) ↔ `consumer/event.go` ↔ CH-inserter ↔ `clickhouse/init/*.sql` — новое поле = правка ВСЕХ четырёх, дрейф молчалив. Consumer decode строгий: `DisallowUnknownFields`, отсутствие `ts` — ошибка строки (не `time.Now()`); не-UUID `event_id` отбрасывать ПОСТРОЧНО с метрикой `ssp_consumer_events_dropped_total` — вечный retry всего батча на CH-ошибке вставки = poison pill: один битый event стоит весь конвейер.
 - MSW-моки фронтенда расходятся с реальным JSON бэка молча — «мок валидирует мок». Типы `api.ts` сверять с фактическим marshaling'ом admin-хендлеров; для форм — golden-JSON реального ответа как shared fixture.
 - Частичный PATCH: бэк мержит пустые поля креатива с текущими (пусто = «не менять»); фронт шлёт фактические значения, не хардкод-дефолты (640×480 в теле PATCH молча затирал click_url/title/размеры кампаний, созданных вне UI).
