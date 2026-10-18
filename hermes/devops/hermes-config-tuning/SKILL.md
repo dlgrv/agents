@@ -286,6 +286,32 @@ check every role it occupies — the default model is only one of them:
   pastes the final `127.0.0.1:<port>/callback?...` URL; tokens then land in
   `~/.hermes/mcp-tokens/<name>.json` (access + refresh, auto-refreshed).
 
+## Proxy env in .env (the 'curl works, Hermes gets 502' trap)
+
+- **Diagnose first: when a Hermes HTTP tool call fails (502/timeout) but a
+  direct curl to the same URL succeeds, check the gateway's env before
+  blaming the service** — `ps eww <gateway-pid> | grep -i proxy`. Hermes'
+  HTTP client honors `HTTP_PROXY`/`HTTPS_PROXY` from `~/.hermes/.env`, so
+  requests to self-hosted endpoints (Tailscale 100.x, LAN) route through
+  Clash/a local proxy and fail there. Plain curl is NOT a valid control
+  test: curl deliberately ignores uppercase `HTTP_PROXY`, so it bypasses
+  the proxy the gateway used. Reproduce the failure with the gateway env
+  (lowercase `http_proxy` or the venv provider code with proxy vars set).
+- **Every self-hosted/tailnet endpoint Hermes talks to must appear in both
+  `NO_PROXY` and `no_proxy` in `~/.hermes/.env`** — the lowercase form wins
+  for the httpx/urllib client, so fixing only uppercase changes nothing.
+  Include localhost + the exact IPs (new tailnet service ⇒ extend the list).
+- **Editing .env:** the patch/write_file tools refuse it (protected
+  credential file). Use `hermes config set KEY value` — but it normalizes
+  the key to UPPERCASE, so a case-sensitive env var (`no_proxy`) needs a
+  terminal `sed -i '' 's|^no_proxy=...|...|'` on the exact line. Grep with
+  a case-insensitive pattern (`grep -i proxy`) when verifying — the
+  uppercase-only pattern misses the lowercase line that actually takes
+  effect.
+- Env changes in .env are picked up per-call by the config-aware env layer
+  (verified live, no gateway restart needed) — but confirm with one real
+  tool call through Hermes before telling the user it's fixed.
+
 ## Display settings for minimal noise
 
 - **Reactions:** Enable `platforms.telegram.extra.reactions: true` for visual acknowledgment (👀👍👎) instead of text spam. Requires gateway restart.

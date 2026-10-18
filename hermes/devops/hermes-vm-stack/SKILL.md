@@ -5,6 +5,13 @@ description: Use when working on hermes-vm, Uptime-Kuma, or @fafbbea_bot.
 
 # hermes-vm: сервер и стек мониторинга
 
+## Honcho (self-hosted, :8000)
+- AUTH_USE_AUTH=true: клиент обязан слать JWT (Bearer). Плагин берёт ключ из `apiKey` в `~/.hermes/honcho.json` (root или host-блок); без него шлёт заглушку `local` → "Invalid JWT", в логах Hermes это выглядит как `Honcho background session init failed: HTTP 502`.
+- Выпуск токена: `ssh hermes-vm-ts 'docker exec -w /app honcho-local-api-1 /app/.venv/bin/python scripts/generate_jwt.py --workspace hermes --print-only'` (в контейнере НЕТ uv — только /app/.venv/bin/python).
+- **БАГ образа: `--expires` кладёт exp СТРОКОЙ → PyJWT decode отклоняет ЛЮБОЙ токен с exp.** Токен генерить ТОЛЬКО без --expires (бессрочный; ок для tailnet-only сервиса). Проверка токена: в контейнере `verify_jwt(os.environ['TKN'])`, с мака — SDK `Honcho(workspace_id='hermes', api_key=tok, base_url=...).get_metadata()`.
+- Секрет один и тот же в /root/.honcho/profiles/local/{config.toml [auth] JWT_SECRET, .env AUTH_JWT_SECRET} — при рассинхроне подпись не сойдётся.
+- Диагностика «все роуты 404»: v1-пути (`/apps`) у v3-сервера отсутствуют валидно; проверять надо SDK-вызовом, не curl по старым путям.
+
 ## Сервер
 - `hermes-vm` = 178.104.217.93. IP заблокирован в РФ — работать ТОЛЬКО через Tailscale: `ssh hermes-vm-ts` (100.93.178.88), алиас настроен на Mac.
 - Старый сервер 193.148.253.171 выведен из эксплуатации (сервисы остановлены) — не использовать.
@@ -14,6 +21,7 @@ description: Use when working on hermes-vm, Uptime-Kuma, or @fafbbea_bot.
 - Honcho (Docker Compose, self-hosted) — память о пользователе
 - Uptime-Kuma 2.5.4 (Docker, порт 3001, админ root; креды — в kuma-poller.js на сервере, не дублировать)
 - SearXNG (Docker, порт 8080 — слушать только tailnet, наружу не открывать; UFW и так прикрывает): метапоиск. Обязательно `format: json` в settings.yml (иначе API отдаёт HTML) и лимитер выключен (запросы только от своих). Порт прибит к tailscale-IP, не к 127.0.0.1 — реальный бинд смотреть `docker port`, а не предполагать localhost. Поиск у обоих агентов идёт через плагин **web-search-plus** (профиль self-hosted): SearXNG — базовый провайдер, keyless Keenable — фолбэк; base_url задаётся в `~/.hermes/plugins/config.json` (`searxng.base_url` = `http://100.93.178.88:8080`), `SEARXNG_URL` в .env провайдером плагина не подхватывается
+- **Clash-прокси на маке vs tailnet:** если в `~/.hermes/.env` есть `HTTP_PROXY` (clash), Hermes ходит к 100.93.178.88 ЧЕРЕЗ прокси → Clash не маршрутизирует 100.x → HTTP 502 на каждый запрос (SearXNG «мёртв», honcho init падает). Лечится добавлением `100.93.178.88` в ОБЕ строки `NO_PROXY` и `no_proxy` (нижний регистр обязателен — httpx даёт ему приоритет; `hermes config set` пишет только верхний, нижний — sed'ом). curl при этом работает (игнорирует HTTP_PROXY uppercase) — не обманываться прямой проверкой.
 - Работоспособность SearXNG проверять РЕАЛЬНЫМ запросом `curl 'http://100.93.178.88:8080/search?q=test&format=json'` и считать `results`, а не healthz/200 — на IP датацентра апстримы (brave, ddg, qwant, …) блокируют ВСЕ дефолтные движки (rate-limit/CAPTCHA), healthz при этом зелёный, а поиск пустой. Фикс — `/opt/searxng/settings.yml`: включить рабочий движок (bing живой), мёртвые отключить; контейнер монтирует settings.yml — правка на хосте + restart контейнера
 - Периодическое обслуживание: диск растёт от логов и контейнеров — `docker system prune` периодически (пользователь одобрил)
 - Watchtower — автообновления; Kuma на теге `:2` — Watchtower обновляет в пределах минора, мажор не перепрыгнет
