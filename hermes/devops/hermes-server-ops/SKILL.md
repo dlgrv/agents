@@ -68,8 +68,8 @@ padding — the user rejects «запас на вырост» (same stance as vp
 - No dedicated «show pinned» command exists; pin state is a flag in
   state.db — answer such questions by querying it server-side.
 
-## Config state after deployment
-- Provider: Z.ai `glm-5.3-flash` (main model), `glm-4.5-air` (all auxiliary tasks except vision), `glm-5.3-flash` (vision) — all via Z.ai direct API (`https://api.z.ai/api/pas/v4`).
+## Config state after deployment (updated 2026-10-18: всё на подписке Z.ai)
+- Provider: **`glmpro`** (custom) → `https://api.z.ai/api/coding/paas/v4` (Coding Plan — списывает кредиты подписки, не баланс), key_env `ZAI_API_KEY`. Main `glm-5.3-flash` (экономит кредиты — мак жжёт полный glm-5.3), все 17 aux-задач + delegation → `glmpro/glm-5.3-flash` без base_url-оверрайдов, fallback `glmpro/glm-5.3`, `agent.api_max_retries: 2`. Проверка фактического роутинга: `grep run_agent ~/.hermes/logs/agent.log | tail -1` → должно быть `base_url=…coding/paas/v4`.
 - `agent.reasoning_effort: medium`, `agent.max_tokens: 32768`, `agent.max_turns: 40` (user-set; medium functional since v0.21.2). NOTE: CometAPI silently ignores reasoning params entirely (verified live — no token gradient); Z.ai accepts the native `thinking:{type,effort}` and Hermes' zai plugin maps `reasoning_effort` correctly.
 - Toolsets: web, browser, terminal, file, code_execution, vision, skills, todo, memory, session_search, clarify, delegation. Disabled: computer_use, connections, cronjob, tts, image_gen, video, video_gen, x_search, homeassistant, spotify, yuanbao. A2A: inbound 9900 + outbound toolset ENABLED (mac↔server A2A is live — server-origin sessions in the desktop list are normal, see New server section).
 - STT: faster-whisper `small` installed in the Hermes venv — incoming Telegram voice messages transcribe automatically, no extra service.
@@ -158,7 +158,9 @@ system/config changes need the user's pick (standing rule).
 - a2a-cleanup runs on BOTH machines: deletes A2A-origin sessions older than retention = **7 days** (user decision — do not re-tighten to 1 day). Before deleting "leftover a2a chats", read the session's source/origin field in state.db first: `source=desktop` test chats are NOT a2a sessions — purge by the right class, not by title text.
 - logs-cleanup on the server prunes gateway logs.
 
-## Honcho stack (updated 2026-09-16)
+## Honcho stack (updated 2026-10-18: LLM на подписке Z.ai)
+- **Honcho LLM переведён с CometAPI на `https://api.z.ai/api/coding/paas/v4`** (LLM_OPENAI_BASE_URL + LLM_OPENAI_API_KEY в /root/.honcho/profiles/local/.env; бэкап .env.bak-zai). Причина: dialectic через CometAPI занимал 60-75 с при 24-39K некэшированных токенов → у мак-плагина таймаут 30 с (`Honcho dialectic query failed`).
+- **Питфолл recreate: `docker compose up -d` из profiles/local создаёт проект `local`, а живой стек — `honcho-local`** → port conflict + пустые db/redis. Правильно: `docker compose -p honcho-local up -d`. Случайный проект сносить: `docker compose down` + `docker volume rm local_pgdata local_redis-data local_lancedb-data`.
 - Stack runs as docker project `honcho-local` (profile `local`); DATA volumes: old project was `local` (local_pgdata) — data restored into `honcho-local_pgdata` from /root/honcho-backup-2026-09-16.sql
 - `honcho start` re-renders docker-compose.yml from TEMPLATE in site-packages honcho_cli/local/templates/ — env keys do NOT override hardcoded environment (compose environment > env_file). Hardening (passwords, ports removal) must be patched IN THE TEMPLATE; backups: /root/compose-template-backup.yml
 - managed_env (env.py) originally forced AUTH_USE_AUTH=false on every render — patched to respect existing .env value
