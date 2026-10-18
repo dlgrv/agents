@@ -35,7 +35,12 @@ Find, validate, and analyze origami-style leather wallet patterns that use a sin
 ### 2. Search and Collect Patterns
 
 **Free patterns (always check availability first):**
-- **CraftiveThink / LEATHER RIOT**: Minimalist Stitchless Origami Wallet
+- Availability is volatile: craftivethink.com was unreachable 2026-10-18 (host dead, also via proxy); Etsy blocks curl and headless browsers — verify by hand before promising.
+### AVFolds "ForeverFold" — NOT a pattern source
+- **Status**: ❌ Proprietary, pattern not sold
+- Videos (e.g. HG94ADkzhDQ, NrYxVndpFg0) show their commercial wallet; avfolds.com sells finished wallets only, behind aggressive Cloudflare (curl and isolated browser both blocked). Don't chase this as a pattern.
+
+### CraftiveThink / LEATHER RIOT - Minimalist Stitchless Origami Wallet
   - One piece, 308×220 mm, folds to bifold with 4 diagonal slits as "locks"
   - No snap holes (optional), no sewing lines
   - Download: https://craftivethink.com/minimalist-stitchless-leather-wallet.html
