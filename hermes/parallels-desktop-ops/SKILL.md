@@ -32,6 +32,11 @@ Manage Parallels VMs entirely from the mac terminal with `prlctl`; no GUI needed
 
 ## Long-running guest commands
 - Never hold `prlctl exec` open across a long guest install (language packs, installers) — it stalls the mac-side terminal past its timeout and you lose the output anyway. Instead: write the .ps1 to the shared folder, have it redirect all output to a log file in that same folder, launch it detached (`start /b powershell -ExecutionPolicy Bypass -File \\Mac\<share>\x.ps1`), and poll the log file from the mac side. Even the detached-launch exec call can hang; treat any exec as fire-and-forget and verify via the log, not via exec's exit.
+## Silent installs in the guest (MSI/installers)
+- Verify by the binary, not the exit code: after a silent install, `Test-Path` the actual exe (e.g. `C:\Program Files\Google\Chrome\Application\chrome.exe`). msiexec exit 0 with no files on disk is a real failure mode (see next rule).
+- A failed or half-finished silent install leaves the product REGISTERED with no files. Re-running the same MSI then enters maintenance mode — instant exit 0, nothing installed; the verbose log (`/l*v`) shows `Feature: Complete; Installed: Local; Request: Null` and "maintenance mode". Fix: `msiexec /x <same.msi> /qn` first (plus remove the leftover install dir), then `/i` fresh. Check for a registered entry (`HKLM:\...\Uninstall\*` DisplayName) before diagnosing anything else.
+- Prefer downloading the installer on the MAC into the shared folder over downloading inside the guest — guest downloads stall easily (proxy/geo), and the share already bridges the two. Big installers (~160 MB Chrome enterprise MSI works fine) run detached per the long-running pattern above.
+- If a silent install keeps failing after one clean-reinstall attempt, stop: copy the installer to the guest desktop (`copy /Y \\Mac\<share>\x.msi C:\Users\<user>\Desktop\`) and give the user the 2-step manual instruction (uninstall the phantom entry in Settings→Apps if one exists, then double-click). The user prefers finishing installs by hand over long automated debugging.
 - Delete the .ps1/_log files from the shared (desktop!) folder when done — the user sees that folder on both desktops.
 
 ## Guest language / localization
@@ -44,6 +49,17 @@ Set-Culture ru-RU
 Set-WinHomeLocation -GeoId 203           # 203 = Russia
 ```
 Add a layout alone via `Get-WinUserLanguageList` / `.Add('ru-RU')` / `Set-WinUserLanguageList -Force`. Reboot the guest afterwards (`shutdown /r /t 5`) — UI language applies only at next logon. Substitute the tag/GeoId for other languages.
+
+## Guest safe mode: exec is dead
+Parallels Tools do not run in Windows safe mode, so `prlctl exec` fails with "Unable to open new session in this virtual machine" for as long as the guest stays in safe mode — shared folders die with it, so you cannot even run a recovery script from `\\Mac\...`. Recovery is manual, in the VM console window (Win+R → cmd): `bcdedit /deletevalue safeboot` then `shutdown /r /t 0`.
+- Never `bcdedit /set safeboot` from exec just to make a one-off change (driver removal, service work): if the follow-up work cannot run, the VM is stranded in safe mode with no tool access. Only enter safe mode when something inside the next boot also exits it (see the self-exiting task pattern below).
+- Before setting safeboot, warn the user the VM will be console-only for a while and exec will not answer.
+
+## Hardening / disabling Windows Defender in the guest
+- `Set-MpPreference` reverts unless Tamper Protection is off first (`Set-MpPreference -DisableTamperProtection 1`); check state via `Get-MpComputerStatus`.
+- `Sense` (Defender ATP) and `SecurityHealthService` accept a direct `Start=4` via reg/Set-ItemProperty, even from exec's SYSTEM session. The core keys — `WinDefend`, `WdNisSvc`, `WdNisDrv`, `WdFilter`, `WdBoot` — do not: the running WdFilter kernel driver blocks SetAccessControl (ownership/ACL) on them with "unauthorized operation" even as SYSTEM. Registry edits only stick while that driver is not loaded — i.e. in safe mode.
+- Pattern: from exec, copy a .ps1 to `C:\` (shared folders are unavailable in safe mode), register it as a SYSTEM onstart scheduled task (`schtasks /create /sc onstart /ru SYSTEM /rl HIGHEST`), set `bcdedit /set safeboot minimal`, reboot. The task must be self-exiting: disable the Wd* services, delete its own task, `bcdedit /deletevalue safeboot`, `shutdown /r /t 10` — otherwise the VM is stranded (see safe-mode section). Log everything to `C:\<name>_log.txt` and read it back via exec after the guest returns to normal mode to verify Start=4 took.
+- Getting the guest into safe mode requires a reboot cycle where exec is dead; budget for the manual console recovery above when the task does not fire.
 
 ## reg add pitfalls
 - Never end a quoted `/d` value with a backslash (`"Y:\"`): reg.exe's parser eats the closing quote, drops `/f`, and reg loops forever on the overwrite prompt — flooding gigabytes of output under prlctl. Use `"Y:"`; Windows accepts a drive root without the trailing slash in these values.
