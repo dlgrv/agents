@@ -31,10 +31,16 @@ Consumer (franz-go) при отсутствующем topic МОЛЧА буфе�
 - Рейт-лимит логина в Redis: при тестах чистить ключ `login_limit:login:<ip>`.
 
 ## Сервер (135.106.162.15)
-- SSH: `ssh -i ~/.ssh/id_ed25519_lowbid dlgrv@...`; **одна неудачная попытка = стоп** (fail2ban). sudo через askpass (`SUDO_PASSWORD` в `~/.hermes/.env`, `sshpass -f /tmp/ap.secret sudo -A`).
+- SSH: `ssh -i ~/.ssh/id_ed25519_lowbid dlgrv@...`; **одна неудачная попытка = стоп** (fail2ban). sudo через askpass: одноразовый хелпер на сервере — локально `PW=$(grep '^SUDO_PASSWORD=' ~/.hermes/.env | cut -d= -f2)`, `printf '#!/bin/sh\necho "%s"\n' "$PW" > ap2.secret && scp -i <key> ap2.secret dlgrv@<host>:ap2.sh && rm -f ap2.secret`; на сервере `chmod 700 ~/ap2.sh`, команды через `export SUDO_ASKPASS=$HOME/ap2.sh; sudo -A …`. Хелпер УДАЛЯТЬ после админ-раунда (`rm ~/ap2.sh`) и пересоздавать перед следующим — пароль не живёт на сервере постоянно.
 - Для деплой-операций есть алиас **`ssp-deploy`** (юзер deployer, NOPASSWD `sudo -n systemctl` для lowbid_*-сервисов) — рестарты воркеров и read-only проверки (`docker ps/logs`, `systemctl show`, `journalctl`) ходить через него; путь с askpass остался для админ-задач под dlgrv.
 - ClickHouse: у сервера нет IPv6 — healthcheck только `127.0.0.1` (не localhost → ::1), `listen_host=0.0.0.0`. Миграции/сиды — из контейнера, креды в `deploy/.env` на сервере.
 - GeoIP за CF+nginx: реальный IP юзера — **последний** XFF-хоп / `CF-Connecting-IP` (nginx `$proxy_add_x_forwarded_for` ставит CF-IP первым).
+
+### Диск и логи сервера (профилактика переполнения)
+- Логи контейнеров ограничены В ДВУХ местах: якорь `x-logging` (json-file, `max-size: 50m`, `max-file: 3`) в базовом `deploy/docker-compose.yaml` для compose-сервисов И `/etc/docker/daemon.json` с теми же log-opts на сервере — daemon.json нужен для контейнеров ВНЕ compose (uptime-kuma, разовые). `systemctl reload docker` применяет дефолт только к НОВЫМ контейнерам — живые несут старые лимиты до пересоздания; проверять фактические лимиты `docker inspect <c> --format '{{.HostConfig.LogConfig.Config}}'`, а не `docker compose config`.
+- Итог деплоя верифицировать фактическим состоянием контейнеров (`docker ps`, inspect), а не conclusion'ом CD-рана: ран может отрапортовать failure (healthcheck при перекате), при этом новая конфигурация уже применена — и наоборот.
+- После переполнения диска проверять redis ДО следующего деплоя: запись, оборванная в момент «диск полон», бьёт хвост AOF — redis уходит в crash-loop «Bad file format reading the append only file», CD падает «container ssp-redis-1 is unhealthy», зависимые сервисы застывают в Created и сами не стартуют. Фикс: `docker run --rm -v /var/lib/docker/volumes/ssp_redisdata/_data:/data redis:7-alpine sh -c 'yes | redis-check-aof --fix /data/appendonlydir/appendonly.aof.<n>.incr.aof'` → `docker restart ssp-redis-1` → ВРУЧНУЮ `docker start` всем Created-контейнерам. `--fix` отрезает только битый хвост — безопасно.
+- Ретеншн текстовых логов воркеров (krutilka/pacer, `/var/log/lowbid`) — cron на сервере: удалять ротированные, обрезать активные до 500 МБ и хранить ≤3 дней (~2 ГБ/день при живом трафике). БД `bid_attempts` (host-PostgreSQL `lowbid_db`) — cron: `DELETE WHERE ts < now()-interval '7 days'` + VACUUM: jsonb-тела запросов/ответов раздували её до ~70 ГБ сверх heap при отсутствии retention.
 
 ## Брендинг (решения юзера)
 - Вкладка админки **всегда** «Lowbid SSP» (без динамики по разделам), favicon 📺.

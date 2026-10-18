@@ -82,6 +82,9 @@ questions. Never ask the user to re-state any of it.
 Established on the games/adtech server (krutilka, then copied for ssp) and reusable anywhere: dedicated `deployer` user (docker group, owns `/home/deployer/<project>`), a deploy-only SSH keypair named `<project>_github_actions` whose pubkey sits in deployer's `authorized_keys` with comment `github-actions@…`, manual `workflow_dispatch` CD job that SSHes in and runs compose build + up. Env-specific compose overrides MUST live in the repo — the CD job's checkout replaces the working tree and silently reverts any override file that existed only on the server. The same mechanism bites services: gate host-port-conflicting services (Caddy/Traefik on 80/443 when host nginx owns the ports) behind an INACTIVE compose `profiles:` entry in the BASE file, never by deleting them from a server-side copy — the CD checkout restores the stock base file, the service comes back and fights for the port, and the rollout step dies on 'driver failed programming external connectivity'. When a CD run fails, read the run log (`gh run view <id> --log | grep -iE 'error|FATAL'`) — the failing compose step names the conflicting container.
 
 ## Pitfalls
+- Disk 100% on a server with Postgres: follow the validated recovery recipe
+  (writer triage → safe reclaims → TOAST-bloat diagnosis → swap-rebuild →
+  retention cron) — `references/disk-pressure-recovery.md`.
 - DNS failover is a **1–5 min window**, not instant (TTL 60 + healthcheck
   cadence). Seconds-level needs VRRP/IP Failover — paid, same-DC only.
 - WAL-архив (WAL-G → S3) = point-in-time recovery; hourly dump = simpler,
