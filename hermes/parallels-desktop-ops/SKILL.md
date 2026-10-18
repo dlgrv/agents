@@ -17,12 +17,18 @@ Manage Parallels VMs entirely from the mac terminal with `prlctl`; no GUI needed
 - Opening the guest console window can only be done in the Parallels Control Center GUI (double-click the VM card, or topbar View menu after focusing). prlctl cannot open it.
 
 ## Passing Windows paths from the mac shell
+- Mapped drive letters (Y:, Z: for Parallels shares) exist only in the user's logon session — `prlctl exec` (service session) cannot see them. Address shared folders by UNC `\\Mac\<share>` in exec commands; UNC works from any session.
+- Cyrillic paths work fine through exec (robocopy/copy handle them) — just keep the mac-side double-backslash discipline.
 - Double every backslash in cmd one-liners from the mac side (`\\\\Mac\\share`), or the mac shell eats them and the guest sees a mangled path. Verify reachability with `dir \\\\Mac\\<share>` first.
 - For quoting-heavy work, write a .bat into a shared folder from the mac side, then run it: `prlctl exec ... cmd /c "\\\\Mac\\<share>\\file.bat"`. This sidesteps all quote-escaping between two shells.
 
 ## Guest shell / desktop / GUI apps
-- prlctl exec runs in a service session with no interactive desktop: launching GUI apps (explorer, browsers — anything `start`-ed) silently does nothing — verify with `tasklist /fi "IMAGENAME eq <name>.exe"`. To apply shell/desktop-affecting changes (e.g. a desktop-folder registry redirect), reboot the guest instead: `shutdown /r /t 5` via exec — it auto-logs back in.
-- When the user must launch a GUI app with specific arguments (e.g. a browser with a proxy flag), drop a .bat in the shared folder and have them double-click it — exec cannot start it, and this avoids dictating steps over chat.
+- prlctl exec runs in a service session with no interactive desktop. GUI apps launched from exec DO start — but they land in session 0 (tasklist shows `Services`), invisible to the user, eating RAM as zombie windows. Check the Session column in `tasklist /fi "IMAGENAME eq <name>.exe"`: `Console` = visible to the user, `Services` = invisible. If a session-0 duplicate appears while the user already has the app open, `taskkill /f /pid <Services-instance-pid>` — never kill the Console one.
+- To apply shell/desktop-affecting changes (e.g. a desktop-folder registry redirect), reboot the guest instead: `shutdown /r /t 5` via exec — it auto-logs back in.
+- When the user must launch a GUI app with specific arguments (e.g. a browser with a proxy flag), drop a .bat in the shared folder and have them double-click it — exec cannot put it on their desktop, and this avoids dictating steps over chat.
+
+## Guest command output encoding
+- Guest cmd output arrives through prlctl garbled (cp866, never converted). Don't fight it for yes/no facts (counts, task presence stay readable); for anything you must actually read back, redirect to a log in the shared folder and decode on the mac: Windows PowerShell `Out-File` defaults to UTF-16LE → `iconv -f UTF-16LE -t UTF-8 <log>`; cmd `>` writes cp866 → `iconv -f cp866 -t UTF-8`.
 
 ## Long-running guest commands
 - Never hold `prlctl exec` open across a long guest install (language packs, installers) — it stalls the mac-side terminal past its timeout and you lose the output anyway. Instead: write the .ps1 to the shared folder, have it redirect all output to a log file in that same folder, launch it detached (`start /b powershell -ExecutionPolicy Bypass -File \\Mac\<share>\x.ps1`), and poll the log file from the mac side. Even the detached-launch exec call can hang; treat any exec as fire-and-forget and verify via the log, not via exec's exit.
