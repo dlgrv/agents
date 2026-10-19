@@ -40,6 +40,17 @@ gh api 'search/repositories?q=created:>YYYY-MM-DD&sort=stars&order=desc&per_page
 
 Set the date to today minus the requested window.
 
+## 3. Popular repos for a product/niche ('popular repos for X')
+
+```sh
+gh api -X GET search/repositories -f q='<keyword>' -f sort=stars -f order=desc -f per_page=20 \
+  --jq '.items[] | "\(.full_name) | \(.language // "-") | \(.stargazers_count) | \(.updated_at[0:10]) | \(.description // "" | .[0:90])"'
+```
+
+- Search the product's OWN name/domain token first (`hh.ru`, `notion`) — paraphrased keyword queries ('hh auto apply') miss the top repos, whose descriptions use the product name itself.
+- Run 2–3 queries in one go (plain keyword, keyword + native-language terms, `topic:<x>`) and merge; niche ceilings are real (~600★ for RU-market tools vs 75k★ international equivalents) — report the ceiling, don't keep digging.
+- Filter noise rows (gibberish names) before presenting.
+
 ## Output
 
 Present as a markdown table with clickable repo links, then a 1–2 line thematic read of the week (what's trending as a category). Offer follow-ups: per-language trend, trending developers, or a cron job for recurring digests.
