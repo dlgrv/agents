@@ -198,6 +198,8 @@ When auditing a machine with Cursor/VSCode installed, these are the recurring wi
 - Parallels Desktop keeps ~6 processes (prl_disp_service, prl_naptd, watchdog) alive with the app closed, via label `com.parallels.desktop.launchdaemon` in the system domain (plist lives inside the app bundle). bootout+disable of that label stops autostart; the app and VMs still start manually — the service relaunches on demand when the app opens.
 - Apps that are the user's daily tools (browser etc.) are not "background waste" even at multi-GB RAM — confirm the role before listing something as a kill candidate; ask before disabling anything user-visible.
 
+- Startup audit ("что запускается при старте"): inventory with `osascript -e 'tell application "System Events" to get the name of every login item'`, the three launchd dirs (`~/Library/LaunchAgents/`, `/Library/LaunchAgents/`, `/Library/LaunchDaemons/`), and `sfltool dumpbtm | grep -E 'Name:|Disposition:'` for Ventura+ background-task registrations. An agent is an orphan only if its target app is gone — verify the app still exists before judging (Google Updater/Keystone is legit while Chrome is installed, Valve's `steamclean` while Steam is). Dead `.plist.disabled` files in LaunchAgents are safe to delete outright.
+
 ## Moving large data to an external drive (with verified delete of the source)
 
 Never delete the original folder based on rsync/cp exiting 0 — verify the copy first, then delete:
@@ -205,6 +207,7 @@ Never delete the original folder based on rsync/cp exiting 0 — verify the copy
 1. **Identify the destination conventions first**: `diskutil list` for the device, `mount` for the filesystem (exFAT has no ownership/modes — use `rsync -rlt`, not `-a`), and list existing top-level dirs on the volume to copy the user's naming convention (e.g. `город_дд_мм_гггг`, lowercase). Rename the folder to that convention before the copy, not after.
 1.5 **Scan the source for secrets before copying** (`find SRC -name 'id_rsa*' -o -name 'known_hosts' -o -name '.env*' -o -name '*.pem'`): old flash dumps and hand-me-down archives routinely carry SSH private keys, and external drives are unencrypted (exFAT especially) — flag any hits to the user and delete them from BOTH source and destination before finishing the move.
 2. **Copy**: `rsync -rlt src/ /Volumes/X/dest/` (trailing slashes matter: `src/` copies contents, plain `src` nests the dir).
+   - **Many small files → tar, not rsync**: exFAT gives ~100 small files/min, so a 60k+-file tree (legacy project dumps) takes HOURS by file-level copy. Pack into an UNCOMPRESSED tar first (`tar` without `-z` — compression on legacy content is slow and saves little), copy the single file, verify, delete the source. The user can untar on demand.
 3. **Verify three things before deleting the source**: file **count** on both sides, **total bytes**, and per-file **md5**. Hash in sorted filename order — `find` order is not guaranteed to match between two trees, and an unsorted concatenation of hashes yields false mismatches:
    ```bash
    c1=$(cd SRC && find . -type f | sort | xargs md5 -q | md5)
@@ -213,6 +216,12 @@ Never delete the original folder based on rsync/cp exiting 0 — verify the copy
 4. Only on full match: `rm -rf` the source. Report freed space.
 
 **Pitfall — macOS ships ancient rsync 2.6.9**: flags like `--info=progress2` make it print the usage banner and copy NOTHING, exit code masked by the pipe. After any rsync-to-new-dir, confirm the destination actually has files (`find DST -type f | wc -l`) before running verification or deleting anything.
+
+**Pitfall — system `tar` fails on iCloud-synced folders (Desktop)**: fileproviderd holds the sparse-file metadata and `tar` dies with `lseek(SEEK_HOLE) timed out` mid-run. Use python `tarfile` instead — it reads without SEEK_HOLE.
+
+**Pitfall — python tarfile must use `format=tarfile.PAX_FORMAT`**: the default USTAR silently skips any path longer than 256 chars (they just don't land in the archive). PAX handles long names.
+
+**Verify a tar move** by comparing sorted `(relative-path, size)` lists from the archive members (`tarfile.open(dst)` → `m.name, m.size` for `m.isfile()`) against `os.walk` of the source — count + per-file size, `MATCH: True` — plus md5 of the tar itself if it was copied across volumes. Only then delete the source.
 
 ## Checking a disk's real capacity / size confusion ("почему 1 ТБ показывается как 926 ГиБ")
 
