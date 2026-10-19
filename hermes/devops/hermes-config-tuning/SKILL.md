@@ -26,9 +26,7 @@ never hand-edit config.yaml (a stray indent corrupts it and breaks the live gate
 
 ## CLI facts that save debugging
 
-- **`hermes config set KEY <yaml>` accepts complex values.** Inline flow-style
-  YAML works: `hermes config set providers.foo.models "[{id: m1},{id: m2}]"`.
-  No need to hand-edit the file for model lists.
+- **Replacing an EXISTING section needs `--force`.** `hermes config set <section> '<mapping>'` fails with 'Cannot set to a scalar — configuration section with N sub-keys' once the section already exists; use dotted leaf paths (`config set model_overrides.glmpro.glm-5.3.context_window 300000`) or `hermes config set --force <section> '<mapping>'` to replace the whole section. Inline flow-style YAML works for the complex value: `hermes config set providers.foo.models "[{id: m1},{id: m2}]"` — no need to hand-edit for model lists.
 - **String-list values need per-element quotes.** `hermes config set
   x.args '[-y, @scope/pkg]'` stores a plain STRING (warning: "looks like a
   list/mapping but is not valid YAML/JSON") that isinstance-gated readers
@@ -208,6 +206,20 @@ check every role it occupies — the default model is only one of them:
 4. **Do NOT**: hand-write exponential delays into config.yaml (duplicates
    built-in backoff), raise tool workers (code fork, and API latency is the
    bottleneck anyway), or raise max_iterations (burns budget on wedged tools).
+
+## Context window clamping (model_overrides)
+
+- The model catalog can report a huge native window (GLM-5.3 family: 1M); cap it
+  with `model_overrides.<provider>.<model_id>.context_window` (other fields:
+  supports_tools, supports_vision, supports_reasoning). Set it per role — main
+  model AND glm-5.3-flash — or aux/compression calls keep the big window.
+- **The window size itself is not a cost; tokens actually sent are.** Capping
+  helps only through the auto-compressor: with `compression.threshold: 0.5`, a
+  300K cap compresses at ~150K filled vs ~500K on a 1M window. Balance: 200K
+  standard, 300K for long file-heavy sessions, 128K only when compression
+  frequency matters more than context depth.
+- Overrides apply on NEW sessions; the live one keeps the old window. Verify
+  with `hermes config get model_overrides`.
 
 ## Model/provider management
 
