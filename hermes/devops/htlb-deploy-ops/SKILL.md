@@ -12,7 +12,7 @@ CI/CD and deploy operations for `dlgrv/HowToLiveBetter` (api = Go + PocketBase, 
 | Workflow | Trigger | Does |
 |---|---|---|
 | `deploy-api` | push to main touching `api/**` | lint+test Go → build binary → stop service → backup `pb_data` → rsync binary → activate symlink → perms → start → health-check (auto-rollback on failure) |
-| `deploy-book` | push touching `book/**` | build static site → rsync to `/var/www/book.dlgrv.com/releases/<stamp>` → flip `current` symlink |
+| `deploy-book` | push touching `book/**` | build static site → generate sitemap.xml (532 urls) + llms-full.txt (22MB, 245 sections) + copy IndexNow key into `.publish/` → rsync to `/var/www/book.dlgrv.com/releases/<stamp>` → flip `current` symlink → IndexNow ping (changed urls; **first ping after adding the key may 403 — retry manually, later deploys are 200**; jq filter MUST precede positional `--args` args) |
 | `ebooks` | push touching `book|docs|forge/ebook` | build EPUB+PDF per lang (matrix) → replace assets on fixed `ebooks-latest` release (must be exactly 14 assets, `gh release upload --clobber`) |
 | `pages` | push touching `deploy/pages-redirect/**` | deploy a permanent redirect site to GH Pages (mirror removed 2026-10-20): `index.html` + `404.html` JS map `/HowToLiveBetter/<path>` → `book.dlgrv.com/<path>`. GH Pages serves 404.html for unknown paths (HTTP 404 is expected) — verify redirect content, not status code |
 
