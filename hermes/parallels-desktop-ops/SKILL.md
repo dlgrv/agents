@@ -13,12 +13,14 @@ Manage Parallels VMs entirely from the mac terminal with `prlctl`; no GUI needed
 ## Control
 - `prlctl` fails with «Failed to initialize Parallels Desktop in unattended mode» (inittool2 init hint) while the Parallels Desktop app is closed — `open -a "Parallels Desktop"` first, wait a few seconds, then prlctl works; no sudo init procedure needed.
 - `prlctl list -a` — VMs and their state. Use the display name (e.g. `"Windows 11"`) everywhere; the UUID also works.
-- `prlctl start|suspend|resume|stop "<vm>"`. `stop` is a hard power-off — prefer a guest-side `shutdown /s /t 0` via exec.
+- `prlctl start|suspend|resume|stop "<vm>"`. `stop` is a hard power-off — prefer a guest-side `shutdown /s /t 0` via exec. A suspended VM must be resumed before exec works (`prlctl resume`, give it ~20 s).
 - Run commands inside the guest: `prlctl exec "Windows 11" cmd /c "<command>"`. Works for cmd, reg, tasklist, shutdown, etc.
 - Opening the guest console window can only be done in the Parallels Control Center GUI (double-click the VM card, or topbar View menu after focusing). prlctl cannot open it.
 
 ## Passing Windows paths from the mac shell
-- Mapped drive letters (Y:, Z: for Parallels shares) exist only in the user's logon session — `prlctl exec` (service session) cannot see them. Address shared folders by UNC `\\Mac\<share>` in exec commands; UNC works from any session.
+- Mapped drive letters (Y:, Z: for Parallels shares) exist only in the user's logon session — `prlctl exec` (service session) cannot see them. Address shared folders by UNC `\\Mac\<share>` in exec commands; UNC works from any session. An isolated VM may have no `\\Mac\Home` at all — list the shares the guest actually has (`net use` via exec) before assuming.
+- Mac→guest bulk copy recipe: `ditto <src> <stage>` into the dedicated shared folder on the mac side, then `robocopy "\\\\Mac\\<share>\\stage" "C:\\dest" /MIR /NFL /NDL /NJH` via exec, then delete the stage. `robocopy /MIR` mirrors deletions too — use it to re-sync a whole tree, never against a folder with an app open in the guest (locks + rewrite on save).
+- Guest-side `findstr` can fail to open a Cyrillic path that `dir` lists fine — don't debug guest-side search; `copy /Y` the file to the shared folder and grep it on the mac.
 - Cyrillic paths work fine through exec (robocopy/copy handle them) — just keep the mac-side double-backslash discipline.
 - Double every backslash in cmd one-liners from the mac side (`\\\\Mac\\share`), or the mac shell eats them and the guest sees a mangled path. Verify reachability with `dir \\\\Mac\\<share>` first.
 - For quoting-heavy work, write a .bat into a shared folder from the mac side, then run it: `prlctl exec ... cmd /c "\\\\Mac\\<share>\\file.bat"`. This sidesteps all quote-escaping between two shells.

@@ -122,6 +122,13 @@ Established on the games/adtech server (krutilka, then copied for ssp) and reusa
 - Static files (downloads) → Object Storage + CDN survives any single server
   death, near-free.
 
+## Monitoring (Uptime Kuma) and weekly-plan MCP
+- Two-instance Kuma (primary on a server + standby clone on the NAS), mutual
+  Kuma↔Kuma monitors, and the sqlite-surgery procedure for adding monitors or
+  upgrading versions — `references/monitoring-kuma.md`.
+- Managing the user's PrimeBPM weekly plan over raw MCP (session handshake,
+  weekly_* tools, --noproxy) — `references/primebpm-weekly-plan.md`.
+
 ## Postgres HA patterns
 - **Streaming replication**: B-standby, promote by playbook — RTO ~2–5 min;
   simple, but risk split-brain if promote without fencing. Test quarterly.

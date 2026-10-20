@@ -2,7 +2,7 @@
 
 ## Setup pattern for multi-DC HA
 - **Subnet:** 10.0.0.0/24 (user's decision)
-- **Nodes:** A=.1, D=.2, E=.3, NAS=.4 (Selectel + PrimePilot + NAS)
+- **Nodes:** A=.1 (hub), D=.2, E=.3, NAS=.4, F=.6, C=.7
 - **Always use vanilla WireGuard** (no custom forks; user rejected 'ru' variants).
 - **No public etcd access** — all etcd/Patroni traffic only via WG mesh.
 - **No public Patroni REST** — only from WG peers.
@@ -11,7 +11,7 @@
 - **Postgres replication**: inside WG only
 - **etcd cluster**: inside WG only
 - **Patroni DCS**: inside WG only
-- **NAS backups**: rsync over WG
+- **NAS backups**: pull over WG (NAS SSHes out to each server — outbound from the NAS is unrestricted, so the "NAS ufw allows only 10.0.0.1" rule stays intact; do not propose opening NAS ufw to the mesh for backups)
 - **Admin panels**: only accessible via WG
 
 ## User preference
@@ -52,6 +52,26 @@ keepalive; the hub keys off the peer's public key, not its address:
   genpkey -algorithm X25519` may be unavailable on macOS) and handed to the
   user as ready-to-paste blocks; Leonid explicitly prefers commands with real
   values already substituted over templates with placeholders.
+
+## Hub-and-spoke: spoke-to-spoke traffic is BLOCKED by default (validated fix)
+With stock spoke configs (hub peer `AllowedIPs = 10.0.0.1/32`) a spoke drops
+packets sourced from any other spoke's mesh IP, so a new node can reach only
+the hub. Full connectivity = two changes, both required:
+1. Hub: `sudo ufw route allow in on wg0 out on wg0` (allow forwarding inside
+   the tunnel; also needs `net.ipv4.ip_forward=1`).
+2. EVERY spoke: widen the hub peer's AllowedIPs from `10.0.0.1/32` to
+   `10.0.0.0/24` — runtime `wg set wg0 peer <hub_pub> allowed-ips 10.0.0.0/24`
+   AND persist with
+   `sed -i '/^AllowedIPs = 10.0.0.1\/32/c\AllowedIPs = 10.0.0.0/24' /etc/wireguard/wg0.conf`
+   (runtime alone dies at the next wg-quick restart).
+- Never run the spoke `wg set` on the HUB itself with the hub's own public
+  key — it creates a bogus self-peer with a /24 AllowedIPs; check
+  `wg show wg0 peers` after a batch change and remove it
+  (`wg set wg0 peer <hub_pub> remove`). The accompanying sed is harmless on
+  the hub (its config has no 10.0.0.1/32 line).
+- Verify the fix from the NEW node with unprivileged TCP probes to each
+  spoke's real service port (80/22/...), then confirm the monitoring instance
+  on that node goes green — heartbeats are the end-to-end proof.
 
 ## Verifying connectivity as a non-root user
 `ping` fails for unprivileged users on hardened hosts (`ping: socket:

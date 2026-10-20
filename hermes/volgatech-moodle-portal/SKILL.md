@@ -5,7 +5,7 @@ description: Use when working with the VolgaTech Moodle portal.
 
 # VolgaTech Moodle portal (elearning.volgatech.net)
 
-Login in the ISOLATED browser only (use_real_profile off — host Chrome locks the profile). Creds are in the vault bound to this origin: type the identifier with fill_input, then browser_vault_fill. Login form (Trusted.ID at auth.volgatech.net): `#inputUsername` / `#inputPassword`, submit button text «ВОЙТИ» — the vault fills only the password. Courses: `/course/view.php?id=<id>`; a submission editor: `/mod/assign/view.php?id=<cmid>&action=editsubmission`.
+Login in the ISOLATED browser only (use_real_profile off — host Chrome locks the profile). Creds are in the vault bound to this origin: type the identifier with fill_input, then browser_vault_fill. Login form (Trusted.ID at auth.volgatech.net): `#inputUsername` / `#inputPassword`, submit button text «ВОЙТИ» — the vault fills only the password; VERIFY BOTH FIELD LENGTHS before submitting (the SPA re-renders can leave the username empty even after a successful vault fill — check `value.length` on both inputs, refill the empty one, then click «Войти»). Courses: `/course/view.php?id=<id>`; a submission editor: `/mod/assign/view.php?id=<cmid>&action=editsubmission`.
 
 ## Replace an existing submission (filemanager)
 Deleting + re-uploading is the only way to swap files; Moodle keeps no in-place rename.
