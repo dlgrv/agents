@@ -26,6 +26,15 @@ Teachers see «последний доступ к курсу» per student; empt
 Pitfall: the OAuth redirect can re-present the SAME Trusted.ID form after the first «ВОЙТИ» — check `document.querySelector('#inputUsername')` and, if present, fill the identifier + vault-fill + submit a second time. After submitting, poll `page_info()` until the URL contains `elearning` (up to ~30 s); a single `wait_for_load()` may return while still on auth.volgatech.net.
 Pitfall: if the browser daemon was restarted mid-session, the Moodle session dies with it — re-login before assuming anything about course state.
 
+## When elearning won't load from the agent browser
+The isolated browser inherits the Mac's proxy env (Clash on 127.0.0.1:17891); volgatech routes through a dead clash node and every HTTPS request hangs (proof: `curl --noproxy '*' https://elearning.volgatech.net/` returns 200). Fix WITHOUT touching Clash (user's hard rule): launch a dedicated headless Chrome for Testing with the proxy env vars unset (`env -u HTTP_PROXY -u HTTPS_PROXY ... chrome --headless=new --remote-debugging-port=9223 --user-data-dir=/tmp/agent-browser-manual-profile`), then `hermes config set browser.cdp_url http://127.0.0.1:9223` and pkill browser_harness.daemon — it respawns onto that Chrome. Configure Hermes only via `hermes config set`, never by editing config.yaml (a stray indent breaks the live gateway). Restore with `hermes config set browser.cdp_url ''` afterwards.
+
+## Portal quirks for scripted access
+- **`core_course_get_contents` is disabled on this portal** («Веб-служба недоступна») — enumerate a course's modules by parsing the `/course/view.php?id=<id>` HTML: regex over `/mod/<type>/view.php?id=N` hrefs plus the nearest `instancename` text gives type/id/name for every module including the 10 assignments of a practice course.
+- **Check assignment submissions via the page wording, not guesses**: `mod/assign/view.php?id=N` (full goto, not XHR — XHR GET of an assign URL returns the course shell) reports «Состояние ответа … Ни одной попытки» when nothing was submitted.
+- **This harness's js() has no await_promise — run in-page API calls as synchronous XHR** (`x=new XMLHttpRequest(); x.open('POST',url,false); x.send(body); return x.responseText`), and build the JS expression by string concatenation, not an f-string — the JS braces collide with f-string syntax and throw.
+- On a course page the plain ajax `core_course_get_enrolled_courses_by_timeline_classification` still works (see above) — only some WS methods are disabled; read the error body before assuming the whole ajax service is dead.
+
 ## File naming formula
 `{Предмет-аббревиатура}_{Тип+№}_{Группа}_{Фамилия_И.О.}.{ext}` → e.g. `ОИИ_ЛР1_ИТС-41з_Долгирев_ЛМ.docx`. Canonical spec with the full rule list: `university/именование-файлов.md`. When renaming, rename BOTH the local files and the portal submission (old filenames linger on the platform otherwise).
 

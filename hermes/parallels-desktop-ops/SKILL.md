@@ -11,6 +11,7 @@ Load when the task involves a Parallels Desktop VM on this Mac: controlling the 
 Manage Parallels VMs entirely from the mac terminal with `prlctl`; no GUI needed for control or guest commands.
 
 ## Control
+- `prlctl` fails with «Failed to initialize Parallels Desktop in unattended mode» (inittool2 init hint) while the Parallels Desktop app is closed — `open -a "Parallels Desktop"` first, wait a few seconds, then prlctl works; no sudo init procedure needed.
 - `prlctl list -a` — VMs and their state. Use the display name (e.g. `"Windows 11"`) everywhere; the UUID also works.
 - `prlctl start|suspend|resume|stop "<vm>"`. `stop` is a hard power-off — prefer a guest-side `shutdown /s /t 0` via exec.
 - Run commands inside the guest: `prlctl exec "Windows 11" cmd /c "<command>"`. Works for cmd, reg, tasklist, shutdown, etc.

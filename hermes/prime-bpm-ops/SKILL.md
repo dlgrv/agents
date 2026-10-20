@@ -40,3 +40,4 @@ Tokens are `bpm_*`, stored hash-only (`sha256(raw)` in `api_tokens` table, model
 
 - NEVER put a literal URL inside a shell command you hand to Leonid to paste: his chat client wraps URLs as `` @url:`https://...` `` and he pastes it verbatim, corrupting the file/command. Build commands so the URL appears only in output, or include a strip step: `sed 's|@url:`\([^`]*\)`|\1|'`.
 - Don't trust `git pull` on a work server dir blind: check `DEPLOYED_SHA` matches `origin/master` head before diagnosing version-dependent behavior.
+- Fleet/server-park operations (firewall, fail2ban, WireGuard mesh, Kuma instances, sudoers, the A–F + NAS hosts) have their own runbook: see `references/work-infra-fleet.md`. Read the inventory (`~/work/infra/docs/inventory.md`) before touching any work server, and update it after any topology change.
