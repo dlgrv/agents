@@ -15,6 +15,8 @@ Streamable HTTP at `https://primebpm.ru/mcp`, Bearer PAT. Session-based — ever
 2. POST `notifications/initialized` with that header.
 3. POST `tools/call` / `tools/list` with `Mcp-Session-Id: <sid>`.
 
+Sessions expire (server restart / idle): a mid-work `Session not found` means re-run the initialize dance and swap in the fresh `Mcp-Session-Id` — do not retry the old sid. Caching the sid in the scratch dir between calls is fine, but expect to re-initialize at least once per session.
+
 PAT lives in `~/.cursor/mcp.json` under `mcpServers.primebpm.headers.Authorization` — read it from there, update it there when Leonid sends a new token.
 
 Status-by-response cheat sheet:

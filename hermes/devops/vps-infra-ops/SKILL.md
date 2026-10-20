@@ -82,6 +82,32 @@ questions. Never ask the user to re-state any of it.
 ## GitHub Actions deploy pattern (deployer user)
 Established on the games/adtech server (krutilka, then copied for ssp) and reusable anywhere: dedicated `deployer` user (docker group, owns `/home/deployer/<project>`), a deploy-only SSH keypair named `<project>_github_actions` whose pubkey sits in deployer's `authorized_keys` with comment `github-actions@…`, manual `workflow_dispatch` CD job that SSHes in and runs compose build + up. Env-specific compose overrides MUST live in the repo — the CD job's checkout replaces the working tree and silently reverts any override file that existed only on the server. Same rule generalizes to every repo-owned file CD copies to the server (compose files, systemd units, cron files): a manual server-side edit of a repo-owned file survives only until the next deploy — fix in the repo, and pin the invariant with a CI lint gate (e.g. grep failing the build) where the failure class is known. The same mechanism bites services: gate host-port-conflicting services (Caddy/Traefik on 80/443 when host nginx owns the ports) behind an INACTIVE compose `profiles:` entry in the BASE file, never by deleting them from a server-side copy — the CD checkout restores the stock base file, the service comes back and fights for the port, and the rollout step dies on 'driver failed programming external connectivity'. When a CD run fails, read the run log (`gh run view <id> --log | grep -iE 'error|FATAL'`) — the failing compose step names the conflicting container. Two more invariants for privileged installs: (a) a repo-owned file copied by CD to a root-owned path needs its own per-file NOPASSWD sudoers entry — sudoers matches exact `cp <src> <dst>` command lines, so a new file without one fails the cp with 'a password is required'; (b) the remote script must propagate errors (`set -e`) — an ssh heredoc returns the LAST command's exit code, so an early failed sudo/silent skip reports a green run. Verify the installed file's CONTENT on disk, never the run conclusion. The end state of this pattern: every server config (cron.d, rsyslog, logrotate, docker daemon.json, nginx, sudoers) lives in the repo under `deploy/server/` with an idempotent installer and a scheduled drift-check that diffs normalized copies (normalize away secrets/tokens and comment lines) and pushes status to the monitoring system — the manual 'fix in the repo, not on the server' rule enforced by automatic detection. Secrets stay out of the repo: placeholder in the template, real value in a root-only env file the installer reads at install time. Idempotent installers never repair an existing BROKEN file ('skip if exists') — rm + reinstall to fix, and verify content (grep for the variables) after installing, never the installer's output.
 
+## Firewall hardening — status checks and standing gates
+- **`systemctl is-active ufw` = inactive does NOT mean no firewall.** Rules can
+  be loaded in the kernel while the systemd unit shows inactive; the verdict
+  comes from `ufw status` (or the live nftables ruleset), never the unit state.
+  A false "firewall is off" verdict triggers unnecessary ruleset work.
+- **`fail2ban` service running does NOT mean it bans anything.** Debian's
+  stock `jail.conf` ships `enabled = false` and an empty `jail.d/`, so a green
+  `systemctl is-active fail2ban` can coexist with zero jails. Check
+  `sudo fail2ban-client status sshd` (or grep `jail.d/` for `enabled`), and
+  treat `Currently banned: N` with N>0 as proof the jail is live.
+- **Standing user gate: never remove port 22 from any firewall.** SSH access
+  is non-negotiable, and the user's external IP floats — IP allowlists for
+  SSH are rejected. The accepted compensation for a public 22 is: keys-only
+  auth (PasswordAuthentication no) + fail2ban sshd jail. Secondary SSH ports
+  (GitLab git+ssh etc.) stay public too — they are functional, not legacy.
+- **The validated hardening baseline lives in `~/work/infra/deploy/host-baseline/`**
+  (sshd drop-ins, `fail2ban/jail.d/service.conf` with nftables action,
+  `apply-sshd-fail2ban.sh`). Take configs from there (or from a peer server's
+  `/etc/fail2ban/jail.d/`), never hand-write new ones.
+- **For agent autonomy the user grants a narrow NOPASSWD sudoers file**
+  (`/etc/sudoers.d/ldolgirev-firewall`: nft/ufw/iptables/install/systemctl
+  fail2ban/fail2ban-client, chmod 440, verify with `visudo -c`) rather than
+  sharing root passwords. When no sudo is available, stage files in `/tmp` via
+  scp and hand one short root command block — the user pastes and returns
+  output, then you verify remotely.
+
 ## Pitfalls
 - Disk 100% on a server with Postgres: follow the validated recovery recipe
   (writer triage → safe reclaims → TOAST-bloat diagnosis → swap-rebuild →

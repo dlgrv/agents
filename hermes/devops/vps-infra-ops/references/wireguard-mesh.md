@@ -38,6 +38,33 @@ Endpoint = <peer_public_ip>:51820
 PersistentKeepalive = 25
 ```
 
+## Adding a peer behind NAT / with a dynamic IP (validated)
+Static public IP is needed on ONE side only — the hub. A spoke behind home
+NAT / CGNAT / floating IP initiates the tunnel itself and keeps it open with
+keepalive; the hub keys off the peer's public key, not its address:
+- Spoke config: `Endpoint = <hub_ip>:51820` + `PersistentKeepalive = 25`;
+  `AllowedIPs = 10.0.0.0/24` (mesh traffic only, never full-tunnel).
+- Hub peer entry: NO `Endpoint` line — the hub learns the address from the
+  first handshake packet and updates it automatically.
+- Order of operations: add the peer on the hub first (`wg set wg0 peer ... allowed-ips 10.0.0.X/32`, then append the same Peer block to wg0.conf for persistence), then bring up the spoke — the handshake lands immediately.
+- Keys for the whole exchange can be generated locally (python
+  cryptography.hazmat.primitives.asymmetric.x25519 — LibreSSL's `openssl
+  genpkey -algorithm X25519` may be unavailable on macOS) and handed to the
+  user as ready-to-paste blocks; Leonid explicitly prefers commands with real
+  values already substituted over templates with placeholders.
+
+## Verifying connectivity as a non-root user
+`ping` fails for unprivileged users on hardened hosts (`ping: socket:
+Operation not permitted` — missing cap_net_raw), and an unprivileged `ssh`
+account usually cannot read `/etc/wireguard/` either. Verify instead with a
+TCP probe that needs no capabilities:
+```bash
+ssh <host> 'timeout 5 bash -c "echo > /dev/tcp/10.0.0.X/22" && echo ok || echo fail'
+```
+Also `cat /proc/sys/net/ipv4/ip_forward` on the hub (readable without root)
+to confirm spoke-to-spoke forwarding is even possible before debugging a
+failing spoke→spoke path.
+
 ## Firewall (nftables)
 ```bash
 nft add table inet filter
