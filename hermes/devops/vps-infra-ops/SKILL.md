@@ -60,8 +60,9 @@ questions. Never ask the user to re-state any of it.
   не плодить договоры с мелкими хостерами.
 
 ## Planning workflow for infra tasks
-1. **Inventory first** — references/infra-inventory.md; verify live state via
-   user-pasted SSH output (audit mode: we never SSH ourselves).
+1. **Inventory first** — references/infra-inventory.md; verify live state
+   via user-pasted SSH output (audit mode: no direct SSH except the
+   direct-access exceptions listed in the inventory).
 2. **Options + recommendation BEFORE the final plan** (user's standing
    preference). Collect decisions with clarify; don't finalize on guesses.
 3. Write plan to `.hermes/plans/` (see `plan` skill); open an

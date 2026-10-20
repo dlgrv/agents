@@ -1,5 +1,5 @@
 # Infra inventory & decision log
-Updated: 2026-10-14 (added office NAS; план v3 от 2026-10-12 в силе)
+Updated: 2026-10-20 (added dedik 109 access/layout)
 
 ## ACTIVE PLAN: v3 «Восточный пояс» вариант A (2026-10-12)
 Контекст: окт.2026 — удары БПЛА по 3 ЦОДам Яндекса (Сасово/Калуга/Владимир);
@@ -31,6 +31,27 @@ etcd-судьи: W1(NSK)+J1(Екб)+C2(Казань) — 3 региона/3 пр
 | 94.26.229.45 | PrimePilot: app/admin/api.primepilot.tech; license-service, репо ~/work/license-service (docker compose) |
 | 94.26.228.62 | PrimePilot configurator (страница /download); «там ничего не крутится» |
 
+## Дедик 109.236.57.134 — доступ и раскладка (проверено 2026-10-20)
+- SSH: `ssh web-main` (алиас в `~/.ssh/config`, user `ldolgirev`, в sudo-
+  группе, но sudo требует пароль — NOPASSWD нет; `root@` запрещён).
+  GitLab: `ssh primegit.ru` → user `git`, port 2222, ключ `id_ed25519_prime_web`.
+- primebpm: деплой в `/opt/prime-bpm` (владелец `deployer`), файл
+  `DEPLOYED_SHA` = задеплоенный коммит; сервис systemd `bpm-api.service`
+  (uvicorn на 127.0.0.1:8080, `EnvironmentFile=/opt/prime-bpm/backend/.env`).
+  `.env` читает только `deployer` — ldolgirev не может; переменные сервиса
+  смотреть через `systemctl cat bpm-api.service`, прод-окружение процесса —
+  только под sudo (которого нет без пароля).
+- Репо primegit.ru/prime-web/prime-bpm — локальная копия `~/work/prime-bpm`.
+  Дефолтная ветка **`master`** (ветки `main` нет). `git fetch/clone` к
+  primegit.ru падает с SSL-ошибкой при экспортированных прокси-переменных
+  clash (`http(s)_proxy`) — снимать прокси-окружение (`env -u http_proxy -u
+  https_proxy git …`); напрямую соединение работает.
+- Отладка «эндпоинт отвечает обобщённым disabled/503»: сначала grep репо по
+  тексту ответа — kill-switch/политики в middleware срабатывают ДО auth,
+  так что токен/креды не первый подозреваемый; потом сверять env-переменные
+  гейта на сервере с тем, что код требует для включения (прод по умолчанию
+  может выключать фичу, включённую в dev).
+
 ## Office NAS (офис, за Tailscale — можно SSH напрямую)
 Полные данные: `~/work/infra/nas/README.md`. Кратко:
 - **Доступ:** `ssh nas` — алиас в MacBook `~/.ssh/config` → `kbbs@100.69.213.39`
@@ -43,8 +64,10 @@ etcd-судьи: W1(NSK)+J1(Екб)+C2(Казань) — 3 региона/3 пр
 - В etcd-кворумах NAS запрещён (см. Postgres HA) — офис выключают.
 
 Audit mode: user pastes SSH command output; we do not SSH directly.
-Исключение: собственные машины юзера, доступные напрямую (офисный NAS по
-Tailscale) — туда SSH разрешён, включая sudo через пользователя.
+Исключение: собственные машины юзера, доступные напрямую — офисный NAS по
+Tailscale и дедик 109.236.57.134 (алиас `web-main`). Туда SSH разрешён;
+на дедике — read-only диагностика, любые изменения (env, рестарты сервисов)
+только после явного спроса.
 
 ## Target architecture (plan v2, 2026-09-02)
 - **Web VPS** (Selectel, СПб): 4 vCPU / 8GB / **300GB локальный NVMe** —
