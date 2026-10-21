@@ -42,6 +42,29 @@ NEVER hand-edit these files while Altium has the project open — the app holds 
 3. Byte sizes of purely-replaced files unchanged.
 4. FINAL GATE (nothing else proves Altium parses it): reopen the project in Altium and check the Messages panel is clean. Do not report success after step 3 alone.
 
+## Generating a schematic by DXP script (no UI drawing)
+Modern Altium (AD26 and later) installs with NO local content libraries — a generated
+schematic cannot reference stock TTL/analog symbols, and Manufacturer Part Search needs
+network + licensing. The script must build its own `.SchLib` first:
+`Client.OpenNewDocument('SCHLIB', ...)` → `SchServer.GetCurrentSchDocument` →
+`SchServer.SchObjectFactory(eSch_LibComponent, ...)` with `eSch_Pin` children →
+`AddSchComponentToLibrary`. Then place on the sheet with `eSch_Component`
+(`LibReference` + `SourceLibraryName` pointing at that lib).
+
+- **Wire with net labels, not geometric wires**: identical net-label text = connection in
+  Altium. This eliminates all routing-coordinate math — the script only places components
+  and drops `eSch_NetLabel`/`eSch_PowerPort` at pin ends. Symbols only need the pins
+  actually used (unused pins omitted) — far fewer labels.
+- Soviet-ttl mapping when only Western parts exist: К155ЛА3=7400, ИЕ2=7490, ИЕ4=7492,
+  ТМ2=7474 — reuse stock symbols and set the Russian name in the Comment/designator.
+- No netlist import exists in modern Altium — after the schematic, the PCB path is
+  Design → Update PCB Document; the script does not need to generate the PcbDoc.
+- A script written without access to a running Altium WILL error on first run — structure
+  it as stages separated by `ShowMessage` progress prompts so partial success survives,
+  then iterate from the user's pasted error text or screenshot instead of rewriting blind.
+- Run via File → Run Script (a bare `.pas` is enough; no `.PrjScr` needed). Files created
+  by scripts are NOT in the project — the user adds them via ПКМ → Add Existing Document.
+
 ## Virtual folders in the Projects panel
 The sidebar folder INI format inside .PrjPcb is undocumented and NOT guessable — never hand-write folder sections. Learn it empirically: have the user create ONE folder in Altium (ПКМ по проекту → Add New → Project Folder) and Save Project, then diff the .PrjPcb before/after and replicate the discovered structure. Note the Projects panel is flat regardless of physical disk folders — grouping requires these virtual folders, and files must first exist as `[DocumentN]` entries to be grouped at all.
 

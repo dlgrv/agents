@@ -82,6 +82,29 @@ hermes config set auxiliary.vision.provider <your_provider>
 hermes config set auxiliary.vision.model <model_name>
 ```
 
+**vision_analyze errors with a "text only / not supported" accept-code:** the configured
+aux vision model is not vision-capable *on that endpoint* — the same model name can be
+text-only on a coding endpoint while vision models live elsewhere. Don't swap flash↔full
+of the same family; pick a model the endpoint actually serves with images (for z.ai's
+coding endpoint that is `glm-4.6v`; the 5.3 family there is text-only). Smoke-test the
+endpoint directly (chat/completions with a base64 image, key from `.env`) before blaming
+the tool or the key.
+
+Pitfalls once a vision model works:
+- **Disable thinking for vision requests** (`"thinking": {"type": "disabled"}`) — image
+  queries otherwise burn the whole token budget on reasoning before emitting a single line
+  of description, and the answer comes back empty or truncated.
+- **Config changes apply to NEW sessions only** — the live session keeps its old routing;
+  verify fixes via direct API calls, not by re-calling the tool in-session.
+- **Never downscale a dense image (schematic, document scan) before recognition** — the
+  model hallucinates unreadable detail at low resolution. Tile the ORIGINAL resolution
+  into crops and query each tile, then merge.
+- **Find the primary source before transcribing**: photos of published material (magazine
+  schematics, articles) often exist digitized in web archives; text from the source plus
+  datasheet-standard topology (e.g. К155ИЕ2=7490, ИЕ4=7492) beats pixel-guessing values.
+  Old Russian sites are usually koi8-r or cp1251 — decode by trial, mojibake patterns tell
+  you which.
+
 ### Desktop native notifications never appear (macOS)
 Diagnostics, cheapest first:
 1. **App-level pref** — desktop notification kinds (approval, turnDone, turnError, backgroundDone) default to ON. The toggle is stored as `hermes:native-notifications` in Electron localStorage (`~/Library/Application Support/Hermes/Local Storage/leveldb/`). `grep -c "hermes:native-notifications" .../leveldb/*.ldb` returning 0 means defaults are in effect — do NOT conclude notifications are disabled.
