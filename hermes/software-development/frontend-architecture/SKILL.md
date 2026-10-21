@@ -801,6 +801,17 @@ For an FSD npm-workspaces frontend (public/cabinet/admin + shared packages) the 
 - **Unit (Vitest):** per-app `defineProject` workspace, aliases, colocated `*.test.ts` in `lib/`. See `references/vitest-monorepo-setup.md`.
 - **E2E (Playwright):** per-app projects with `baseURL`, isolated via `context.clearCookies()` in a shared `helpers/base.ts` (outside `testDir`). The session's hardest lesson — clearing `localStorage`/`sessionStorage` on `about:blank`/`data:` URLs throws `SecurityError`; clear them only AFTER navigating to the app. Full working pattern + pitfalls: `references/vitest-monorepo-setup.md` → "Playwright E2E isolation".
 
-## 12. Standalone preview apps (design prototypes)
+## 12. Porting a feature into another of the user's repos
+
+When a feature exists in one project (e.g. the crbsit-site PDF viewer) and must be added to another (e.g. license-service public app):
+
+1. **Read the target repo's `eslint.config` and `tsconfig` BEFORE writing any ported code.** Local rules are often much stricter than the source repo's — e.g. max-lines-per-function (120), interface-only types, no non-null assertions, max-params. Porting in the source repo's style triggers a whole second refactor pass; write to the target's rules from the first line.
+2. **Port the logic 1:1, restyle 100%.** Reuse the target project's existing shells and design tokens (e.g. its `LegalPageShell`, color/spacing tokens) instead of copying the source app's styles or classes. The user wants the same behavior in the target's visual language, not a transplant of the source's look.
+3. **Match dependency versions across apps sharing a library.** If the source app pins `pdfjs-dist@X`, install the same version in the target — the worker protocol and renderer API must stay identical.
+4. **Grep the target's test tree for hardcoded expectations before extending a catalog** — tests pin exact item counts ("ровно 4 документа на продукт") and will fail on the new entries; update them in the same change.
+5. **On a dirty worktree with foreign uncommitted changes: create the feature branch, commit ONLY your files by explicit path, never `git add -A`.** Other chats may have dozens of in-flight changes in the same repo.
+6. Verify each app independently: its own `vitest run`, `lint`, `build`, and a locally started dev server (allocate distinct ports — the first project's dev server already occupies 5173) before reporting ready.
+
+## 13. Standalone preview apps (design prototypes)
 
 When the user asks for a visual prototype/mock of a dashboard or ЛК section WITHOUT touching the main apps, use the standalone preview-app pattern: `frontend/previews/<hash>/` (own Vite+React package, `base: '/<hash>/'`), a row in `frontend/previews/REGISTRY.md`, nginx + CI + deploy.sh entries copied 1:1 from the sibling preview branch — and branch from that sibling branch in a worktree (it carries the infra), not main. Full pattern, infra file shapes, verification checklist (incl. the ru-RU NBSP-in-Intl test pitfall and the headless design audit): `references/standalone-preview-apps.md`.

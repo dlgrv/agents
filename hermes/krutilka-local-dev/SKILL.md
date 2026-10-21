@@ -94,4 +94,7 @@ Note the import paths — they differ from what the file layout suggests: engine
 
 ## Test/fix workflow for this repo (proven)
 
+## Антифрод-стенд (pacer как генератор размеченного трафика)
+Эталонные методологии лежат в репо SSP: `~/aezly/lowbid-ssp/docs/antifraud/GIVT.md` (первая линия, 5 детекторов без ML) и `SIVT.md` (42-факторный ML-скоринг, Z-score, cookie lifetime, whitelist, каскад 0–100). План превращения pacer в полигон — references/antifraud-bench-plan.md: персоны-режимы поверх identity-профилей, каждая бьёт в конкретный детектор, ground-truth манифест для precision/recall антифрода SSP.
+
 Delegated waves (test-writers, implementers, reviewers) via subagent-driven-development; plan files in `.hermes/plans/`. Bugs found by adversarial tests are pinned as strict-xfail with BUG-ids — a fix commit's acceptance criterion is "xfails removed AND green". See `programmatic-adtech` skill (anti-fraud evasion + SDD sections) for the per-task dispatch protocol; `lowbid-git-workflow` for the commit gate (fix commits: `fix(lowbid-NN): ...`, never push without an explicit ask).
