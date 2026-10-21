@@ -196,6 +196,7 @@ Read and understand:
 - Design documents or user description
 - Acceptance criteria
 - Constraints
+- **Throughput / scale expectations.** For anything touching a hot path, get the numbers FIRST (events/min, rows/day, peak profile) — before drafting tasks. This user runs highload systems and has dropped a load constraint ("60–100K/мин, highload") after a plan was already written, forcing a full rewrite. Derive hard rules from the numbers (e.g. per-event DB writes die at 1.7K events/sec → batch + sample; per-event redis roundtrips → decide at lease/TTL granularity, not per event) and put them in a dedicated "Нагрузка / Load" section of the plan so every task inherits them.
 
 ### Step 2: Explore the Codebase
 
@@ -250,6 +251,10 @@ Check:
 - [ ] Commands are exact with expected output
 - [ ] No missing context
 - [ ] DRY, YAGNI, TDD principles applied
+- [ ] Every concrete number has provenance (file:line / doc section)
+- [ ] Load/scale assumptions stated, and no task violates them
+
+For large plans, or plans that must satisfy an external spec/methodology document, offer parallel review subagents before handoff: one critical review of the plan itself, one spec-vs-plan coverage comparison. This user asks for exactly this split.
 
 ## Principles
 
@@ -318,6 +323,14 @@ git commit -m "type: description"
 
 **Bad:** "Create the model file"
 **Good:** "Create: `src/models/user.py`"
+
+### Unsourced Numbers
+**Bad:** "lease живёт 24–72 ч" with no reference
+**Good:** "TTL 24–72 ч (`user_profile.py:45`, DEFAULT_PROFILE_TTL_HOURS_MIN/MAX)"
+This user verifies plan details against the code and source docs and challenges any figure without provenance — cite file:line or a doc section for every concrete constant, threshold, or default.
+
+### Stale Doc Paths
+Files the user quotes "в downloads" may already have been moved into a repo (and renamed) — resolve the CURRENT path with ls/search before citing it in the plan, and note renames ("README.md → SIVT.md") so the plan and chat never disagree.
 
 ## Execution Handoff
 
