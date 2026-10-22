@@ -254,7 +254,11 @@ Check:
 - [ ] Every concrete number has provenance (file:line / doc section)
 - [ ] Load/scale assumptions stated, and no task violates them
 
-For large plans, or plans that must satisfy an external spec/methodology document, offer parallel review subagents before handoff: one critical review of the plan itself, one spec-vs-plan coverage comparison. This user asks for exactly this split.
+For large plans, dispatch parallel review subagents before handoff — this user orders exactly this review pass and gates execution on it. Proven split of the two reviewers:
+- **Load/performance reviewer**: for every plan point that touches a hot path, a verdict (ok/risk/blocker), an impact estimate with the arithmetic, and a concrete plan fix if needed. The user's standing constraint is «производительность не должна пострадать» — make it the reviewer's headline question.
+- **Code cross-checker**: verify ONLY claims not yet verified. Paste the already-confirmed list verbatim under an explicit «проверять снова не нужно» heading — without it the reviewer burns its budget re-proving settled facts.
+
+For both: read-only mandate («не изменяй файлы, без git»), require `file:line` for every verdict, and define an `output_schema` with a top-level verdict enum so results aggregate cleanly. Fold every confirmed mismatch into the plan as a new version line (vN+1) with the fix inside the affected task BEFORE offering execution — never offer to execute a plan a reviewer has just falsified.
 
 ## Principles
 

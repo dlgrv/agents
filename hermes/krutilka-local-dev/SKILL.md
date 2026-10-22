@@ -1,6 +1,6 @@
 ---
 name: krutilka-local-dev
-description: Run krutilka locally — docker ports, creds, rebuild gotchas.
+description: Run krutilka locally and prod — deploy, data checks, gotchas.
 ---
 
 # Krutilka (Lowbid) local runbook
@@ -87,6 +87,26 @@ Note the import paths — they differ from what the file layout suggests: engine
 - Restart logic in deploy scripts must enumerate instantiated systemd units explicitly: `systemctl list-unit-files --state=enabled` lists only the TEMPLATE of a template unit (status `indirect`), so running instances `@1/2` are invisible and a match-based restart branch silently no-ops on them. Match with `systemctl list-units --all '<name>@*'` or restart the explicit instance list — then verify fresh `ActiveEnterTimestamp` per instance, per the standing post-deploy rule.
 - New behavior ships behind a global env flag defaulting OFF in prod (e.g. profile leases: absent `PROFILE_LEASE_ENABLED` = disabled), so a deploy never changes live traffic by itself — enabling is a separate explicit step the user controls.
 - After a subagent code wave, run the commit gates YOURSELF before committing: `cd backend && uv run black app/` + fix any F401 it leaves — black/flake8 pre-commit hooks reject the commit, and a rejected hook aborts a chained `commit && push && gh workflow run` mid-chain with the earlier steps already done. Push rejected «fetch first» = a PR merged concurrently: `git fetch && git rebase origin/main`, then push and only then trigger CD.
+
+## Prod data verification («проверь, всё ли правильно считается»)
+
+Pipeline order — check freshness end-to-end before trusting any aggregate: ClickHouse events by day (is anything arriving at all?) → gateway request log (bids vs tracking pixels separately) → pacer worker logs (playback completions, UMG/SSP 429 shaping) → PG aggregates per campaign. A gap in step 1 with live bids in step 2 means traffic is going around the pipeline (demand disabled, campaign paused, or a partner fed directly), not that counting broke.
+
+- Prod DB: `export PGPASSWORD=$(grep '^DB_PASSWORD=' ~/krutilka/backend/.env); psql -h 127.0.0.1 -U lowbid_user -d lowbid_db` on the prod box. Never put the raw password anywhere but that expansion.
+- **When imp/start ratios collapse, check the IP limiter first**: the `/imp` endpoint silently drops pixels once a source IP exhausts its daily quota (`ipimp:{ip}:{day}` Redis key) while `/start` is not limited — starts keep flowing and impressions vanish with zero errors anywhere. A sudden drop to <5% imp per start in one hour's bucket is this limiter, not playback breakage.
+- **Never write psql over `ssh host 'psql -c "..."'` inline** — the remote shell eats the double quotes and Postgres misreads quoted literals (`date_trunc('day',…)` turns into a column lookup). Write the SQL to a local /tmp script, `scp` it over, run `ssh host 'bash /tmp/x.sh'`.
+- Buffer batch sizes are **hardcoded in `backend/app/workers/worker_settings.py`** (bid buffer 500 rows/1s flush, playback stats 200/1s, bid stats 5s) — no .env params. They do NOT drive worker RAM: each flush is at most a few hundred rows, so "increase the chunk" never fixes memory; multi-day worker RSS growth is session accumulation, fixed by a worker restart (brief playback interruption). High worker RAM is by design per the user — don't propose shrinking it.
+- **`bid_attempts` is write-only diagnostics: no API handler ever SELECTs it.** Full error analytics already live in `bid_stats` (`bid_stat_buffer.py`: every attempt of any status aggregates into (campaign, 5s bucket, status, error_type) counters incl. 429s) — so dropping raw ERROR rows from `bid_attempts` loses zero analytics. Fix plan (requeue-instead-of-drop in BasePostgresBuffer, .env-tunable chunk sizes, `BID_ERROR_RAW_MODE=off|first_seen|all` gate in executor.py): `.hermes/plans/2026-10-22_buffer-reliability.md`. Awaiting user approval — never commit/deploy the wave without it.
+- **Buffer internals (verified against code — re-check file:line before relying on it):** `_to_row`/`_prepare` in `base_postgres_buffer.py` are SYNC and run inside the flusher task, not the bid hot path; `_handle_error` retries re-run the whole `_flush`→`_prepare`, so any per-row gate or transform placed inside the flush path MUST be idempotent or computed once upstream (the proven pattern: decide in async `add()`/executor and store a flag on the buffered entry). `error_type` is `type(error).__name__` (a 429 shows as `'HttpError'`, the HTTP code lives only in the error text); `bid_attempts` has no `created_at` — filter by `started_at`.
+- **`backend/tests/fake_redis.py` is a hand-rolled double covering only hash ops** (hset/hget/pipeline) — no `set(nx=True, ex=…)`. Gate/TTL tests need it extended first; `fakeredis` is not in requirements-dev.
+- **Kuma push-monitors on the prod box must be added in TWO places**: the live `/etc/cron.d/kuma-push` AND the repo template `lowbid-ssp/deploy/server/cron.kuma-push` — `check-drift.sh` diffs the live file against the template and alerts on divergence. Monitors are single-level up/down (warn+crit = two monitors or msg-with-percent).
+- **systemd unit files in `etc/` set no `TimeoutStopSec` (default 90s)** — any change that lengthens graceful shutdown (buffer drain, longer arq `job_timeout`) must raise it in the unit files or systemd SIGKILLs mid-drain and loses exactly the data the change protects. Check restarts for «Killing»/exit 137 in journalctl.
+
+## Prod disk & retention
+
+- Retention is cron, not scripts: `/etc/cron.d/lowbid-retention` (bid_attempts 7 days, ad_playback_stats 30, bid_stats 60, weekly `docker image prune -a` + builder prune). Verify it works via `min(created_at)` age < window and `n_dead_tup = 0` in pg_stat — not by assuming.
+- **VACUUM never returns disk to the OS**: after a traffic spike the table files (especially jsonb TOAST on bid_attempts — tens of GB) stay at peak size forever; deleting rows reuses space internally but `df` never shrinks. Real reclaim = `pg_repack`/`VACUUM FULL` in a maintenance window; before promising disk savings, compute `pg_total_relation_size` minus heap+indexes to expose the TOAST bloat.
+- Quick non-destructive disk wins on the prod box: `docker image prune -a -f --filter until=…` (several GB of dangling images) and a journald cap (`SystemMaxUse=` in `/etc/systemd/journald.conf` + restart; the journal alone can hold GBs). Both are system changes — list the plan and get the user's «да» first.
 
 ## Verified happy path
 
