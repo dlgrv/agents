@@ -38,16 +38,28 @@ def _setup_tmp_repo(tmp):
 
 ## Running Tests
 
+`make test` is the canonical entry (what CI's `test` workflow runs): pytest (translate/validate, translate/llm, forge/site) + all `node --test site/assets/*.test.mjs` files + Go api tests. Keep new test files registered in its `node --test` line in the Makefile — an unregistered test file never runs in CI.
+
 ```bash
-# From repo root with venv activated
-python3 -m pytest tools/validate/tests/ tools/llm/tests/ -v
+# Full suite (what CI runs)
+make test
 
-# Single file
-python3 -m pytest tools/validate/tests/test_assemble.py -v --tb=short
+# Single pytest file
+python3 -m pytest translate/validate/tests/test_assemble.py -v --tb=short
 
-# Verbose with stdout
-python3 -m pytest tools/validate/tests/test_assemble.py -v -s
+# Single node test file (any file under site/assets/)
+node --test <site/assets/FILE.test.mjs>
 ```
+
+## Site (frontend) tests
+
+The site parser/filter logic lives inline in `site/index.html`; `make web-build` copies it into every `site/<lang>/index.html`. Test it with `node:test` files in `site/assets/`:
+
+- **Extract the logic under test from the BUILT page, not the source**: read each `site/index.html` and `site/<lang>/index.html`, pull the regex/expression out with a targeted `/e\.todo\s*=\s*(\/.*?\/[a-z]*)/`-style exec, compile with `new Function(...)`, and loop tests over every page. This fails both on a source regression AND on a forgotten rebuild of the locale copies.
+- Run against realistic field samples in ALL languages, not just zh — the same markup is validated against translated text.
+- **LANG is runtime-selected** (URL/localStorage/system) — every page carries the full multilingual branch chain, so test every LANG through every page, not one locale per page.
+- **Extracting multi-branch ternary chains** (e.g. `e.dispute = LANG==='en' ? /re/.test(e.note) : ... : /re/.test(e.note);`): a non-greedy regex ending at the first `.test(` cuts inside the chain (branches each contain `.test(e.note)`) and compiles to garbage. Instead `indexOf('e.dispute =')` then slice to the next `;` and compile the whole statement with `var e = {note}; return <stmt>;`.
+- To measure a marker/flag change on real data, grep only record fields (`^- ` lines) per language dir: `grep -rhE '^- ' book/<lang>/*.md | grep -cE '<pattern>'` — don't grep whole trees, translation subdirs nest inside `book/`.
 
 ## Test Coverage Categories
 
@@ -78,7 +90,9 @@ test(tool-name): describe what's tested
 
 ## Pitfalls
 
+- **Never use a case-insensitive marker regex over multilingual text.** `/todo/i` also matches Spanish/Portuguese «todo(s)» («all») and the substring inside Indonesian «metodologi» — hundreds of false 'unverified' flags. Use `\bTODO\b` case-sensitive plus explicit phrase alternatives; the same trap applies to impact-count greps (`grep -i` overcounts identically).
 - Never use `monkeypatch.setattr(__main__, '__file__', ...)` — `__file__` doesn't exist under `exec(compile(...))`.
 - `sys.exit("msg")` writes to stderr, not stdout — check both in assertions.
 - Real tools use `ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))` — mirror the repo structure in temp so `root` resolves correctly.
 - Tests must run without network access — all fixtures are local mock data.
+- **Marker filters must list every translated variant of the CN marker.** Translators render «争议» (contested) as different words per language: en `Contested/Disputed/Controversy`, ru `Спорно/Спорный`, es `En disputa/Controversia`, pt `Em disputa/Controverso`, ar `متنازع/خلاف`, id `Kontroversi`. Matching only one variant silently drops entries from the 'contested only' filter (was −114 records). Detect drift by cross-language count parity; find real variants by sampling `^- Примечания/Notes/Notas/...:` lines per language dir.

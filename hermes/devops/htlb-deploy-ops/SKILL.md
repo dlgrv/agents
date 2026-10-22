@@ -27,6 +27,12 @@ gh run watch <id> -R dlgrv/HowToLiveBetter --exit-status --interval 15
 curl -sS https://api.dlgrv.com/api/htlb/v1/health               # {"ok":true,"version":"<sha>"}
 ```
 
+## Git hooks (local gates)
+
+`.githooks/` via `core.hooksPath`. pre-commit = `make lint` + `make check-content` + `forge/ops/check_links.py`; pre-push = full `make test`. A broken link blocks `git commit` (exit 1) naming the file — most CI test failures are therefore catchable before any push. Keep the hook list and the CI `test` workflow steps in sync: CI runs `make test`, which must include every node/pytest file.
+
+To verify a hook end-to-end: commit (or stash) your hook edits FIRST, then plant the bad fixture (e.g. a broken relative link), run the real `git commit`, and clean up with `git checkout -- <fixture>` or `git reset --hard` — a reset done while the hook edits are still uncommitted wipes them and you ship stale hooks.
+
 ## Pitfalls
 
 - **Check `sudo -l -U deployer` on the server BEFORE the first deploy run.** The deploy script ssh's as `deployer` and runs restricted sudo; any unlisted command aborts mid-deploy. Required NOPASSWD set lives in `/etc/sudoers.d/` on hermes-vm: exact `systemctl {stop,start,restart,status} htlb-api.service`, plus `ln`, `chown`, `mkdir`, `tar`, `rm`, and **exact** `chmod 755 /opt/htlb-api` + `chmod 755 /opt/htlb-api/releases` (arg-exact entries — bare `/usr/bin/chmod` is more privilege than needed).
