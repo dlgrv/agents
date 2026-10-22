@@ -25,6 +25,9 @@ questions. Never ask the user to re-state any of it.
 - **S3 removed entirely** (decision 2026-09-02): backups = mutual dumps on
   the paired server (web ↔ gitflic cross-dump), retention/prune по cron.
   GitLab RPO 1ч / RTO 30мин accepted. **GitLab Geo is Premium — never propose it.**
+- **Backup audit 2026-10-22 (fleet A/C/D/E/F → NAS via restic pull over WG):
+  what/where/sizes/exclusions — `references/backup-audit.md`. Server B does
+  not exist; F has no Postgres (E→F replication pending).**
 - Admin panels (admin.primepilot.tech) — **WireGuard only**, never public.
 - **PrimePilot is isolated from all other products:** zero permitted connections
   between PP nodes and the main group (verify `nc -zv` both ways), own S3 key

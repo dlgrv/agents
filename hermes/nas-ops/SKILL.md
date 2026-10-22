@@ -60,6 +60,11 @@ Ubuntu NAS (X99M-H, 12 threads, 30 GiB RAM, NVMe 240G system) serving ~10 non-te
 - Verify from the admin's Mac: `curl --noproxy '*' https://nas.tailaf23ba.ts.net/status.php` (must return JSON with `installed:true`) and `openssl s_client ... | openssl x509 -noout -issuer -dates` (issuer must be Let's Encrypt, ~90-day auto-renewing — not the self-signed panel cert). `/` 302s to `/login` — that is success, no need to chase redirects.
 - Do NOT also expose :8080 by domain — the AIO panel stays IP+self-signed-only (HSTS trap); serve covers only the app.
 
+## Fleet backups vs Nextcloud backups (two separate systems)
+
+- Server-fleet backups (A/C/D/E/F → this NAS, restic over WireGuard) are governed by the `nas-backup-ops` skill and the plan at `~/work/infra/docs/backup-nas-plan.md` — do not mix them with the Nextcloud AIO borg backup. Both land on md127; keep their roots distinct.
+- The array is `/dev/md127`, ext4, 2×4 TB, mounted at `/srv/nas` — verified. Any backup plan that names a different mountpoint/size is stale; correct it.
+
 ## Deployment project
 
 - Plan and docs live in `/Users/dlgrv/work/infra/nas/`: `README.md` = verified host facts, `docs/` = admin-onboarding, employee-guide, runbook, tailscale-acl example. The phased plan (host prep → disks → Docker → AIO → UFW → ACL → policies → backups → monitoring → docs → go-live) is in `docs/superpowers/plans/`.
