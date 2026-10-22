@@ -20,12 +20,15 @@ Falls back from broken search to the page text. Trigger cases: results in the wr
 ## Ladder (in order, stop when you have the text)
 
 1. **Detect backend failure early.** After 2 failed query reformulations, stop rephrasing — the backend is ignoring the query; switch to direct navigation.
-2. **Go direct via browser.** `new_tab("https://<known-url>")` and read `document.body.innerText` via `js()`. Guess plausible paths from the site's footer/nav names before searching for them.
-3. **On 403 'Forbidden / Guru meditation':** the page is fine, the browser's egress IP is blocked. Retrying the URL, waiting, or opening a new tab will not help. Route through a reader proxy: `goto_url("https://r.jina.ai/<original-url>")`, then sleep 10–15 s and read the body — it returns the page as markdown with links intact.
-4. **On captcha walls (Yandex SmartCaptcha, DuckDuckGo bot-check):** dead end — never attempt to solve or click through. Fall back to step 3 for the target page directly.
+2. **Go direct via terminal curl (works with no browser at all).** `curl -sL -m 25 -A "Mozilla/5.0" "$url"` piped through a python one-liner that strips `<script>/<style>` tags, unescapes entities, collapses whitespace — server-rendered pages (docs, HuggingFace model cards) come back as clean text. Verify the output actually contains page content, not a shell of the site (a JS-rendered pricing page can return just the brand name — see Pitfalls).
+3. **Go direct via browser.** `new_tab("https://<known-url>")` and read `document.body.innerText` via `js()`. Guess plausible paths from the site's footer/nav names before searching for them.
+4. **On 403 'Forbidden / Guru meditation':** the page is fine, the browser's egress IP is blocked. Retrying the URL, waiting, or opening a new tab will not help. Route through a reader proxy: `goto_url("https://r.jina.ai/<original-url>")`, then sleep 10–15 s and read the body — it returns the page as markdown with links intact.
+5. **On captcha walls (Yandex SmartCaptcha, DuckDuckGo bot-check):** dead end — never attempt to solve or click through, and the wall fires for plain curl too (Yandex Cloud serves SmartCaptcha to any non-JS client). Fall back to step 4 for the target page directly; if that also fails, report the figure as 'unverified, needs manual check' in the final answer instead of filling it from memory.
 
 ## Pitfalls
 
 - `goto_url` may raise `Page.navigate timed out after 5s` **while navigation actually succeeds**. Wrap it in try/except, sleep 10–15 s, then check `page_info()` / body text before declaring failure. Never conclude a page is unreachable from this error alone.
 - Reader-proxy responses are cached by URL: a second fetch can return a shorter/older snapshot. Read whatever arrived fully (`len` first) before deciding the page is truncated.
+- When a degraded backend returns only brand homepages or unrelated locale pages for brand-name queries, the query text is not the problem — stop rephrasing and jump to direct fetches. Pricing/landing pages are typically JS-rendered and return nearly empty via curl; the site's /docs pages are usually server-rendered and fetch fine.
+- Search snippets are not verification of a price or spec. If direct fetches all failed, say so in the answer and label the number unverified — a confident wrong price is worse than an honest gap.
 - Keyword homophones are a trap for RU retail/tech queries (site names like DNS/ДНС collide with networking terms). Prefer exact site URLs and on-site navigation over general web search for such targets.
