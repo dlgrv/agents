@@ -23,6 +23,19 @@ Full reference: https://hermes-agent.nousresearch.com/docs/user-guide/configurat
 
 `hermes config check` reports sections missing from an older config.
 
+### Fallback & Retry Tuning (overload handling)
+
+When the primary model returns transient errors ("service is busy", rate limits, 5xx), Hermes retries then walks the fallback chain. Keys that control it:
+
+| Key | Effect |
+|---|---|
+| `agent.api_max_retries` (3) | Hermes-level retries per call; retry backoff is hardcoded (~2→4→8s jittered) — NOT configurable per-second |
+| `agent.auto_recovery_cycles` (5) | after retries AND fallback chain are spent, wait 15/30/60/60/60s (Retry-After wins) and retry — all on the primary if the fallback chain is empty |
+| `fallback_providers` (list) | ordered fallback chain, e.g. `[{provider: glmpro, model: glm-5.3-flash}]`; `[]` = never switch models, stay on primary and wait |
+| `fallback.min_switch_reset_seconds` (0=off) | when the provider declares a rate-limit reset sooner than N seconds, skip the fallback walk and let the retry backoff ride out the window |
+
+Pattern — user prefers quality over failover: to stay on the primary model through brief overloads instead of dropping to a cheaper fallback, set `fallback_providers: []` plus `fallback.min_switch_reset_seconds: 10`. Set with `hermes config set fallback_providers '[]'` (list values pass through the CLI; verify with a grep of config.yaml, not `hermes config` output alone). Delegation subagents have their own `delegation.model` — a cheap fallback for subagents is intentional and separate.
+
 ### Toolsets
 
 Enable/disable via `hermes tools` (interactive) or `hermes tools enable/disable NAME`.
