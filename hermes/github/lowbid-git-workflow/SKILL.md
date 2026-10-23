@@ -54,7 +54,7 @@ Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `ci`, `perf` (Convent
 
 **Commit subjects and bodies are in ENGLISH** — the user set this as a repo-wide rule («у нас все коммиты должны быть на английском»); do not mirror the user's chat language into commit text.
 
-**Sequential NN when there is no issue**: the effective practice is one shared sequence, not every no-issue commit staying at 00 — take the next number from history (`git log --oneline | grep -oE 'lowbid-[0-9]+' | sort -V | tail -1`) and bump it. When work spans stages/tasks in one wave, split into consecutive numbers (one clean commit each), staging explicit per-commit file lists — a tree carrying several stages' changes mixed in one file needs the file assigned to its dominant stage, not a combined commit.
+**Sequential NN when there is no issue**: the effective practice is one shared sequence, not every no-issue commit staying at 00 — take the next number from history (`git log --oneline | grep -oE 'lowbid-[0-9]+' | sort -V | tail -1`) and bump it. When work spans stages/tasks in one wave, split into consecutive numbers (one clean commit each), staging explicit per-commit file lists — a tree carrying several stages' changes mixed in one file needs the file assigned to its dominant stage, not a combined commit. When one file genuinely carries two commits' changes (e.g. a constant change and an unrelated fix in the same module), stage per-hunk with `git add -p` instead of assigning the file wholly to one commit — file-level assignment mislabels one of the changes.
 
 If there's an issue, add `Closes #<number>` in the commit body when the commit fully resolves it:
 
