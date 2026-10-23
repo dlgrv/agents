@@ -21,7 +21,7 @@ Monorepo frontend at `~/work/license-service/frontend`: `public/` (сайт prim
 ## Gates before commit
 
 - Run BOTH lints from `frontend/`: `npm run lint` runs eslint over `public/src cabinet/src admin/src packages` with `--max-warnings 0`, then steiger (FSD lint:fsd). Format with `npx prettier --write` first — the string-class ternaries prettier collapses will fail eslint review otherwise.
-- Run tests per project: `npx vitest run --project packages` (shared), `npx vitest run src/features/view-pdf` etc.
+- Run tests from the `frontend/` ROOT via `npm run test:unit -- <paths>` (or `npx vitest run --project packages`): the jsdom environment lives in `vitest.workspace.ts` at the root. Calling `npx vitest run <file>` inside `cabinet/` or `admin/` skips it — every DOM test dies with `ReferenceError: document is not defined`, which looks like real failures but is pure invocation error (`cabinet/package.json` has no test script either).
 - Single-consumer slices (`features/view-pdf`, `features/offer` → only `pages/offer`) are overridden in the steiger config's `insignificant-slice` list — follow that existing override pattern when a new single-consumer slice trips `lint:fsd`, instead of restructuring the slice or letting CI go red.
 
 ## Shared working tree — foreign edits everywhere
@@ -36,6 +36,25 @@ Parallel Hermes sessions drop uncommitted edits into this repo (cabinet widgets,
 - Offer links in shared `LegalLinks` must be host-aware: relative `/offer/<slug>` when hostname is `primepilot.tech`/`localhost`/`127.0.0.1` (viewer lives there), absolute `https://primepilot.tech/offer/...` from cabinet/admin (no local viewer). A hard-coded absolute URL sends localhost clicks to prod — Leonid rejects that.
 - The primepilot PDF viewer is a copy of crbsit-site's with primepilot styling: NO card borders or `bg-card` background around pages (transparent gutters, page edge-to-edge). Keep the two implementations visually distinct; don't "sync" styles back to crbsit without asking.
 - Legal labels use full product names: «Оферта PRIMEPILOT», «Оферта PRIMEPILOT Configurator».
+
+## Offers are the source of truth (legal alignment)
+
+The two Минцифры offers (PRIMEPILOT, PRIMEPILOT Configurator) govern every license price, billing text and cabinet wording. Before changing any of those, re-check the offer text — the cabinet must never assert more than the offer states (it passes legal review precisely because it asserts almost nothing itself; keep it that way).
+
+- The offer PDFs are scans with no text layer. Extract text by rendering pages (e.g. `docker run --rm -u $(id -u):$(id -g) -v "$PWD:/docs" alpine:3.20 sh -c 'apk add -q poppler-utils && pdftoppm -png -r 150 file.pdf page'`) and dispatching vision-capable subagents to transcribe (~6 pages each); keep transcripts in scratch and the findings in `docs/legal-review-*.md` on the feature branch.
+- Payment requisites shown to users come from `PaymentSettings` in `backend/settings.py` (env-overridable `PAYMENT_*`); verify the `/api/v1/payment-details` payload against the official requisites from the offer before any release — placeholder defaults have shipped before.
+- Balance-debiting transaction comments must quote the offer's payment purpose verbatim; when editing manager texts, grep the test tree for the old wording and update those assertions in the same change.
+- Any new balance-debiting endpoint follows the Redis Idempotency-Key pattern in `backend/app/utils/idempotency.py` (cache successful responses only; same key + different body → 409) — an unprotected renew/top-up double-bills on double-click.
+
+### Full wording audit ("перепроверь всё с юридической точки зрения")
+
+When Leonid asks for a legal sweep of user-facing texts, dispatch one vision-free subagent per site (license-service and crbsit-site are governed by the SAME offers) with this scope — UI alone is not enough:
+- Frontend: public site tariff/licensing texts, cabinet purchase/renew/top-up dialogs, admin, LegalLinks/footer.
+- Backend texts are legally significant: mail templates (`grep -rn template backend/app --include='*.py' | grep -i mail`), `purpose_template` in `backend/settings.py` (the «Назначение платежа» the user copies for bank transfer), transaction comments. Verify each against п. 6.6 verbatim.
+- Each formulation gets a verdict: СООТВЕТСТВУЕТ (offer clause) / РАСХОЖДЕНИЕ (file:line, what) / НЕТ В ДОКУМЕНТАХ (UI asserts something no doc covers — risk) / НЕ КРИТИЧНО (UI slang, no legal assertion). Report to `docs/legal-review-wording*.md` on the branch.
+- High-risk patterns to check for: promising instant activation (offer says «как правило 2 рабочих дня»), «бессрочно/навсегда» for anything (base license is 5 лет with auto-renewal; PrimePilot firmware is 0 ₽ with NO paid configurations — п. 4.2), SLA/30-min fund figures, support contacts vs the offer.
+- Companion docx (тарифы, договор на доработку) have no PDF tooling: read via `python3 -c "import zipfile; print(zipfile.ZipFile(f).read('word/document.xml').decode())"` and strip tags.
+- Reuse the transcripts already in scratch (`~/.hermes/cache/scratch/offer-pages/transcript-*.md`) before re-OCR-ing the PDFs — they survive across sessions until pruned.
 
 ## Prod pitfall: .mjs MIME breaks the pdf.js worker
 
