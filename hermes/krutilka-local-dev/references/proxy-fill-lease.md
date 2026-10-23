@@ -9,7 +9,19 @@ Five proven timing-seam bugs (all found by adversarial tests, all fixed) plus th
 3. **drop_stale must re-check liveness at delete time** — the `protected_ips` snapshot was taken before the drop window; at 1000 rps a lease can appear between snapshot and delete. Pipeline-recheck each candidate before removing.
 4. **The free-set mirrors the pool**, never add-only: `_forget_free_ip` (SREM) on every discard/drop path, or dead IPs stay "free" and the Lua walk mints profiles for nonexistent IPs (quota waste, manifest pollution).
 5. **Meta-key TTL ≥ interval, not = ttl_seconds**: `max(ttl_seconds, fill_interval + 60)`, written AFTER `refresh_ttl` (which would shrink it back). Otherwise with ttl < interval `last_filled_at` evaporates mid-interval and the skip-gate dies → probes on every 10s timer tick. No config validation exists for ttl < interval — check before assuming it's safe.
+6. **Normalize encodings before comparing a pool entry against config.** The probe/maxmind path writes `geo.country` as ISO alpha-3, campaign config carries alpha-2 — a raw `==` marks EVERY entry «changed» on every fill tick, mass `drop_ip` wipes the free-set, and at load rate the result is a `profile_preferred_unavailable` storm (each lookup for a wiped IP fails closed per attempt). Any cross-source comparison (country codes, units, id types) goes through the shared normalizer (`app.services.proxy.geo.iso3166`) first.
+7. **Lease has a quota budget, not just a correctness contract.** Capacity = pool_count × profiles_per_ip × shows_per_profile_hour must exceed the campaign target rps; under-budget means a fixed fraction of lease attempts fails closed even with every bug fixed. Compute it before enabling lease on any campaign; the main 60k/min campaign was ~9× short (enable there only after raising the budget — larger pool or ppi).
 
+## Storm triage (one error class hitting many attempts at once)
+
+- **A storm that survives a code revert is config/state-driven** — check campaign settings in the DB (a SQL-flipped flag) and Redis free-set/pool state before re-deploying more code. Kill the trigger at the data layer, verify the per-minute error rate hits 0, only then diagnose code.
+- **Measure the storm RATE, not the count**: probe with a bounded recent window (last 2–3 min of journal) each time — a cumulative grep count keeps growing during diagnosis and reads as «still storming» when the storm has already stopped.
+- **Onset lags the trigger by up to a pool turnover/warmup (several fill ticks)** — build the timeline (flag flip, deploys, first storm line) before attributing cause; a revert that «didn't help» may predate the storm entirely.
+
+## Test environment
+
+- Standalone Redis for worktree/isolated runs: `redis-server --port 6380 --daemonize yes`, then `REDIS_PORT=6380 REDIS_DB=15 pytest tests -q`; kill it when done. Compose-stack runs use the repo convention (live lowbid_redis db15).
+- `tests/fake_redis.py` is a hand-rolled double — extend it (sets/srem/pipeline ops) BEFORE writing gate/TTL tests; `fakeredis` is not in deps.
 ## Test environment
 
 - Standalone Redis for worktree/isolated runs: `redis-server --port 6380 --daemonize yes`, then `REDIS_PORT=6380 REDIS_DB=15 pytest tests -q`; kill it when done. Compose-stack runs use the repo convention (live lowbid_redis db15).

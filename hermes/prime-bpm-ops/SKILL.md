@@ -72,6 +72,24 @@ NEVER use `weekly_create` for Leonid's work items: his work tasks live in projec
 
 Feedback (REST + MCP): MCP tools `feedback_create_message(message, type?, title?, page_url?)` and `feedback_list_my_messages()` on scope `feedback:write`; input limits are enforced at the MCP layer mirroring `FeedbackCreateInput` (type enum, message 3–4000, title ≤200, page_url ≤500). `feedback:write` is default-OFF on the token form — mint explicitly (checkbox or `POST /api/v1/tokens` with `scopes` in the body). A token minted before the checkbox existed denies the feedback tools with `isError` — that is the scope gate working, not a broken endpoint. Deployed and smoke-verified in prod; MCP is the first choice. REST fallback if MCP is off: `POST /api/v1/feedback` (`FeedbackCreateInput`, plus `idempotency_key`, `draft_id` for attachments) via `manager.feedback_notes.create_feedback`; `GET /api/v1/feedback/mine` verifies delivery, `GET /api/v1/feedback` = admin all-list.
 
+## Weekly report (recurring, every week)
+
+Every week Leonid sends his boss a plain-message report. Format (verbatim structure, bullets "•", plural past tense — «добавили», «сделали», «починили», NEVER singular):
+
+```
+На этой неделе
+
+<Секция>            # Лицензирование / Инфра / NAS / GitLab / PrimeBPM / Минцифры / crbsit.ru — what fits the week
+• <fact>            # concrete, one line each, with plain-language parenthetical for non-tech readers
+
+На след неделе / перенос
+• <open item>       # from todo/blocked roadmap tasks
+```
+
+Source of truth: closed tasks of the week in the two roadmaps (licensing `302f022445fc`, infra `a8c08280ddc8`) + `weekly_list_tasks`. Show the draft to Leonid before he sends it. If a real week's work has no matching roadmap task, ADD the missing task to the roadmap first, then reflect it in the report.
+
+Quirks: roadmap create without explicit end_date inherits a stale default from the plan's step — always pass end_date. Leonid edits wording: plain Russian, no anglicisms ("восстановление", not "restore-дрилл").
+
 ## Testing conventions (backend)
 
 TDD RED→GREEN, full suite before done. `Manager` is a singleton: tests must never overwrite its attributes directly — use `monkeypatch`, or overrides leak into every later test in the run. `app/mcp` is held at 100% coverage (argued with `--cov=app.mcp`, not by eye). Known legacy baseline on master: `tests/` full run gives ~15 collection errors (missing `app.main`, `app.managers.otk/reports/tables`, stale local Postgres volume without `users.access_id`) and some tests need the compose db (`docker compose up -d db`, then stop it) — these are pre-existing, prove your diff clean by comparing error counts against a stash-baseline (move NEW untracked test files aside during the stash run, or their missing fixtures will poison the baseline). Style: `bash scripts/check-backend-style.sh` must pass. The MCP SDK wraps tool exceptions as `Error executing tool …` — tests must assert on that masked contract, not the original error text.
