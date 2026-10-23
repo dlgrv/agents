@@ -54,6 +54,16 @@ Static-file perms: files copied from `~/Downloads` inherit `600`; nginx runs as 
 
 Deploy verification: curl the viewer routes AND the PDFs directly — a 200 on the page does not prove the assets load.
 
+## Local full-stack demo (worktree + docker compose + seed)
+
+To show Leonid the app running with branch code, run the stack inside the feature worktree so `./backend` mounts that branch's code:
+1. Copy env from the main checkout first — a fresh worktree has no `.env`, and compose silently fails to start without it: `cp ~/work/license-service/backend/.env <worktree>/backend/.env` (same for any other compose-consumed env).
+2. Start with `docker compose up -d` — run it as a background terminal call with `notify=true` and poll `docker compose ps` via process_manage; a foreground call that starts containers is rejected as a long-lived process. Wait for readiness (healthcheck or a curl of the API) in a separate foreground command before seeding.
+3. Seed with `make seed` (runs `scripts/seed_org_demo.py` in the api container). It prints the demo creds table at the end: admin on port 37175, app (client cabinet) on 37174, public site on 37173, API on 38080, Mailpit on 38125. All demo users share the seed's fixed TOTP secret — hand over the currently printed code; it rotates, so regenerate if it expired.
+4. Verify before handing over: curl each port for 200, don't trust "containers Up".
+
+Seed scripts are real API clients, not fixtures — they call managers directly (`manager.license.activate_for_device(...)`). Grep `backend/scripts/*.py` for any manager method whose signature you change; a missed call site only explodes at `make seed` time, on a stack Leonid is already looking at. Keep seeds idempotent: they re-run over an already-seeded org loop (e.g. the active-cabinet scenario is seeded twice), so check before mutating — for licenses, `get_active_for_device(...) is None` before `activate_for_device(action="purchase_and_assign")`, since the manager raises ConflictError on double purchase. If a partially-failed seed leaves dirty state, `docker compose down -v` and re-seed clean rather than patching around the leftovers.
+
 ## Dev servers vs git operations
 
 A running vite watcher dies (or corrupts) when you `git checkout`/merge in the same worktree underneath it — expect both dev ports (5173/5174) down after a merge/deploy session. Restart them after git surgery, and re-check with curl before telling Leonid «проверяй».

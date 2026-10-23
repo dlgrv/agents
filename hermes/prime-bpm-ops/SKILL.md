@@ -21,7 +21,7 @@ Streamable HTTP at `https://primebpm.ru/mcp`, Bearer PAT. Session-based — ever
 
 Always pass curl `--max-time 15` (streamable HTTP keeps the connection open after a response — without the timeout curl hangs) and `--noproxy '*'` (local proxies interfere with the SSE handshake).
 
-Sessions expire (server restart / idle): a mid-work `Session not found` means re-run the initialize dance and swap in the fresh `Mcp-Session-Id` — do not retry the old sid. Caching the sid in the scratch dir between calls is fine, but expect to re-initialize at least once per session.
+Sessions expire (server restart / idle): a mid-work `Session not found` means re-run the initialize dance and swap in the fresh `Mcp-Session-Id` — do not retry the old sid. Caching the sid in the scratch dir between calls is fine, but expect to re-initialize at least once per session. For batch operations (mass create/delete — e.g. migrating a week's plan into roadmaps), do the initialize dance once in a Python script and loop `tools/call` over the same session id; parse `isError` per call and keep going so one bad payload doesn't kill the batch.
 
 PAT lives in `~/.cursor/mcp.json` under `mcpServers.primebpm.headers.Authorization` — read it from there, update it there when Leonid sends a new token.
 
@@ -59,7 +59,7 @@ Omitted `project_id` does NOT mean "all plans" or "shared": the tool resolves to
 - Before creating, verify the target: `roadmap_get_structure(project_id=...)` must show the expected phase/step names for that queue.
 - `roadmap_list_projects()` (scope `roadmap:tasks`) — live in prod, smoke-verified: returns all accessible plans (incl. both queues below) with an `active` marker. Resolve project_id from it; never ask Leonid for board URLs. Prod catalog = 15 tools.
 
-**Routing rule (boss's directive 2026-10-23): work/licensing tasks go into the ROADMAP (`roadmap_create_task`), NOT the personal weekly plan. Personal plan only for genuinely personal items.**
+**Routing rule (boss's directive 2026-10-23): work/licensing tasks go into the ROADMAP (`roadmap_create_task`), NOT the personal weekly plan. Personal plan only for genuinely personal items.** When Leonid orders "all tasks must live in the two projects", that includes CLOSED and BLOCKED ones: transfer them with `status` preserved (`done`/`blocked`/`todo`) and an explicit `end_date` = the actual completion day — omitting `end_date` lets the tool fill a step/plan default (observed: a date from the old sprint), which falsifies the history the boss reads.
 
 Quirks: roadmap-sourced tasks on the weekly board often CANNOT be moved via `weekly_move_task_to_day` even when `can_move: true` — use `roadmap_move_task_to_step`. A "blocked" dependency chain: closing the root blocker does NOT auto-unblock children — statuses flip individually.
 
@@ -67,7 +67,7 @@ NEVER use `weekly_create` for Leonid's work items: his work tasks live in projec
 
 **Leonid's 2 main work queues (dept Лаборатория → IT-отдел, dept=`it_dev`; found via prod DB 2026-10-23 — the site has no per-board URLs):**
 - «PrimePilot Лицензирование» = `project_id 302f022445fc` — licensing tasks; structure: фаза «Разработка MVP» → шаг «Разработка MVP» (single phase/step)
-- «IT-Инфраструктура» = `project_id a8c08280ddc8` — infra tasks; plan is EMPTY (no rows in `phases` for it), `roadmap_get_structure` returns `phases: []`; a phase+step must be created first (ask Leonid for names) before `roadmap_create_task` can target it
+- «IT-Инфраструктура» = `project_id a8c08280ddc8` — infra tasks; structure: фаза «Прочие задачи» → шаг «Прочие задачи» (created via DB, see below). MCP has NO create-phase tool, and REST v1 mutations are cookie-only (`require_fio`) — to add structure to an empty plan, insert into the prod DB replicating `app/managers/roadmap_domain/phases.py::add_phase` + `steps.py::add_step`: one transaction inserting `phases(project_id, phase_key=max+1, name, color=PHASE_COLORS[key%9], sort_order=max+1)` then `steps(phase_id, name, sort_order=max+1)`, and verify with `roadmap_get_structure` before creating tasks.
 - Always pass `project_id` explicitly — the omitted default resolves to the BPM system's own product roadmap, not a work queue.
 
 Feedback (REST + MCP): MCP tools `feedback_create_message(message, type?, title?, page_url?)` and `feedback_list_my_messages()` on scope `feedback:write`; input limits are enforced at the MCP layer mirroring `FeedbackCreateInput` (type enum, message 3–4000, title ≤200, page_url ≤500). `feedback:write` is default-OFF on the token form — mint explicitly (checkbox or `POST /api/v1/tokens` with `scopes` in the body). A token minted before the checkbox existed denies the feedback tools with `isError` — that is the scope gate working, not a broken endpoint. Deployed and smoke-verified in prod; MCP is the first choice. REST fallback if MCP is off: `POST /api/v1/feedback` (`FeedbackCreateInput`, plus `idempotency_key`, `draft_id` for attachments) via `manager.feedback_notes.create_feedback`; `GET /api/v1/feedback/mine` verifies delivery, `GET /api/v1/feedback` = admin all-list.
@@ -82,6 +82,7 @@ TDD RED→GREEN, full suite before done. `Manager` is a singleton: tests must ne
 
 ## Pitfalls
 
+- In a single ssh one-shot, EVERY `sudo` needs its own password feed — the pipe into the first `sudo -S` is consumed, so a second bare `sudo` later in the same command dies with "a terminal is required"; feed `echo "$PW" | sudo -S` for each sudo or split into separate ssh calls.
 - NEVER put a literal URL inside a shell command you hand to Leonid to paste: his chat client wraps URLs as `` @url:`https://...` `` and he pastes it verbatim, corrupting the file/command. Build commands so the URL appears only in output, or include a strip step: `sed 's|@url:`\([^`]*\)`|\1|'`.
 - Don't trust `git pull` on a work server dir blind: check `DEPLOYED_SHA` matches `origin/master` head before diagnosing version-dependent behavior.
 - Fleet/server-park operations (firewall, fail2ban, WireGuard mesh, Kuma instances, sudoers, the A–F + NAS hosts) have their own runbook: see `references/work-infra-fleet.md`. Read the inventory (`~/work/infra/docs/inventory.md`) before touching any work server, and update it after any topology change.
