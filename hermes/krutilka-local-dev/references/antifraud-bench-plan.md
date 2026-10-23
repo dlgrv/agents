@@ -4,6 +4,12 @@
 
 База в krutilka уже есть: `identity/profile_store` (пул профилей ifa/user_id + device-снапшот с UA, квоты), `proxy/soax` (резидентные IP по гео), `event_configs` (jitter/skip на квартили).
 
+## Состояние реализации (обновлять в конце каждой волны)
+- Этапы 0–3 (GIVT-персоны: enum, манифест, буфер, alembic, givt:burst bypass квот в Lua) — в коде, задеплоены на прод.
+- Этап 4 (SIVT-персоны) — в коде, ревью пройдено; деплой ждёт явного «да». Всё через per-campaign настройки: единый dict `fraud_params` внутри `profile_settings`, принимается API только при `bench_campaign=true` (тот же гейт, что у fraud_mix), дефолты = прод-поведение, вкл/выкл PATCH-ем без деплоя. Ручки: night window (start/end hour, tz_offset), stealth quota_multiplier, whitelist ttl_hours_min/max, burst shows (градации Z), profiles_per_ip до 10 000 (гейт >10 только bench; константа PROD_MAX_PROFILES_PER_IP в user_profile.py). Паттерн `parse_fraud_params(raw, strict)`: strict=True (API-гейт, ValueError) vs strict=False (рантайм, warning + дефолт) — новые ручки добавлять в `services/identity/fraud_params.py`, единственный источник констант.
+- Далее по плану: этап 5 (bench-guard), 6 (reporting), 7 (первый bench-ран; перед ним квоты bench-кампаниям по формуле lease-бюджета).
+- Ночной гейт стоит ПОСЛЕ lease-acquire и до bid-запроса (sticky-персона на reuse главнее драу), исход показа вне окна — честный ERROR `NightWindowClosedError`, квотный счётчик при этом тратится (сигнал ночи живёт в манифесте, не в счётчиках). Churn TTL=0 реализован как «lease истёк + grace 60 c» (`COOKIE_CHURN_GRACE_SECONDS`): Redis EXPIRE 0 удалил бы профиль до чтения после acquire.
+
 ## Персоны поверх identity-профиля (поле `persona` в профиле)
 
 | Персона | Искажение | Проверяет |
