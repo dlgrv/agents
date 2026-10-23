@@ -62,7 +62,7 @@ Ubuntu NAS (X99M-H, 12 threads, 30 GiB RAM, NVMe 240G system) serving ~10 non-te
 
 ## Fleet backups vs Nextcloud backups (two separate systems)
 
-- Server-fleet backups (A/C/D/E/F → this NAS, restic over WireGuard) are governed by the `nas-backup-ops` skill and the plan at `~/work/infra/docs/backup-nas-plan.md` — do not mix them with the Nextcloud AIO borg backup. Both land on md127; keep their roots distinct.
+- Server-fleet backups (A/C/D/E/F → this NAS, restic over WireGuard) are governed by the `nas-backup-ops` skill and the plan at `~/work/infra/docs/backup-nas-plan.md` — do not mix them with the Nextcloud AIO borg backup. Both land on md127; keep their roots distinct. IMPLEMENTED 2026-10-22 (nightly crons, restore-tested 2026-10-23); fleet restic root `/srv/nas/backups`, freshness `/srv/nas/backups/status.json`, runbook `/srv/nas/backups/RESTORE.md`.
 - The array is `/dev/md127`, ext4, 2×4 TB, mounted at `/srv/nas` — verified. Any backup plan that names a different mountpoint/size is stale; correct it.
 
 ## Deployment project

@@ -27,3 +27,7 @@ All standing topology lives in `~/work/infra/docs/inventory.md` — read it befo
 - Instance 1: docker on A, port 3001, ufw ALLOW only from 10.0.0.0/24 (DENY public). Instance 2: docker on NAS `uptime-kuma`, volume `uptime-kuma`, bound to BOTH `10.0.0.4:3001` (mesh) and `100.69.213.39:3001` (Tailscale, how Leonid browses from his Mac) — never 0.0.0.0.
 - Shared credentials WITHOUT handling plaintext passwords: copy the `user` table rows (bcrypt hashes) from the source `kuma.db` into the target. Full-clone (users + monitors + settings + history) = stop target container, `docker cp` the source kuma.db over the target's, start. Both instances use image `louislam/uptime-kuma:1`.
 - Push-type monitors (`push`, e.g. host/disk/load/memory) can only ever receive pushes on ONE instance — servers push to A. On the NAS clone they will show down forever; pause them there rather than debugging them.
+
+## Fleet backups (restic → NAS) — implemented 2026-10-22
+
+- Governed by the `nas-backup-ops` skill; plan `~/work/infra/docs/backup-nas-plan.md`, restore runbook `/srv/nas/backups/RESTORE.md` (+ copy `~/work/infra/docs/RESTORE-nas-backup.md`). Nightly: staging on servers 01:30–02:30, NAS pull 02:40, freshness `/srv/nas/backups/status.json`. Restore-tested 2026-10-23 (SQL/volume/image/kuma.db all OK; full GitLab-tar drill pending).

@@ -6,44 +6,71 @@ category: devops
 
 # Fleet backups: servers A/C/D/E/F → NAS (restic over WireGuard)
 
-Canonical detailed plan: `~/work/infra/docs/backup-nas-plan.md`. If this file and the plan disagree after implementation starts, update BOTH in the same run — the plan is the human-readable source, this skill is the operating procedure.
+Implemented 2026-10-22, restore-tested 2026-10-23. Human-readable plan:
+`~/work/infra/docs/backup-nas-plan.md`; restore runbook: `/srv/nas/backups/RESTORE.md`
+(copy at `~/work/infra/docs/RESTORE-nas-backup.md`). If reality and docs disagree, fix BOTH.
 
-## Architecture (fixed decisions)
+## Architecture (as implemented)
 
-- restic, pull model: the NAS (10.0.0.4, behind office NAT) initiates sftp over wg0 with keepalive; hub A (10.0.0.1) forwards to C/D/E/F. Transport verified working.
-- One restic repo per server under `<RAID>/backups/restic/<server>/` — isolation: a compromised host only endangers its own repo.
-- Back up state+config+secrets ONLY. Never back up code (lives in git), docker images/containers, runner caches, redis, live GitLab data dir (use `gitlab-backup create` instead).
-- Retention `--keep-daily 7 --keep-weekly 5 --keep-monthly 6 --prune` → 18 restore points per repo. No date-named directories: a snapshot's timestamp IS the date (`restic snapshots`); restoring to a date = `restic restore <snapshot-id>`.
+- Pull via **sshfs**: NAS mounts each server's staging ro over WG (user `backup-restic`,
+  sftp-only chroot `/var/backups`), restic reads locally → `/srv/nas/backups/restic/<host>`.
+- One repo + own password per server. Password vars in `/etc/nas-backup/restic.env` have
+  NO dashes: `RESTIC_PASSWORD_webmain`, `_crbsitmain`, `_crbsitstandby`, `_primepilotmain`,
+  `_primepilotstandby`.
+- Back up state+config+secrets ONLY (no code, no public images, no live GitLab dir —
+  `gitlab-backup create` instead; `gitlab-secrets.json`+`gitlab.rb` ARE backed up).
+- Non-public images → weekly `docker save` into staging (F: img-configurator-backend.tar.gz).
+- Encryption: WG ChaChi20 channel + client-side restic AES-256. RAID1 md127 = both disks
+  (user decision); off-NAS copy deferred (stage 5).
 
-## Restore difficulty map (before designing anything new, know this)
+## Layout & schedule
 
-| Service | Ease | Critical dependency |
+- NAS: `/srv/nas/backups/{restic/<5 hosts>,etc/nas-backup/nas-backup.sh,logs/,status.json,RESTORE.md}`;
+  secrets `/etc/nas-backup/{restic.env,id_ed25519,known_hosts}` 700/600 root (NOT on RAID).
+- Servers: `/usr/local/bin/nas-staging.sh` + `/etc/cron.d/nas-staging` (644 root!) +
+  `/etc/ssh/sshd_config.d/50-backup-restic.conf` + `/var/backups/nas-staging/`.
+- Staging crons: A 01:30, C 02:00, D/E/F 02:30 (server-local). NAS pull 02:40.
+  Sat 05:00 `restic check --read-data-subset=10%`; 1st of month 04:00 mdadm scrub md127.
+- Retention 7d/5w/6m --prune, strict order backup → forget → prune. RPO ≤24h.
+
+## Commands (on NAS, sudo)
+
+```bash
+source /etc/nas-backup/restic.env
+export RESTIC_PASSWORD="$RESTIC_PASSWORD_webmain"      # pick host
+R="-r /srv/nas/backups/restic/web-main"
+restic $R snapshots / ls latest                       # points / contents
+restic $R dump latest /mnt/staging/<host>/<file> > /tmp/x   # one file to stdout
+```
+Deliver to a server (transit via admin Mac): `ssh nas "sudo … dump …" | ssh web-main 'cat > /tmp/x'`.
+Force a full cycle: `/usr/local/bin/nas-staging.sh` on each server as root, then
+`/srv/nas/backups/etc/nas-backup/nas-backup.sh` on NAS.
+
+## Restore difficulty (tested 2026-10-23)
+
+| What | Status | Notes |
 |---|---|---|
-| PG dumps (bpm, prime_service) | легко | pg_restore; minutes |
-| GitLab | средне | restore requires the SAME GitLab version as the backup tar AND `gitlab-secrets.json`/`gitlab.rb` — a tar without secrets is unusable |
-| GitFlic | средне | volumes back + compose up; check rabbitmq/redis state assumptions |
-| Static sites (D, configurator www) | легко | rsync back |
-| F configurator-backend image | НЕВОЗМОЖНО из бэкапа | the image exists ONLY as local docker on F — if F dies, the image is gone unless rebuilt from source or pushed to a registry. Push it to a registry or back up `docker save` output |
+| bpm SQL dump → test DB | ✅ tested | 107 tables, users 53/53 |
+| GitFlic volumes | ✅ md5 byte-exact | unpack into docker volume mountpoint |
+| configurator image | ✅ docker load | 368 MB, loads fine |
+| kuma.db | ✅ integrity_check ok | SQLite |
+| GitLab full tar | ⚠️ untested | needs SAME version + secrets; quarterly drill |
 
-## Pitfalls
+## Pitfalls (all hit during rollout)
 
-- Losing a repo's restic password loses that repo's backups permanently — password copy lives on the NAS (root:0600) AND in the owner's password manager. Verify the off-NAS copy exists at init time.
-- Sequential fetches only (A→C→D→E→F one after another): the office uplink is narrow; parallel pulls saturate it and stall every server's backup.
-- RAID1 is not an independent copy: both disks share one enclosure. It survives one disk dying, not ransomware/fire/`rm -rf`. Monthly `mdadm` scrub is mandatory anyway (RAID1 silently tolerates divergence until scrub).
-- `gitlab-backup create` skips the container registry by default — images are assumed rebuildable from source.
-- F has no agent SSH access — commands there go through the owner (hand him ready-to-paste blocks).
+- `chown -R root:backup-restic $S` steals `.ssh` → sshd "Could not open user authorized keys".
+  Keep `$S/.ssh` owned by backup-restic.
+- sudo -S via ssh eats the first stdin line: write scripts to files, prepend password separately.
+- NAS sudo password (user kbbs) ≠ fleet SUDO_PASSWORD; it's NAS_PASSWORD in ~/.hermes/.env.
+- cron.d files MUST be 644 root or cron silently ignores them.
+- Dashed env var names are invalid bash → generated without dashes.
+- "post-quantum" ssh warnings from NAS are harmless; `ufw` needs full path + sudo -S.
+- Sequential pulls only: office uplink is narrow.
+- Losing a repo password loses the repo forever — NAS env + owner's password manager.
 
-## Implementation stages
+## Open items
 
-1. Access: sftp-only user `bkp-restic` on A/C/D/E/F (internal-sftp, no shell, NAS's key only); firewall: allow tcp/22 from 10.0.0.4 on wg0 (C/D/E/F).
-2. Staging crons on A (01:30 pg_dump bpm + gitlab-backup create), C (02:00), E (02:30) — dumps to `/var/backups/nas-staging/` with dates in filenames.
-3. restic on NAS: install, init 5 repos, `nas-backup.sh`, first full pull (~14 GB, ceiling ~36 GB).
-4. TEST RESTORE before declaring done: restore a bpm dump and a GitFlic volume into /tmp and verify they load.
-5. Nightly cron (02:40 backups, Sat 05:00 `check --read-data-subset=10%`), `status.json` + Kuma alert if last success >26 h; close the PrimeBPM task.
-
-## Open items at plan time
-
-- The plan file's NAS paths/size are unverified (`/mnt/raid`, «2×2 ТБ»): the real array per nas-ops is mdadm `/dev/md127`, ext4, 2×4 TB mounted at `/srv/nas`. Fix the plan file at implementation start and pick the final root (do not collide with the Nextcloud borg dir `/srv/nas/backups`).
-- Are `/opt/builds` firmwares in git/registry? If yes, drop 1.7 GB from F's scope.
-- Is `/var/www/configurator` on F CI-deployed? If yes, it is droppable.
-- Optional stage 2: weekly `restic copy` to a medium outside the RAID (USB or F's md44, 388 GB free).
+- Kuma monitor on status.json age >26h — NOT implemented yet.
+- Quarterly GitLab restore drill pending.
+- Off-NAS second copy (stage 5) deferred by owner.
+- GitFlic compose path on C not yet located (volumes ARE captured).
