@@ -56,8 +56,24 @@ Force a full cycle: `/usr/local/bin/nas-staging.sh` on each server as root, then
 | kuma.db | ✅ integrity_check ok | SQLite |
 | GitLab full tar | ⚠️ untested | needs SAME version + secrets; quarterly drill |
 
+## Coverage audit (run quarterly, before trusting the chain)
+
+Method: inventory what each service NEEDS to come back up (docker ps -a + volumes,
+systemd units, /etc, env files anywhere, PG dbs, root crontab) vs what staging actually
+holds (`restic ls latest`); report per service covered/gap. Details: `references/coverage-audit.md`.
+
 ## Pitfalls (all hit during rollout)
 
+- Find the HOST source path of container configs with `docker inspect <c> --format
+  '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{"\n"}}{{end}}'` before adding them to
+  staging — the in-container path is misleading (gitlab-runner config lives in
+  /srv/gitlab-runner/config, ls /etc/gitlab-runner on the host fails silently in `tar
+  --ignore-failed-read`).
+- After ANY edit to nas-staging.sh: `bash -n`, re-run staging, then verify the new file
+  exists in /var/backups/nas-staging — a sed that matched nothing still exits 0 and the
+  gap stays invisible until the next restore attempt.
+- When filtering `restic ls` output through grep, print the raw count first — a wrong
+  filter pattern silently returns an empty-looking listing that reads as "repo is empty".
 - `chown -R root:backup-restic $S` steals `.ssh` → sshd "Could not open user authorized keys".
   Keep `$S/.ssh` owned by backup-restic.
 - sudo -S via ssh eats the first stdin line: write scripts to files, prepend password separately.
@@ -73,4 +89,7 @@ Force a full cycle: `/usr/local/bin/nas-staging.sh` on each server as root, then
 - Kuma monitor on status.json age >26h — NOT implemented yet.
 - Quarterly GitLab restore drill pending.
 - Off-NAS second copy (stage 5) deferred by owner.
-- GitFlic compose path on C not yet located (volumes ARE captured).
+- GitFlic compose path on C not yet located (volumes ARE captured; find widened to
+  maxdepth 4 across /opt /srv /root /home).
+- Audit gaps fixed in staging script (bpm .env, gitlab-runner config, runner-config volume,
+  configurator minio+builds volumes) — confirm they landed in the next nightly snapshot.
