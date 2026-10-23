@@ -161,6 +161,7 @@ Should print `AUTHENTICATED`. Setup is complete — token refreshes automaticall
 ### Notes
 
 - Token is stored at `~/.hermes/google_token.json` and auto-refreshes.
+- The token file holds ONE account. If the user has (or adds) a second Google account (e.g. a dedicated agent mailbox), the new token replaces whatever was there. Before running `--auth-code`, confirm which account should own `~/.hermes/google_token.json`, and after the exchange verify the token belongs to the intended mailbox with a live call (`$GAPI gmail search "" --max 1` or `gmail get` on a known message) — a successful exchange alone does not prove the right account was authorized.
 - Pending OAuth session state/verifier are stored temporarily at `~/.hermes/google_oauth_pending.json` until exchange completes.
 - If `gws` is installed, `google_api.py` points it at the same `~/.hermes/google_token.json` credentials file. Users do not need to run a separate `gws auth login` flow.
 - To revoke: `$GSETUP --revoke`
@@ -308,6 +309,13 @@ All commands return JSON. Parse with `jq` or read directly. Key fields:
 - **Sheets create**: `{status: "created", spreadsheetId, title, spreadsheetUrl}`
 - **Docs create**: `{status: "created", documentId, title, url}`
 - **Docs append**: `{status: "appended", documentId, inserted_at, characters}`
+
+## Sending email for the user
+
+1. Compose the draft and show it in chat as a quote block: From, To, Cc, Subject, full body. Do not send anything yet.
+2. Send only after the user's explicit approval of that exact draft. Edits mean show the revised draft again.
+3. After sending, verify with `$GAPI gmail get SENT_ID` that `from` and `to` are the intended addresses — a `status: sent` response alone is not proof of correct recipients.
+4. Drafting tone for the user's letters (Russian correspondence): plain human business style. No em dashes, no AI-slop constructions — run the `humanizer` skill over the draft. Show genuine interest in the recipient's domain where the user asks for it; keep signature to name + email unless the user says otherwise.
 
 ## Rules
 
