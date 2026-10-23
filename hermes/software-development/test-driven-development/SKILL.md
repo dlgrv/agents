@@ -348,6 +348,8 @@ Never fix bugs without a test.
 ## Testing Anti-Patterns
 
 - **Testing mock behavior instead of real behavior** — mocks should verify interactions, not replace the system under test
+- **Assigning mocks onto shared/singleton objects** — `obj.method = AsyncMock(...)` on an app-level singleton leaks into every later test in the process and mass-fails unrelated files; always use the test framework's restoring mechanism (`monkeypatch.setattr` in pytest) or a fixture that snapshots and restores
+- **Taftological mock assertions** — `assert mock_x.assert_awaited()` always passes; assert the call itself (`assert_awaited_once_with(...)`) or don't assert
 - **Testing implementation details** — test behavior/results, not internal method calls
 - **Happy path only** — always test edge cases, errors, and boundaries
 - **Brittle tests** — tests should verify behavior, not structure; refactoring shouldn't break them
