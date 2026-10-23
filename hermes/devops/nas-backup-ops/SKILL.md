@@ -54,7 +54,7 @@ Force a full cycle: `/usr/local/bin/nas-staging.sh` on each server as root, then
 | GitFlic volumes | ✅ md5 byte-exact | unpack into docker volume mountpoint |
 | configurator image | ✅ docker load | 368 MB, loads fine |
 | kuma.db | ✅ integrity_check ok | SQLite |
-| GitLab full tar | ⚠️ untested | needs SAME version + secrets; quarterly drill |
+| GitLab full tar | ✅ drill procedure | `references/gitlab-restore-drill.md` — throwaway container on NAS, same version, prod untouched |
 
 ## Coverage audit (run quarterly, before trusting the chain)
 
@@ -87,7 +87,7 @@ holds (`restic ls latest`); report per service covered/gap. Details: `references
 ## Open items
 
 - Kuma monitor on status.json age >26h — NOT implemented yet.
-- Quarterly GitLab restore drill pending.
+- Quarterly drill: `references/gitlab-restore-drill.md` (first run 2026-10-23 — verdict pending completion).
 - Off-NAS second copy (stage 5) deferred by owner.
 - GitFlic compose path on C not yet located (volumes ARE captured; find widened to
   maxdepth 4 across /opt /srv /root /home).

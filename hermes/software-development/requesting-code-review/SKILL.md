@@ -156,8 +156,25 @@ Quick scan before dispatching the reviewer:
 
 Call `delegate_task` directly — it is NOT available inside execute_code or scripts.
 
-The reviewer gets ONLY the diff and static scan results. No shared context with
-the implementer. Fail-closed: unparseable response = fail.
+The reviewer is independent in AUTHORSHIP (no shared context with the implementer),
+not in blindness. Give it the repo path, the explicit scope (changed files via
+`git diff` + WHICH untracked files belong to the change and which are unrelated
+junk), and let it RUN things: the full test suite, targeted probes of validators,
+even a throwaway local DB/Redis if the change touches one. Findings verified by
+execution ("lax parsing casts `true` to `1.0`, so this bool guard is dead") beat
+speculative diff-reading findings — and execution catches what reading misses.
+Fail-closed: unparseable response = fail.
+
+**Cross-repo changes get an extra cross-contract reviewer.** When the change
+spans two repos/services (client↔server, producer↔consumer), dispatch one more
+reviewer whose ONLY job is the boundary: does the value A writes equal the value
+B reads — join keys, field names, ID semantics, serialization. Each single-repo
+reviewer sees a self-consistent picture and both miss the mismatch; the cross
+reviewer is the one that catches join-key drift (e.g. the request ID A sends vs
+the server-generated ID B writes into URLs/records). After the batch: verify
+critical/major findings YOURSELF with a targeted `path:line` read on both sides
+before reporting to the user or dispatching fixes — reviewer verdicts are
+self-reports.
 
 ```python
 delegate_task(
@@ -244,7 +261,14 @@ Current diff for context:
 ---
 
 Fix each issue precisely. Describe what you changed and why.""",
-    context="Fix only the reported issues. Do not change anything else.",
+    context="""Fix only the reported issues. Do not change anything else.
+Standing user requirements, state in EVERY fix prompt: every fixed behavior gets
+a test (full coverage of the new behavior), and zero crutches — no `except: pass`,
+no `|| true`, no fallback that silently masks the bug (a missing value stays
+missing with an honest '' + warning; never substitute a look-alike). When a
+comment contradicts the code, decide which one encodes the INTENT first — make
+the CODE match the documented intent, not the comment match the wrong code,
+unless the intent itself was wrong.""",
     toolsets=["terminal", "file"]
 )
 ```
@@ -312,5 +336,7 @@ pitfalls (`path.resolve` vs `realpathSync`), and wrapped-CDP return shapes.
 - **No test framework found** — skip regression check, reviewer verdict still runs
 - **Lint tools not installed** — skip that check silently, don't fail
 - **Auto-fix introduces new issues** — counts as a new failure, cycle continues
+- **Frontend validation narrower than the backend contract** — a zod/pydantic enum listing only UI presets while the API accepts a wider pattern (e.g. `multiplier:N` with N up to 9999) means any form save silently downgrades out-of-preset values to the default. Flag any `toForm`/serializer that NORMALIZES unknown values instead of preserving or rejecting them loudly.
+- **Partial patch wipes a nested JSON column** — `model_dump(exclude_unset=True)` only honors unset at the TOP level; without nested exclude_unset or an explicit deep-merge, patching one key of a JSON column nulls its sibling keys. Same class: validation gates that check a flag only within the current patch payload instead of merging with the persisted state (a valid update then requires re-sending unchanged fields).
 - **Review with zero edge-case tests** — a guard/边界 with only happy-path coverage looks "passing" but is unproven; expand tests first (Step 0) or the reviewer will just list missing cases you could have found yourself
 - **Regression lost across branch ops** — an uncommitted fix in the working tree is silently dropped by `git stash`/`checkout`/`restore` that crosses branches, a force-push, or a branch rebuild from a backup ref. A previously-applied fix can vanish and the code "passes review" while being broken. Mitigation: before running the review, `git diff` the working tree against the last commit to confirm your fixes are actually committed; if a review test fails against real behavior that you "already fixed," suspect a lost fix first, not a test bug. (Real case: a contentEditable `Input.insertText` fix was lost on a branch rebuild and only caught because the new edge-case test asserted the correct CDP method.)

@@ -296,9 +296,16 @@ Full trace with backtrace:
 RUST_LOG=trace RUST_BACKTRACE=1 himalaya envelope list
 ```
 
+## Security Rules (mandatory for this user)
+
+- Never put a password directly in `config.toml` — a plaintext secret on disk leaks through backups and screenshots. Use `auth.cmd` to pull it from macOS Keychain at runtime (`security find-generic-password -s himalaya -w`).
+- `chmod 600` the config file after setup.
+- Use an **app-specific password** (revocable, narrow scope), never the account master password.
+- Prefer a **dedicated/secondary mailbox** for agent work over the user's primary one: a mailbox is the password-reset master key for every linked account, so compromising it compromises far more than email.
+- For one-off sends, offer the user the drafted text to send manually instead of pushing for full mailbox access.
+
 ## Tips
 
 - Use `himalaya --help` or `himalaya <command> --help` for detailed usage.
 - Message IDs are relative to the current folder; re-list after folder changes.
 - For composing rich emails with attachments, use MML syntax (see `references/message-composition.md`).
-- Store passwords securely using `pass`, system keyring, or a command that outputs the password.

@@ -27,8 +27,9 @@ Falls back from broken search to the page text. Trigger cases: results in the wr
 
 ## Pitfalls
 
-- `goto_url` may raise `Page.navigate timed out after 5s` **while navigation actually succeeds**. Wrap it in try/except, sleep 10–15 s, then check `page_info()` / body text before declaring failure. Never conclude a page is unreachable from this error alone.
+- `goto_url` may raise `Page.navigate timed out after 5s` **while navigation actually succeeds**. Wrap it in try/except, sleep 10–15 s, then check `page_info()` / body text before declaring failure. Never conclude a page is unreachable from this error alone. If the timeout repeats across calls, the daemon itself is wedged (an unreachable/slow host can block it) — call `ensure_real_tab()` to recover before retrying the URL.
 - Reader-proxy responses are cached by URL: a second fetch can return a shorter/older snapshot. Read whatever arrived fully (`len` first) before deciding the page is truncated.
 - When a degraded backend returns only brand homepages or unrelated locale pages for brand-name queries, the query text is not the problem — stop rephrasing and jump to direct fetches. Pricing/landing pages are typically JS-rendered and return nearly empty via curl; the site's /docs pages are usually server-rendered and fetch fine.
+- A broken backend can return confident-looking garbage: real titles, real URLs, sane descriptions — all unrelated to the query. Check the first result's title against the query before spending any calls on the results; 'results came back' is not evidence the search ran. One reformulation is enough to test this, not two.
 - Search snippets are not verification of a price or spec. If direct fetches all failed, say so in the answer and label the number unverified — a confident wrong price is worse than an honest gap.
 - Keyword homophones are a trap for RU retail/tech queries (site names like DNS/ДНС collide with networking terms). Prefer exact site URLs and on-site navigation over general web search for such targets.
