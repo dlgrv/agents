@@ -282,6 +282,8 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 **Problem:** LLMs use em dashes (—) more than humans, mimicking "punchy" sales writing. In practice, most of these can be rewritten more cleanly with commas, periods, or parentheses.
 
+**Standing rule for this user:** in his Russian texts (emails, letters, docs) long dashes are banned outright, not just "overused" — rewrite every «—» with a comma, colon, period, or sentence split. He reads them as a neural-slop tell.
+
 **Before:**
 > The term is primarily promoted by Dutch institutions—not by the people themselves. You don't say "Netherlands, Europe" as an address—yet this mislabeling continues—even in official documents.
 

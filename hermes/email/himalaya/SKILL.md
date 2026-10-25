@@ -26,6 +26,7 @@ requires the external `himalaya` CLI.
 
 - `references/configuration.md` (config file setup + IMAP/SMTP authentication)
 - `references/message-composition.md` (MML syntax for composing emails)
+- `references/bulk-cleanup.md` (mass spam deletion + unsubscribes: census, transactional-sender verification, Trash-move loop, List-Unsubscribe handling)
 
 ## Prerequisites
 
@@ -126,6 +127,10 @@ message path/stdin); `message read` prints metadata only. Full schema: config.sa
 Yandex gotcha: IMAP auth fails with "invalid credentials or IMAP is disabled" until the user enables
 IMAP in mail.yandex.ru settings (шестерёнка → Почтовые программы → IMAP). Mailbox names are
 English (Inbox/Sent/Spam), not localized.
+
+Yandex SMTP gotcha: if the shell exports `https_proxy`/`all_proxy`, himalaya tunnels SMTP through
+it and Yandex stalls ("stream stopped responding after 60s"). Send with proxies stripped:
+`env -u https_proxy -u HTTPS_PROXY -u all_proxy -u ALL_PROXY himalaya message send ...`.
 
 - **Reading, listing, searching, moving, deleting** all work directly through the terminal tool
 - **Composing/replying/forwarding** — piped input (`cat << EOF | himalaya template send`) is recommended for reliability. Interactive `$EDITOR` mode works with `pty=true` + background + process tool, but requires knowing the editor and its commands
