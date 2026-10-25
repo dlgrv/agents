@@ -29,6 +29,7 @@ description: Use when bridging Hermes skills, MCP or history into ZCode.
 ## API retries (busy/429/5xx)
 - Built-in by default: 10 retries (11 attempts), exponential backoff 2s base, factor 2, cap 60s, jitter. No config.json field.
 - Override via env only: `ZCODE_MODEL_RETRY_MAX_RETRIES`, `ZCODE_MODEL_RETRY_BASE_DELAY_MS`, `ZCODE_MODEL_RETRY_BACKOFF_FACTOR`, `ZCODE_MODEL_RETRY_MAX_DELAY_MS`. For the desktop app use `launchctl setenv` before launch; CLI runs inherit shell env. Source: apps/zcode-cli/packages/adapters/src/model/retry-policy.ts.
+- Persistent across reboot (done 2026-10-25): LaunchAgent `~/Library/LaunchAgents/com.dlgrv.zcode-retry-env.plist` sets all four vars at login (RunAtLoad, /bin/sh -c with four launchctl setenv calls). Current values: 32 retries, 2000ms base, factor 2, 20000ms cap (~10 min total). Reload after edit: `launchctl bootout gui/$(id -u)/com.dlgrv.zcode-retry-env && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.dlgrv.zcode-retry-env.plist`. Test: `launchctl unsetenv VAR && launchctl kickstart gui/$(id -u)/com.dlgrv.zcode-retry-env` then `launchctl getenv VAR`.
 
 ## Verify
 - Runtime: `node /Applications/ZCode.app/Contents/Resources/glm/zcode.cjs` (needs `ZCODE_BUILTIN_PROVIDER_CONFIG_FILE=/Applications/ZCode.app/Contents/Resources/config/provider/zcode-builtin.json` outside the app; macOS has no `timeout` cmd).
