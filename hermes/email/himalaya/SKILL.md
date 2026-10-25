@@ -101,6 +101,32 @@ folder.aliases.trash = "Trash"
 
 ## Hermes Integration Notes
 
+### himalaya v2 (2.x) differences from this skill's v1 examples
+
+Verified on 2.2.1 (2026-10): the skill's v1 `backend.*` config tables are IGNORED by v2 ("configures
+no supported backend... see MIGRATION.md"). v2 account config is flat protocol tables:
+
+```toml
+[accounts.yandex]
+default = true
+email = "user@example.com"
+display-name = "Name"
+imap.server = "imaps://imap.example.com:993"
+imap.sasl.plain.username = "user@example.com"
+imap.sasl.plain.password.command = "security find-generic-password -a user@example.com -s himalaya-example -w"  # macOS Keychain
+smtp.server = "smtps://smtp.example.com:465"
+smtp.sasl.plain.username = "user@example.com"
+smtp.sasl.plain.password.command = "security find-generic-password -a user@example.com -s himalaya-example -w"
+```
+
+Other v2 changes: no `himalaya search` subcommand (use `envelope list` + grep, or `himalaya imap`);
+`folder` → `mailbox` (`-m`); `template send` pipeline removed (v2 `message send` takes a raw
+message path/stdin); `message read` prints metadata only. Full schema: config.sample.toml upstream.
+
+Yandex gotcha: IMAP auth fails with "invalid credentials or IMAP is disabled" until the user enables
+IMAP in mail.yandex.ru settings (шестерёнка → Почтовые программы → IMAP). Mailbox names are
+English (Inbox/Sent/Spam), not localized.
+
 - **Reading, listing, searching, moving, deleting** all work directly through the terminal tool
 - **Composing/replying/forwarding** — piped input (`cat << EOF | himalaya template send`) is recommended for reliability. Interactive `$EDITOR` mode works with `pty=true` + background + process tool, but requires knowing the editor and its commands
 - Use `--output json` for structured output that's easier to parse programmatically
