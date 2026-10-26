@@ -29,11 +29,22 @@ Pitfall: if the browser daemon was restarted mid-session, the Moodle session die
 ## When elearning won't load from the agent browser
 The isolated browser inherits the Mac's proxy env (Clash on 127.0.0.1:17891); volgatech routes through a dead clash node and every HTTPS request hangs (proof: `curl --noproxy '*' https://elearning.volgatech.net/` returns 200). Fix WITHOUT touching Clash (user's hard rule): launch a dedicated headless Chrome for Testing with the proxy env vars unset (`env -u HTTP_PROXY -u HTTPS_PROXY ... chrome --headless=new --remote-debugging-port=9223 --user-data-dir=/tmp/agent-browser-manual-profile`), then `hermes config set browser.cdp_url http://127.0.0.1:9223` and pkill browser_harness.daemon — it respawns onto that Chrome. Configure Hermes only via `hermes config set`, never by editing config.yaml (a stray indent breaks the live gateway). Restore with `hermes config set browser.cdp_url ''` afterwards.
 
+## Messaging a user (личные сообщения)
+1. Get the recipient's userid from their profile page URL (`/user/profile.php?id=<N>`) — find the profile via site search or a course participant list. Verify identity by the email shown on the profile, not just the name.
+2. Open `/message/index.php?id=<userid>` — the message drawer loads the conversation view with a `textarea[data-region=send-message-txt]` and a `button[data-action=send-message]`.
+3. Fill by `ta.value = text; ta.dispatchEvent(new Event('input',{bubbles:true}))` — a plain value set leaves the send button disabled.
+4. Sending works even when the UI misbehaves: call `core_message_send_messages_to_conversation` via the ajax service; the conversationid comes from the request body (hook `XMLHttpRequest.prototype.send` with a `load` listener into a `window.__log` array to capture body + response). A response `[{"error":false,"data":[{"id":<msgid>,...}]}]` is the DB write.
+5. VERIFY server-side, not in the UI: this portal's drawer often fails to render the conversation after reload even when the message is stored. `core_message_get_conversations` with args `{userid: <mine>, limitfrom:0, limitnum:20}` returns conversations incl. a `messages` array — count and match message ids there. `core_message_get_conversation_messages` and `core_message_create_conversation` are disabled on this portal — don't plan around them.
+Pitfall: clicking send twice (e.g. a first attempt whose response you never read, then a scripted retry) can post the message twice — always capture the send response before deciding to retry, and dedupe by message id via get_conversations.
+
+## Writing style for messages/letters to staff (Russian)
+Plain human sentences: NO «—»/тире in the body and no AI-slop phrasing — the user reads em-dashes and formulaic constructions as machine text and asks for rewrites. Keep an approved sentence 1:1 when re-editing a draft (don't paraphrase parts the user already accepted); it's fine to copy a middle chunk verbatim from an already-sent email when writing the follow-up message.
+
 ## Portal quirks for scripted access
 - **`core_course_get_contents` is disabled on this portal** («Веб-служба недоступна») — enumerate a course's modules by parsing the `/course/view.php?id=<id>` HTML: regex over `/mod/<type>/view.php?id=N` hrefs plus the nearest `instancename` text gives type/id/name for every module including the 10 assignments of a practice course.
 - **Check assignment submissions via the page wording, not guesses**: `mod/assign/view.php?id=N` (full goto, not XHR — XHR GET of an assign URL returns the course shell) reports «Состояние ответа … Ни одной попытки» when nothing was submitted.
 - **This harness's js() has no await_promise — run in-page API calls as synchronous XHR** (`x=new XMLHttpRequest(); x.open('POST',url,false); x.send(body); return x.responseText`), and build the JS expression by string concatenation, not an f-string — the JS braces collide with f-string syntax and throw.
-- On a course page the plain ajax `core_course_get_enrolled_courses_by_timeline_classification` still works (see above) — only some WS methods are disabled; read the error body before assuming the whole ajax service is dead.
+- Only some WS methods are disabled; availability is PER METHOD and doesn't follow a pattern (e.g. `core_message_send_messages_to_conversation` and `core_message_get_conversations` work while `core_message_create_conversation` is disabled) — test the exact method and read the error body (`invalidrecord` = method not registered) before assuming the whole ajax service is dead.
 
 ## Find a staff member's contacts (site volgatech.net, not Moodle)
 Use this for «как связаться с преподавателем/сотрудником» asks.
