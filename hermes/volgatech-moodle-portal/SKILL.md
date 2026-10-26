@@ -35,6 +35,15 @@ The isolated browser inherits the Mac's proxy env (Clash on 127.0.0.1:17891); vo
 - **This harness's js() has no await_promise — run in-page API calls as synchronous XHR** (`x=new XMLHttpRequest(); x.open('POST',url,false); x.send(body); return x.responseText`), and build the JS expression by string concatenation, not an f-string — the JS braces collide with f-string syntax and throw.
 - On a course page the plain ajax `core_course_get_enrolled_courses_by_timeline_classification` still works (see above) — only some WS methods are disabled; read the error body before assuming the whole ajax service is dead.
 
+## Find a staff member's contacts (site volgatech.net, not Moodle)
+Use this for «как связаться с преподавателем/сотрудником» asks.
+- The official site is **www.volgatech.net** (ПГТУ «Волгатех», Йошкар-Ола). `volgatech.edu` does not resolve/open — don't burn time on it.
+- **Fastest path is the telephone directory, one page with everyone**: `goto_url('https://www.volgatech.net/about_the_university/telephone_directory/')`, then loop `t.find("Фамилия", idx)` over `document.body.innerText` — every hit gives office, phone, and email. Go here FIRST; personal pages are often stale one-liners (a teacher listed as «АСПИРАНТ» years after defending).
+- Corporate emails follow `Фамилия+Инициалы@volgatech.net` transliterated (Кислицын А.А. → KislitsinAA@volgatech.net) — once the directory confirms one address for a person, that pattern predicts whether a guessed second address is plausible, but never invent an address without a directory hit.
+- Site search at `/search/?q=<url-encoded Cyrillic>` returns relevance-sorted hits with breadcrumb paths and «Изменен» dates — use it to find a person's staff-page id and news mentions (titles, roles, dissertation), which help write a letter that addresses them correctly.
+- A teacher may hold an admin post (отдел/департамент) outside their faculty — their directory entry can sit under that unit, not under кафедра. Grab BOTH blocks: the personal entry (direct phone/email) and the кафедра entry (общий email, завкафедрой) as fallback contact routes.
+- js() returns a Python str: use Python slicing/`.find`, not JS methods like `.slice` (AttributeError).
+
 ## File naming formula
 `{Предмет-аббревиатура}_{Тип+№}_{Группа}_{Фамилия_И.О.}.{ext}` → e.g. `ОИИ_ЛР1_ИТС-41з_Долгирев_ЛМ.docx`. Canonical spec with the full rule list: `university/именование-файлов.md`. When renaming, rename BOTH the local files and the portal submission (old filenames linger on the platform otherwise).
 
