@@ -30,7 +30,9 @@ Implemented 2026-10-22, restore-tested 2026-10-23. Human-readable plan:
 - Servers: `/usr/local/bin/nas-staging.sh` + `/etc/cron.d/nas-staging` (644 root!) +
   `/etc/ssh/sshd_config.d/50-backup-restic.conf` + `/var/backups/nas-staging/`.
 - Staging crons: A 01:30, C 02:00, D/E/F 02:30 (server-local). NAS pull 02:40.
-  Sat 05:00 `restic check --read-data-subset=10%`; 1st of month 04:00 mdadm scrub md127.
+  Sat 05:00 `restic check --read-data-subset=10%` (fixed unescaped `\%` 2026-10-26 —
+  before that cron truncated the command at `%` and check never ran; first real run
+  2026-10-26: all 5 repos clean); 1st of month 04:00 mdadm scrub md127.
 - Retention 7d/5w/6m --prune, strict order backup → forget → prune. RPO ≤24h.
 
 ## Commands (on NAS, sudo)
@@ -79,6 +81,13 @@ holds (`restic ls latest`); report per service covered/gap. Details: `references
 - sudo -S via ssh eats the first stdin line: write scripts to files, prepend password separately.
 - NAS sudo password (user kbbs) ≠ fleet SUDO_PASSWORD; it's NAS_PASSWORD in ~/.hermes/.env.
 - cron.d files MUST be 644 root or cron silently ignores them.
+- Unescaped `%` in a cron.d command field = newline: the command is TRUNCATED at `%` and
+  the redirect (written after it) is lost — restic check looked scheduled but never ran
+  for 4 days, error vanished (no MTA). Escape as `\%` or move the loop into a script.
+- Root-only scripts (nas-staging.sh 750) read WITHOUT sudo + `2>/dev/null` make grep/cat
+  print nothing and exit quietly — cost a false "gitlab-runner config not backed up"
+  verdict on 2026-10-26 (it was inside etc.tar.gz all along). Read with sudo before
+  concluding anything is missing.
 - Dashed env var names are invalid bash → generated without dashes.
 - "post-quantum" ssh warnings from NAS are harmless; `ufw` needs full path + sudo -S.
 - Sequential pulls only: office uplink is narrow.
@@ -91,5 +100,10 @@ holds (`restic ls latest`); report per service covered/gap. Details: `references
 - Off-NAS second copy (stage 5) deferred by owner.
 - GitFlic compose path on C not yet located (volumes ARE captured; find widened to
   maxdepth 4 across /opt /srv /root /home).
-- Audit gaps fixed in staging script (bpm .env, gitlab-runner config, runner-config volume,
-  configurator minio+builds volumes) — confirm they landed in the next nightly snapshot.
+- Audit gaps fixed in staging script — CONFIRMED in snapshots 2026-10-26: `bpm-backend.env`
+  (web-main), gitlab-runner config.toml inside `etc.tar.gz` (web-main, verified via
+  `restic dump latest …/etc.tar.gz | tar -tz`), `vol-runner-config.tar.gz` + gitflic
+  compose/env files (crbsit-main), configurator minio/builds volumes (primepilot-standby).
+- Health check 2026-10-26: 4/4 nights clean (23–26.10), 6 snapshots/host, retention OK,
+  restic check clean on all repos. Note: crbsit-standby raw size doubles when
+  crbsit-site.tar.gz (~590 MiB) regenerates — gzip archives don't dedup, it's expected.
