@@ -128,6 +128,31 @@ Yandex gotcha: IMAP auth fails with "invalid credentials or IMAP is disabled" un
 IMAP in mail.yandex.ru settings (шестерёнка → Почтовые программы → IMAP). Mailbox names are
 English (Inbox/Sent/Spam), not localized.
 
+### Draft-approve-send for official correspondence (mandatory for this user)
+
+For letters to organizations/officials: draft in the recipient's language, show the user the full
+text (From/To/Subject/body) and iterate on their edits BEFORE sending; send only on an explicit
+"send it". Keep the reply in the same thread (In-Reply-To/References to the original Message-ID) so
+the recipient's context survives. This user works this way every time — never send first and
+summarize after.
+
+### v2 send workflow pitfalls
+
+- `himalaya message send` (v2) does NOT save a copy to Sent. Append the raw eml yourself:
+  `himalaya message add -m Sent -- /path/to/message.eml`. The eml MUST carry a `Date` header —
+  without one the Sent listing shows a blank subject/date row and the thread looks broken.
+- Build non-ASCII headers (Cyrillic display names, encoded Subjects) with Python's `email`
+  library (`email.header.Header`, `email.utils.formatdate`), never hand-written base64 — a
+  hand-typed encoded-word decodes to mojibake at the recipient. Mojibake in a display name does
+  NOT block delivery (routing uses the envelope recipient and the `<addr-spec>`), so a "sent OK"
+  hides it until you inspect the copy: verify every send with `himalaya message read <id> -m Sent`
+  and an Inbox grep for mailer-daemon bounces.
+- `himalaya message remove <id> -m <folder>` moves to trash and therefore requires
+  `mailbox.alias.trash = "Trash"` in the account config; without it the remove fails with
+  "Cannot determine the trash mailbox". v2 `flag add` accepts only lowercase
+  seen/answered/flagged/draft — `Deleted`/`Answered` are invalid values, IMAP system flags are
+  not exposed there.
+
 Yandex SMTP gotcha: if the shell exports `https_proxy`/`all_proxy`, himalaya tunnels SMTP through
 it and Yandex stalls ("stream stopped responding after 60s"). Send with proxies stripped:
 `env -u https_proxy -u HTTPS_PROXY -u all_proxy -u ALL_PROXY himalaya message send ...`.
