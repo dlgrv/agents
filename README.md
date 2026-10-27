@@ -46,6 +46,7 @@ machine, and keeps the repo at a few MB.
 │   │   redesign-existing-projects/, image-to-code/  ← from Leonxlnx/taste-skill
 │   ├── omo-frontend/                  ← local build from code-yeongyu/oh-my-openagent (see below)
 │   ├── drawio-skill/                  ← from Agents365-ai/drawio-skill
+│   ├── ub-mode/                       ← from unclebob/ub-mode
 │   └── (14 × superpowers skills)      ← from obra/superpowers
 ├── subagents/                   ← own subagents, unified Cursor + Claude Code (see below)
 ├── cursor/rules/                ← Cursor-specific global rule (see below)
@@ -83,6 +84,7 @@ subfolders, each pinned to the upstream commit it was copied from.
 | image-to-code | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) `skills/image-to-code-skill` | see upstream | `ccbc156` |
 | omo-frontend (local build) | [code-yeongyu/oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) — SKILL.md из `packages/skills-loader-core/.../frontend`, references из `packages/shared-skills/skills/frontend/references` (design/designpowers/perfection); Layer A taste-файлы — симлинки на скиллы из этого хаба; брендовые Layer B (Open Design) — заглушки | see upstream | local |
 | drawio-skill | [Agents365-ai/drawio-skill](https://github.com/Agents365-ai/drawio-skill) `skills/drawio-skill` | MIT | `cfe6131` |
+| ub-mode | [unclebob/ub-mode](https://github.com/unclebob/ub-mode) `SKILL.md` (repo root) | see upstream | `57a8bdd` |
 | improve-agent-harness-token-efficiency | [X: @ericzakariasson](https://x.com/ericzakariasson) — промпт из твита (Cursor learnings), не репо; зеркало [telegra.ph](https://telegra.ph/EHkonomim-tokeny-09-25) | see author | tweet (transcribed) |
 
 ## Update a skill from upstream
