@@ -1,0 +1,166 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:e72e7691d61a830a322f3e0a81f5e08e36551f4362bf6942aa106587a99d4d5c
+  rule_id: AE4
+  file: references/tubemap.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7751d0dd284d0790c9c7c12e374cff588bf63bb55f87c57068da4109059fc893
+  rule_id: AST4
+  file: scripts/autolayout.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6940c819ec976a13cfe110ff417226951fc48cc883ed4477db4b588912675dc8
+  rule_id: AST4
+  file: scripts/buildup.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5a941823be3d15ef7da66c5bf20489ef7fa6550a9620799aebdb9ad2ca98261e
+  rule_id: AST4
+  file: scripts/compress.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c1fc3b3d2a86d8e2efbb473aa6eb3f3ffb02dd6fd286858120b8c1f7b16a1e79
+  rule_id: AST4
+  file: scripts/diagramctl.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:07ffa043399d97d032514160e9498357935f7eda6da0b55111e4e3d86e92d2c2
+  rule_id: AST4
+  file: scripts/diagramctl.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c878e91e400f88ac6ed8c6b518dcccef258a34ad0a62ecb5fa032483d9203cad
+  rule_id: AST4
+  file: scripts/diagramctl.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d04e1cbf619c2bb9eb8c8ee95bafd19b8c6a3fdcd96ecaa4f8a9eaa782c6f4ce
+  rule_id: AST4
+  file: scripts/diagramctl.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0812b79a623c279e110d6b4e17142c8e40fef4a88e4b39f00945f89d423ab122
+  rule_id: AST4
+  file: scripts/diagramctl_mcp.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0c468a189314190ad4ed5055f43f6a62a220356652d9c5653aabe690fe9a81ce
+  rule_id: AST4
+  file: scripts/drawio2pptx.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0f2fcef921030e8b35d44518c35d604b31a50852a0b883917f1a02f246d471f5
+  rule_id: AST4
+  file: scripts/drawiohtml.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6933d53c522a5de2793d3bb7cd180ae5dd00c5b65121e64bbd9c3d74e0f60f11
+  rule_id: AST4
+  file: scripts/goimports.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:395818010192f46989881fbcb81021eb58c00e0bbf98577dd41de3a38ae1929c
+  rule_id: AST4
+  file: scripts/jsimports.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:10ca9b16cdbe064c4737dfb8a9d67d44f4b247ccc1164b08218206109d5570a0
+  rule_id: AST4
+  file: scripts/prdiff.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5076dce995c2a67042bdbba2b995789528e7272a100dc0e0a572bec363666d04
+  rule_id: AST4
+  file: scripts/prdiff.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8f355fd6414718839fecc2604f9fa003fc5b550097f101d1a16df68578d6a1ec
+  rule_id: AST4
+  file: scripts/prdiff.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:4aeb14ede59e5e61688ea5707c97000e2c86f8901c5e961b8d041d397d485e8c
+  rule_id: AST4
+  file: scripts/prdiff.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c3a22679f1451b6a4529fa28872956158a4774270088d48c74fc304b42dcb283
+  rule_id: AST4
+  file: scripts/prdiff.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f1361cfdc965e9ba7ff1ca3aa15206203943517ffa2b5c359fa911b7a0e86023
+  rule_id: AST4
+  file: scripts/pyclasses.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c05a472a1d18c792fe64d8e59fc1a122f6830e82ffc98756243d433cbba401bd
+  rule_id: AST4
+  file: scripts/pyimports.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:2d801cacea438ae08246449e8ebc6a8e78622a642ee69820cd977f215d0db147
+  rule_id: AST4
+  file: scripts/raster2drawio.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6863608d3476fa7b87213992fa0a8402c6b8a40ff0bbe9b1c2242cdf5eb46cab
+  rule_id: AST4
+  file: scripts/rustimports.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:23addd5902abda73924f35fcf27437bb985b516aaa3c391be9e61a328934b656
+  rule_id: AST4
+  file: scripts/svgflow.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:fc6cbba81cc18e05e40ef2386905ed13091479b19c16a915f7a41a5581b32255
+  rule_id: AST4
+  file: scripts/tfimports.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:16a52fe42c1c213cbb75fd4d4207a73917a3a79da532ee2acc2438dd7742a35a
+  rule_id: AST4
+  file: scripts/timelapse.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5da86825929941aca1b21495cee75038d8b2a6762986940c7f8adaf5b197c596
+  rule_id: AST4
+  file: scripts/timelapse.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3cd91dd38bd34e6c562e23f9b26ca4cee85533840aa1f6a2ac2e0d581b95dc56
+  rule_id: AST4
+  file: scripts/timelapse.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:27694aac3d624735c856c37e8afbe96886262168c291a8466f48d16d42841753
+  rule_id: AST4
+  file: scripts/timelapse.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e06b37eecf243ade97959eaf73dffc3bfef72c13c4bc2d768a92f32a4edd1a1a
+  rule_id: E1
+  file: scripts/dbxicons.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ea8cec1f4f54cbb9712a62d09e771879a706a9c01e7dc01cd34e7d9e9c9220a2
+  rule_id: OH1
+  file: scripts/diagramctl.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:797b582c72b45c6f60366d472df6f751bcb50d5937a2f91caf2f26b00bf6552a
+  rule_id: PE2
+  file: references/autolayout.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:dcf0534b7cb3b06d4fbbbdf5d4d14c10eadfa39a1eaa40bf7d5de93b27b27bbe
+  rule_id: P4
+  file: references/shapes.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c07fe0d52063dc350095a988150d182c121af4d9cbcb38206e4dd3636d51f9a8
+  rule_id: RA2
+  file: references/style-extraction.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0356d63fe606bd1d8ea637436da94cb040f6e75854b856a5e414f3516d52ef75
+  rule_id: RA2
+  file: references/style-presets.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8581c73e13d9375d502e0ae536cba756c0bff6e0ff1536780f14331880d83f8b
+  rule_id: RA2
+  file: references/style-presets.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ca26262549e749b767bb5f7a9f5798fc42b6fc85e184e5b741e09c905523f6ba
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:27e251769123d2d6e399f6af7c02e4351cbe0ab0ec0d382ca3a9da9a45597cd0
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:63b692303b1f138841d3abfefb20a5df0d6b2dbea597e0ebfb01ff944d36fb87
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7085d41f543fe66f479e7a1317be1e5ae707b2acbe5dcc8f15b612910b9529b4
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:29cd11e05a1f352958eb3acf9095ef2e557a879794e7cbe2d371e3f2f7ad3deb
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'

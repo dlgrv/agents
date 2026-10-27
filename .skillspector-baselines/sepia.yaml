@@ -1,0 +1,14 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:97fdf9ac697d99a133b04a6bb008d06bce9ff2bf358e8a14cc329f0aeec8bbe9
+  rule_id: EA3
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:af8bddcc6d7525671fadb953002c134ade3f14a53834926195787662c17f8779
+  rule_id: EA2
+  file: references/domains/tickets.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'

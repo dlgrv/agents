@@ -1,0 +1,506 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:c772cc86bbb4893a11a3a444545af94898997dced0c99d884dbfab047a2f8013
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c5a8074063a8caa7b69da37016ebe8875fb5b04c431d6b0925fd4240ec775242
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a485dda685252a9567446ae089f6f55e9defba0abbec429df4ac245500d896b2
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:bd79e7c6b5a350b9f54191f6958a2eb5d4bf2817849054020b78f03467a98db1
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a64949b6a6fca39bbeee21bbeff63ce05518b1c44360705d0e6524132d070f64
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e57f4f4b1a64f81a41bcadd698094a76690dfbc4a0afd14d2fa789d424d18a8e
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:97b4c17aa4251e1d432e80fd9ba0267662201ab1b6ea63af430b189280fa3be1
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:32db801d468f9f0b7f24b37838de2a4cb72b1e330a39a6d45a9ee8e30a017b0a
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0ad5c63680f91a5e059afd76345ad280f56b36a34aa5847e35ee522eb9358c78
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f1c7f568a9d4ebab7526daa69c40f10689ff82bb4646a6683c96ed06a2201b80
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:bb4d86263ec7dbb8ce264ddae4159bfbd03d9f507ef8dab585f2e8915978a68b
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:095b1112b54e754392e31db2f6ce0b7f27087892257b106702a84aca36098993
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:90dc5ea2b77176bffbbaa3663b941ab383a660849a9805b2d324d488238ebe89
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:561a8cd117464931a12bcdbc57cfe0bf1e8d9e3456310419fc1feb957c60acd0
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f879d46e1a27bbcc4af15f6a44d8c5135032796fd9b0c27c749dbed709e4e6a9
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:be1468297e8cb5ae38dbdf71106cad0e1f78c2c7a7113ed9ef71e11a867c7692
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:82fc0105a3fd6365386701b8ee939dfec545a4320c12c4f87e80fef9452fe37c
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5ad8315419a6cfc1aaba1167e75e9ad107455ea809a220dc7163d8eb79705613
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:2383682fb924589a7a55efae88d2d01d1abe16ce6913c2c92f6a74da0438d4ab
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:abdd68b0aaf7a93a7951b3d069d9c277e410096c85e1238366f7decaa58ee745
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:68bdaf3ff7e5a1262dda404c5679b5b72784f7f4b577a20dc6f70d2e6f3d141d
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1542c41e63b6409a79a40029ee1a525e6c31c17a9d804682837331704a9091fa
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9ad2daee07742895c177518b07346fd3a27567afc285f316d90ccb51718c5723
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d28771251f57551b04f9bdccd2c03315782e416bf43b11ad0c0a734f0cc78a58
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:eac0b6668eeb4ff0f7378d71df39f9befb13c0e6830987bafb17e52d6573d34f
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e58f9de82a46a1e25f413153704afbacc6d727b196389bc2aa73b3707c314371
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:126cb8cda47358a44ac743daeea2b2b58fb361416f44e2a7cfa42993b1099b8b
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:607773f4907b8ea51efd2ce78cedad8d9d324bc7a7fa74e905ff754507eb33bd
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a4398a0c3e8646877b1db0ad4ea3cb975736753f02768ebae54b6069fbcf22a5
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c57506459000a6b57d044e2aad2c406d0abf4f4d50d5cae294a52997787b52f7
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6dcd4fe3867ed9392303b8ba632dec538f7b41977753994b30357bbf8c3fb719
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b1d84ccd362d7a6974393d46d24b5800720bd79a46f561ea1e6343ebbfd1a119
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ae4cd26a39e160016bad370aca28235394d16e995f820c0d797d630e7fa862ba
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:77d7ff859e42d09d5f82f3c91e571d543815a063fbaf2c8153ebd8ae772ee677
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:db9503248541ae40c958dd1a9e39d9fc657af85c4afebdcde105465914fde9a7
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f2cccbd9f2f1785408d67b3730ff952bb1355631a6775267ba64cc2ea59d3d79
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:058b48803e9012aaa822fdf9e9007e95593b340b2dd1b2ac1bcc59d0708a4d7b
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5ae9886bead05848a5a00384f126ac4283a4b55c0c659030b1cc7d7b1bebf7d9
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d445a26bba6a4fde67a7fcc59055c45ebb7eea866120059fb817743d7a8549f7
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:acb52fcf36f31f9aaa886f7f0d670de4bea0cf4ba0d7ca164f70b61bcd3c1c83
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6d66bf2b4b00ddc34a89c24521c48c31a868c1f58d0e146c24a5b2426bd4f14c
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8e9c722f75f6e3b8844e1b15bebdc69df3c662a2cef4dba03613ca2796fd1151
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:dd57517bda6469665091c4a9251b6702dd262faaea4ec8dcbc71e1ec599d49d6
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9696ffbc9bad75f0052c1b673caa0354253870769a6c852ae68485f68ab26626
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1126f76e4700c501b70906f84a7930d8d46e7e374ff7db650ae9284d7f4dc61d
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7ccdb561d0f41c840a08c528c3b740a71f56adc1029711419aacdbc2c6a44eda
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6b25194978805cea81542fc62455eb04d3ef6dc0522e9a47c2f1391b546c13a3
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1fd5de0273863e6213d4f031379ededa8701ab15f0c2fea29f92c2f69d4c3e5d
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:95b4e1e10c929e5a6837df5095622747b8d38abffebedf3966d7815757f00896
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c905ca1bab50c69f5b945cb33ce23a40d8c287f90e5749c0d277295ddbf904f7
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:74bb3154ebf11ce8d23e7d1a3df58798d31a4ca0ba4fff2fec908d8910bfde5c
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ecff54129201d2e28750109cebfabb2eb1eecb5993ea4f2f99410826e193f310
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:2706f02f215c7bfdcd3d652277fec49a0c6723023134db78131f22774ea3fa34
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3e085464fa2b2952558a820061b1106918a59eb26b5d4544a2b012821f5b88b1
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8ec832a7eb261bb0839e4c5a68de3f812e766071142a24501290de2a1d192365
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:56ca7eec8a9f5fa0a2f527ff85872810e5a9dc162019596fd8c02d4ef0617d43
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:107b6b526c5b2844ecfd0493bebc63ef4a11c6a8032a8be0459525191f18872f
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:49a5444f9c416289b33e2e30d27cc8ffe770d75e67a8a957059116f02ae4535e
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8269a5cb502cdc7c64de92c6a8a8f37f31fb9715e61afb6aee003b202d15a9d1
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:4ee2c5f3f485aed9398faad1933730b9a969cbe4d9f63322e408ddd7be404f3a
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:61a267920ce069dd58f4f4f4e97d15b6c5891b28e55c44e8957e23533ead6174
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:bba29f5ebd0510f8dd52a0770bef7ac2f0c366f8812f7a55c0e76766f3c6ab49
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ef823a4d17ca80c177e452f14244dd9dfd376136535b1f1ba460dfd5695f0348
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c59a985864f4a7be45979117ee5651210902f1b1cfec754e7b6b5d8887649ee8
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9ff6867c58238ab71619449499f4bd3c6e68d887c1f4bbb0a886df277179b310
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c8a988d1c0868b253bdf50b326bfbf1836b7cf055ce9a1dcf55a3afb7499f10b
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7b284dd369670e13ca94bf16db4432ccc4682999a874abcd750972fb0abefcae
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:58d3f7d3f27138f5404b486bc5fada52490ea8d7c3ca2da540fe3c591ca3b91a
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:866e54a962898252ebfe5cd6180bb0e193915a43c55b432df7cf7cbfb5439293
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9b86b10eab4fe58e6bd383c5893596bf059b0818ed246a8e8aa2fc3fa9b7cdab
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:99ec5555757de58d8c47103140b5c796efbf9dfa5fec157019c9258a7c1d9549
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d71708d9c9f1c50e4e47cf8211421f817d45709230785d16d5fb5aed1fbd9699
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:50de0a97d0cedd7033f77cb78bcd5e6b8ef899f51f23c2227fc949cf9b3189da
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:88c9349f65d8361e1f24d40429b2ccb7198a92d04e1ad2a2549fcf29097c477a
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9ed05c9af1af3b47b9e1b208b5978d024dece6bbb99f1e90af430e9a92e7d97d
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:cdff561e1d016826ef1285229287b753e57addfd40bd3c1eef3c7e2e1d8a5da5
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:fcc2ce143b2ade4bddb2c65588597f1d2a095b97d5ebcf29ab849b2bc23d7986
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ec6bb8a8c246a89699bc14ad1a4c8651b6569d386f760a37167640ca72d464ff
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b15fc3ea2097596d5c387a2c7d6557c845ac5d0bbea619a6bbeeeb517f244204
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ac9dca81fd89fb5cbe4d881703d6f1f27d933feee50322d5749880a8d9b260e6
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:94837c02a345c2ec1031d73acc96bfd36d20de870085e36e61a3b78621e21759
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b597ec78b3e009153965b3c6152094f5a702b9424ffe6547fc759243c09f1d7e
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:64f2082b710f8524a10b62a9a284663ba3ca965cdb6c051139c697fb97a39720
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:bbdab0926e1a084c4b445c241137723dfbf0fc8fd27fd5df64085e97d523da58
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:fcd97fa7b3fd239fda24d8172e3b263086326b2d807b59882e67b7ddb7eed872
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c172c2e6fd043a324cbe4b1f5a3ce3a8fc3efcdc561aa140d6768698de8f5a57
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:843cf19624cf4ae4cb309ffd06a53ba0014f0c107b1265318901f74080377945
+  rule_id: RP1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a085db0b5c2d052090543b46294176c8f2cf0183e98522d0e8ae7dc1b71af152
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ff2629261029f73c16f2aadaf11e4a4514004b4023a2fa940d1080c61119caab
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ed88bd3ffe47cf549df027e139bcb997951f083fc67dea820c9e4018950d0a11
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:19b8156c372c71d77558c24c7bf18084c58943074f84e72f91825c21d3441c6a
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:08e2427435f5b16a74754596ffaf6c89e488bff3ad860a788f1a9bd74007bcbd
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f55e52cb278fd4e6fc106ec50fc56ace4477e0c0d6d3b08ea0805134524403a0
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7ae88045e830a2e4bfa7beb036c45f48a4bc976b31831872bde95bdddb586587
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8d62f63dd909081a283b501db419f740eff33903c02e9f2d7d5c1e352881b38b
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:037035f5c132b2d0350e8b9016df91bc95c75802979eb50a8972338f75a09282
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:064e3513aa8e38a68f90fda9664e0fbb7007cbfb65de088ff2bfebb8d4b68c93
+  rule_id: RP1
+  file: customization.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e503283a406c55e0ddc95b2b4a544e3501e5272c4be9d27da703639c3ac3485c
+  rule_id: RP1
+  file: mcp.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:614ead0c3092656d48d6bb1bc16241a5adff973d120a99337f2d9b2bcaa62456
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1f27443f0c518190afd2313fbce9d931955d1e99ca771dff8404a9ede87dba8c
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b85b7310de8151ca4114734300425f4365192fd4cd06eb9889fd2bbe9c67ff01
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:627296accf5024f8e46aa25b4753bae0a6e35e84c241720c98e18cd40de8f0e2
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c3636e39bba2779e6fa85e072efe873c2906ce9617953f7c248b92d4b16d8449
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8e5180e682aa695d46b3f46a195e4712dd9234e20ea1e0c38c0c8877f1c06315
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:bdc8d34a11fec7ecc0b8c9bc76d115d351b7958f3ab67a257a08b693342ad8e9
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e15648dcda0a5192cee4fc0c6632146a98176eb6cd55673c6fdaeb692c374441
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0c4ab2d7eccde08a6067a90f5992946524a95bc94b2fb9cf4977d3259a99f65b
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7f1bcd64cad8b5be84b5dbc096bd41307655f1f7f03d9b2bcb34004299230ae3
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b95c40b2a1c71791e3978dcf315801a3f97effbccca8bc41541944f941303fd7
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:89003429aa009d95a89c1efb8612bf395c8f51cfdf529cc834f480f1ca060591
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e62fe3a2b8e4593061aaf90d11c117b423cfd803ccc06b1fb111e41711f3d8c3
+  rule_id: RP1
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9ad06f62afdb8d3bebca4c9208056e82f3b72d3b6848aa8f1931cb28da140ea7
+  rule_id: RP1
+  file: rules/base-vs-radix.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e577884045cfa6d9cb395020514a9fee21d6af97c83e31f9133d96f93bbfa887
+  rule_id: RP1
+  file: rules/chat.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1080023993c70643fb1f5553f8ee5315679eabc13618ae0ba76d774851608fe6
+  rule_id: RP1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1f4238915d8d5064b5eb36ea7b0d9df8a340e6a88e0d5047acbec463e552b320
+  rule_id: AS1
+  file: mcp.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1791068a8e59530a569c99812b47e26a3f303679c1ec117ca4fa6b78c47834ca
+  rule_id: E1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c8c8ad63b53d61416a50e30509eead2c2a79c0b3ad6fc75220dee062fb924da1
+  rule_id: EA2
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f2aa06f8bba1c488e014407615299c31779518ed67d92a788abd40d67f8b0e04
+  rule_id: EA2
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:28d5b8c0e54b812a5c62a80f5cd13c9b2171435b9bc1d1bd09b22e54e166d1b7
+  rule_id: EA2
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:724f24a9ff59ac81705d508ef559b70a1086bd43e965f17d959bc2ac740f3b0e
+  rule_id: EA3
+  file: registry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:848175a3cfb68e1f13b657c8979634175149634aa239b612894f2d4e989bb045
+  rule_id: MP3
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f4331f4f24d0cd7a968488e46b91a5004f0e39d0ccf0ffe0e9ba4ba3b85b8f60
+  rule_id: RA1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3a8393a06d6890e0ac7efa72daa460ba955983cd6f29707dd4dc95369e3667de
+  rule_id: RA1
+  file: cli.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:94d30333170da174539a9d81d05e4d1aa9b13a175dd14fe64d0c7da5616ea98d
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a3fb59a91a75f98473e18256a13aeec712316a3186af2c20384e2c456c0efd41
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'

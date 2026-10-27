@@ -1,0 +1,38 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:bf2241113a6a78d77f346718869f3771c62357ec5049df90cb0ca2d8e7d98d86
+  rule_id: LP3
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d8fcc65fa3aa8816ced10e124cdfcbe89dce9f719fbb99638e9162bbe6ca4c06
+  rule_id: RA2
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7120f1b9aa7a0a06a92a3d14d851d99c65e257a1d3f4777468fb15b74f35c112
+  rule_id: RA2
+  file: scripts/start-server.sh
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5f815adf8f625cf23859ecf55735e748b23efee57ca1abe7fa8c31e1be529cf5
+  rule_id: RA2
+  file: scripts/start-server.sh
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:bdfb0ef4f03dfc7e4e3191c5593d2a5dc6f63ef45912e496a2fa08bc2c6f958a
+  rule_id: RA2
+  file: scripts/start-server.sh
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:427affe4dbccf13da551c8997db8777e3b4378dc536d711dd477d789bf312565
+  rule_id: RA2
+  file: scripts/start-server.sh
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0271efd60ad65438d83ccb64ee43bcaac6519dcca434789d51d4f641359d1b53
+  rule_id: RA2
+  file: scripts/start-server.sh
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:aa39719ad3dd4638181d67c08abc8087af746c4eaf7828492e2931d8726a60d8
+  rule_id: TM1
+  file: scripts/stop-server.sh
+  reason: 'Reviewed 2026-10-25: false positives on doc text'

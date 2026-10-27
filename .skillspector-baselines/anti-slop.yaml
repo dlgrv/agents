@@ -1,0 +1,26 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:bc418a14b61e43732f4d1589fadb5b43b026a1362eacc6d0990a070bb3113744
+  rule_id: LP3
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:669b8730fdcfceb17836f0d184cb5b8fc3a784c77e82e38d4b06a2539411e83c
+  rule_id: EA2
+  file: README.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1ac64338793e9eea193c6bcbf3000c1dc57f5b6e420dff1ec3c42b5fd40305ce
+  rule_id: EA2
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:59e147ad18fd5ed72715ba7d5c03a9b4a67c7565a2dba1368407140db2a1e508
+  rule_id: EA2
+  file: scripts/clean_slop.py
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6672fbdb8c0d6d8154539be84c8e0504fb2b5535883f95a04e00b337560f70b9
+  rule_id: MP3
+  file: references/design-patterns.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'

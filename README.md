@@ -51,6 +51,7 @@ machine, and keeps the repo at a few MB.
 ├── cursor/rules/                ← Cursor-specific global rule (see below)
 ├── scripts/
 │   └── update-skill.sh          ← refresh one skill from upstream
+├── .skillspector-baselines/     ← accepted SkillSpector findings per skill (see Security scan)
 ├── README.md                    ← this file
 └── LICENSE                      ← MIT (for my files only; skills keep upstream licenses)
 ```
@@ -96,12 +97,43 @@ git add skills/<name> && git commit -m "update <name> from upstream"
 
 The script shallow-clones the upstream repo and rsyncs the subfolder over the
 inlined copy. Check the diff before committing — upstream may have moved ahead.
+Then re-scan with SkillSpector (below) so only new findings show up.
+
+## Security scan — SkillSpector
+
+Skills are third-party prompts and code loaded into every agent session, so every
+**new or updated** skill is scanned with
+[SkillSpector](https://github.com/nvidia/skillspector) — NVIDIA's open-source
+security scanner for agent skills — before it lands in `skills/`:
+
+```bash
+uv tool install git+https://github.com/NVIDIA/skillspector.git
+
+# new skill — full scan, no baseline
+skillspector scan skills/<name>/
+
+# after an upstream update — scan against the accepted baseline,
+# so only NEW findings (introduced by the update) are reported
+skillspector scan skills/<name>/ --baseline .skillspector-baselines/<name>.yaml
+
+# findings reviewed and accepted? re-record the baseline
+skillspector baseline skills/<name>/ --no-llm -o .skillspector-baselines/<name>.yaml
+```
+
+`.skillspector-baselines/` holds one accepted-findings baseline per skill, so
+routine scans surface only deltas instead of known false positives.
+Full audit 2026-10-25: all 32 skills scanned; every finding was manually
+reviewed and accepted as a false positive on documentation text.
 
 ## Add a new third-party skill
 
 1. Clone the upstream repo (shallow), copy the skill subfolder into `skills/<name>/`.
-2. Write the pinned upstream SHA into `skills/<name>/.upstream-pin`.
-3. Add a row to the attribution table above and commit.
+2. Scan it: `skillspector scan skills/<name>/` — investigate anything above LOW
+   (score > 20) before continuing; a DO NOT INSTALL verdict is a hard stop.
+3. Write the pinned upstream SHA into `skills/<name>/.upstream-pin`.
+4. Record the accepted baseline:
+   `skillspector baseline skills/<name>/ --no-llm -o .skillspector-baselines/<name>.yaml`.
+5. Add a row to the attribution table above and commit.
 
 ## Your own materials
 

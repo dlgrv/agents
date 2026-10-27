@@ -1,0 +1,414 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:201dfe7255cad7a4c3b82b4ac5f747a379ad7626ab638ae8ed0d09211008dbd4
+  rule_id: AE4
+  file: references/design/airbnb.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5207bbfa23482c34be87ff5a0849cc0683ffb0537232adfd0e97447e35d2b1af
+  rule_id: AE4
+  file: references/design/airtable.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e220f0128f5bdbaa459d9784b14c84c659344e8b861c0d93c3042bb5715a2e10
+  rule_id: AE4
+  file: references/design/app.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:180131d2ddec485f00e3e11565273f7d4a893b981d27595c46f025f3d61efb93
+  rule_id: AE4
+  file: references/design/apple.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e114fcc60816989584d474d60b9f98d423d90cfe06982d0ad208cb576b9e76fa
+  rule_id: AE4
+  file: references/design/aside.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:48fa0cb1df0d88f685b6ccff268146b19f25240c70b7db09fe711a54381c0a8a
+  rule_id: AE4
+  file: references/design/binance.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:02aca6e313d70c3ffa07cd74b29ecd2f63d2d228d35a90fa2de1e663ba5b999b
+  rule_id: AE4
+  file: references/design/bmw.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1fe503fea207e6b7a241ec0b3dcf12b3efa03b43755752511b3f0b75bd1ccf0c
+  rule_id: AE4
+  file: references/design/brutalist-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9d2f0f868d778c0056e192d8ad99dc25146877472314b59563f03b1818a30a84
+  rule_id: AE4
+  file: references/design/bugatti.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d8a6db699996b92fde1293cd570b76f91b9ea735cb6bc8d94faa239b853fff48
+  rule_id: AE4
+  file: references/design/cal.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0c0973f54de42a60972dafda614dcaed0890d3091fdb3c198048cb2ab0962041
+  rule_id: AE4
+  file: references/design/claude.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:396bc28bea16988b8a6ff115c0002e51f6c35ecc89b6ee4757cf0ee2d7967f49
+  rule_id: AE4
+  file: references/design/clay.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:73ba971f2660615e13fc7d5700912e4f4101644618d8a8c0f07f506cba308861
+  rule_id: AE4
+  file: references/design/clickhouse.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d90ba221657b2eed622d37bfe1c1ebd0beee811ba1d8d76e3deb0e27fea7ccdb
+  rule_id: AE4
+  file: references/design/cohere.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8a72481bac7007668e106e281942e30c373fe212ac4a57d44e883a2696dc169f
+  rule_id: AE4
+  file: references/design/coinbase.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:68f6807ebeaa1711ea5be1c0d8a3cf8515c189a2344797b64edab41acbd2e330
+  rule_id: AE4
+  file: references/design/composio.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:465fbbafb171e5bef21039eb0448338b03f1b5c1066b030a7fbda6d3e38c9952
+  rule_id: AE4
+  file: references/design/cursor.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:358fa9fd9a20d685d345df2be6c04e9bb470d30f7d37ed12adbd7b1520c19369
+  rule_id: AE4
+  file: references/design/design-system.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d4294d1e96047767b59569b6af9d7a82d2463ee13fbdf3029162d764fbb88b5f
+  rule_id: AE4
+  file: references/design/design-tokens.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c18b0600a226ebd90740da9411c31aa462cb45aa84085bd25fb47afdbddcadf7
+  rule_id: AE4
+  file: references/design/elevenlabs.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:21bc1f481b5de20d00c657df0d6bf67c5f450e622d18e5d3818d7d1903b71606
+  rule_id: AE4
+  file: references/design/expo.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f86435d2e2fa715fd7a3e4cb629b4b87f4cc43823447d8a7493e7ac7dfe58b1f
+  rule_id: AE4
+  file: references/design/ferrari.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3d653b6609e97bd413111f50f25c77bc964092462ea0c17eef9b0fe1e9529739
+  rule_id: AE4
+  file: references/design/figma.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:49cadae64dfb7dcb3c93cf37c07b29187436288a9a2fff8a8ecbeed14a664a33
+  rule_id: AE4
+  file: references/design/framer.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:33d7b09c93e147f721b9f32a3784dbc66d4082904107b0b0fb22b20508c7b261
+  rule_id: AE4
+  file: references/design/gpt-tasteskill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a66f0b85f371a139c2d562d644141c1bfc22966d4ffb0f8f00dc9188c2f69f34
+  rule_id: AE4
+  file: references/design/hashicorp.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a576ed05a2a29353020d5206d5882fd7f931623b363cf637e1895b72133a5475
+  rule_id: AE4
+  file: references/design/ibm.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:dcc0129b4936d81ed55e9c6c4b43e27161369ed4a8474e1f12e894666caa3133
+  rule_id: AE4
+  file: references/design/imagegen-brandkit.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0791f49f77bc86bb9156cfd931781b2c89e95090af976d36c54664c1f7a4c801
+  rule_id: AE4
+  file: references/design/imagegen-frontend-mobile.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c7635ba4cdeb69aa1b0edd308a817e96bcf1e9dc03a847ed799e30fd0f0e5e13
+  rule_id: AE4
+  file: references/design/imagegen-frontend-web.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:40c3e5efcc74bcec8329a684a187cf4d0ae7871f4c32d77c56688bf4e5dcc2ca
+  rule_id: AE4
+  file: references/design/intercom.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0e11c2501f9aa4b83aabdd8860b896222f467fafc952db6d8902831c0381c039
+  rule_id: AE4
+  file: references/design/kraken.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c1afc80923c4640ed5d11879824d3a76a46c111e2d06cc519e944c9548beb0be
+  rule_id: AE4
+  file: references/design/lamborghini.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:d1f12accd2a1e50d5081a5411a83241a3e5b2be6d6655982605e94e45cefc1be
+  rule_id: AE4
+  file: references/design/linear.app.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:221ea7fea3b9b46d651c5e685b01b77823f008007db7b3ff0c012c14903a6cd3
+  rule_id: AE4
+  file: references/design/lovable.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:83863be785ca91388f5ed50767d485b2e196cc358779977ef84033e4bb2f6bc5
+  rule_id: AE4
+  file: references/design/mastercard.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b7cfa2fd82d90be6f3b9f8e72d28302027ef299a7115d0c9b492f65928f0991a
+  rule_id: AE4
+  file: references/design/meta.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1a9bfcb78421c4c52ff79916b48583841231f3c8f38bbdff8594ff24129d6571
+  rule_id: AE4
+  file: references/design/minimalist-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:54e0f6d66247fcce91dd5715505ce91c8c5a970283b6a9970c60ca35a2214cbc
+  rule_id: AE4
+  file: references/design/minimax.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:34b85b4f3acaf9528b2d109ec5e34104c126d95afc9ff9897a9a992a43d9b888
+  rule_id: AE4
+  file: references/design/mintlify.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:2e2ab8db44e83301a5afb13316f8186b8334a5a7fb75f0d9a6b1b268651d9e02
+  rule_id: AE4
+  file: references/design/miro.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:88a6b10ec69efeb1659a93214d3410d43e3209a976ab3c18724c9c8ae08d4d20
+  rule_id: AE4
+  file: references/design/mistral.ai.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ea966c6ac199ecaa54e532136c66e084c05a5b8a1d3431204bf762ad741c2b7a
+  rule_id: AE4
+  file: references/design/mongodb.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:697e4c01b9936e9ba1bba0a47167366bacff1ba059792c659a486ff1a1b43235
+  rule_id: AE4
+  file: references/design/nike.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:86b4212a44e078cbc67a4c0e07bccabd75bc5e5a9bfa95f8a21d1c6fa3fd638b
+  rule_id: AE4
+  file: references/design/notion.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a0ebe22fcb70a5991c0e8233ee924fc712d4842a8848d0b8ab5691df393614df
+  rule_id: AE4
+  file: references/design/nvidia.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:42b7bc7c20e6e8ec9ec378e310d542a6bd0f2302a15119c490ba1a97a523769e
+  rule_id: AE4
+  file: references/design/ollama.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8c5bad2a1742b36ae65e8cb134bf7504101275be9622b1c180764cb5b1d0d50d
+  rule_id: AE4
+  file: references/design/opencode.ai.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:19c52c017e88acc9389a531ae6c062640b52cdc35cef3ac9b23faa22fa76fec9
+  rule_id: AE4
+  file: references/design/output-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5703fbf941ee2f57ec4899775a5bbf288721ada9bce79d088862ab098b0adb5d
+  rule_id: AE4
+  file: references/design/pinterest.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ab11c79c98c061eba02eda3930fd5239b70e52dced5b047458838ad5c6f69c92
+  rule_id: AE4
+  file: references/design/playstation.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7bef5d60bbf139e08ec8fac4b5c91da390d650923953f1eecdb0a492ef32c86e
+  rule_id: AE4
+  file: references/design/posthog.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1cf2fd70750e541280ed09c93d5512ef6c0830e9b00132f605ed0a4403f8182d
+  rule_id: AE4
+  file: references/design/raycast.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9f0be5a1995385b0e320b8ce9978b5b3ba7b3f5a68975dce33e18c26c984aae6
+  rule_id: AE4
+  file: references/design/renault.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3c64e6cb211d0d4bd8527986368c27f380dcc340f143022977e123496c586f0a
+  rule_id: AE4
+  file: references/design/replicate.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8b1c33f5fa50f4dbcc4adfcc03046278c0251a9463aebcaca05fdf43539269c8
+  rule_id: AE4
+  file: references/design/resend.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7c4275abb6f691ad13d9ce447c0c281890f0ff04a3824fb277f6872570f872a0
+  rule_id: AE4
+  file: references/design/revolut.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:31c7f38733a7943d688ca144e24529d9ee543b3e7e1b9013a10df14d52a601d1
+  rule_id: AE4
+  file: references/design/runwayml.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ebbca0a660523ad24a1cd3de8bac91cd26f440f54ecfed2b064cf5e2acbed5d4
+  rule_id: AE4
+  file: references/design/sanity.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:dd9bf4260938f9237aa7185403372ff51a5bbc9b9a59512ce34d6b020c144934
+  rule_id: AE4
+  file: references/design/sentry.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b6efd50bc5b317b87c5a5c646982e72dd29f450a6e7ae1d0317cc91f628fcdcc
+  rule_id: AE4
+  file: references/design/shopify.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:35006349cc24fd51edce623847c2b6f6bb85f991f7d7a5b0aaedf89dcfef1c17
+  rule_id: AE4
+  file: references/design/spacex.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8d2cb6118c9b558fc31c7bc3dd33108131971aa8d46b6c736601201ffd022abd
+  rule_id: AE4
+  file: references/design/spotify.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1d853058f4d3aeae3308002bac8c85307c945fb65810f811881147f01c829fb8
+  rule_id: AE4
+  file: references/design/starbucks.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f8c0ae79e2294269d911c7439c788c9572107f329bc128f7939b03bd3a679ed1
+  rule_id: AE4
+  file: references/design/stitch-design-example.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:187d1f31e403cfa4cf1b58958c0b40d4e508b8be37a5f17ce329e658b0fe6480
+  rule_id: AE4
+  file: references/design/stitch-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ee45170c8931773ed62804a5881e90812b3f4de5593a8d248f4a3bf75c2d847b
+  rule_id: AE4
+  file: references/design/stripe.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1724842affd35d607c146623d14129787c6c16fdc883f9d1738f41a67eb34d38
+  rule_id: AE4
+  file: references/design/supabase.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:789b0d077a852ea57abe1bfabf27fee9c2ba91abcb7f4e5547acc53a604b468b
+  rule_id: AE4
+  file: references/design/superhuman.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:05a6521f2b0ea199f298a183f8ce8b8dff4885c9f724ee920f723fa1eaabdc44
+  rule_id: AE4
+  file: references/design/tesla.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:7ea5b9f158c776b2cd88486b390f0b327868f848185383c51f07ff44909e76df
+  rule_id: AE4
+  file: references/design/theverge.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ee4dc1cc85db909548118aebda0fe861611ec451fdacd73cde71ee407d78d59d
+  rule_id: AE4
+  file: references/design/together.ai.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3e1d8408655c6a36e97cc8aebc346bc2b573ed899cfbc28d839d77ada6e2b2a2
+  rule_id: AE4
+  file: references/design/uber.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:40ae67027f8daac329edcef7271787c6bbf76674d7d48b7478a8e50039e441fb
+  rule_id: AE4
+  file: references/design/vercel.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3a68df1d7cf772e1b5648026bf949dce38da54df5c86dc462ad6b9bfd0a72f67
+  rule_id: AE4
+  file: references/design/vodafone.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:dd5345a7ab87a1a12b4f812b962e214a55ec6ef3a387006c3569953e9ece9737
+  rule_id: AE4
+  file: references/design/voltagent.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:541a6410a24e0ac731919060f922616880c51eec41569c4615cf983870ebcfff
+  rule_id: AE4
+  file: references/design/warp.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3371ea6ccae6a7ea93bbae7cab1bc085a1d3481d9e7b2c4f5e0b7bd822d32416
+  rule_id: AE4
+  file: references/design/webflow.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c26184f2e76fc86835ee7c316cec15c979b2259c16b0fbd3a3517c0b390a0b52
+  rule_id: AE4
+  file: references/design/wired.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:a67bcf2a04db8bfe2911ddc0baa0590aefa9cb2c958869e8c4d1629a0196eac7
+  rule_id: AE4
+  file: references/design/wise.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:dcb5121c7c7211a8ed8acfd14958fe04f5f49f5e954bd99c081ed1f7fa76878c
+  rule_id: AE4
+  file: references/design/x.ai.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:791d3acdffeb92f4b5e5f156f8e96233aa164d60b492af8d2fa868745b45b07f
+  rule_id: AE4
+  file: references/design/zapier.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:76ec49343f14d4a2f79f4cf01b02c94c02585bcd52ad05c63da36c3902a421b7
+  rule_id: RP1
+  file: references/design/README.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e0855c3cceb20d4f5c9742be0e8f07d9196dfbb3a766626e17b8170b9e942b27
+  rule_id: RP1
+  file: references/design/README.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5fa252961ecbe434180ca1fb8284d4fcbaed502e5a480f6b2c41f90c5078dd4a
+  rule_id: RP1
+  file: references/design/README.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e755f8586b162680248e586db00920e5baaec51b7ebf3d064786d2745101b6e6
+  rule_id: RP1
+  file: references/design/react-dev-tooling-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8b7b2a7f5f675d0a70b42954a8435484a201f31b9bd8e45408f42898e846e1ff
+  rule_id: RP1
+  file: references/design/react-dev-tooling-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:e004fe472073c46cf43524cec994cb6f0451258a0d5608dde90fa5510b7b3b0a
+  rule_id: RP1
+  file: references/design/react-dev-tooling-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1fdf9488bf065de72aa2e7fb455175ee1c20fae1239ff95a9e0dd7ff35045b4d
+  rule_id: RP1
+  file: references/design/react-dev-tooling-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b98bc06927eaf61bd995346909bc5b8e617b81a453378fca94621efaa593fac4
+  rule_id: RP1
+  file: references/design/react-dev-tooling-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8419dfd19b20959b54ce6351f8f34e816f0bd47c07ec5667797bd28c7610d7e9
+  rule_id: RP1
+  file: references/design/react-dev-tooling-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:567e7de301b31c22502d1f16a43483a1f0a5ebdf6cfb14f4c07a1896c19cd24d
+  rule_id: RP1
+  file: references/design/react-dev-tooling-skill.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:4ccbed5c31eaada0a122a42c6cafbac77444604762e67d28b9cf20907efd9ca9
+  rule_id: RP1
+  file: references/perfection/README.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0dd18fdaf316c5b7b5d5fff227acf90803a106466283504d3c79a7d3b0073f41
+  rule_id: RP1
+  file: references/perfection/react-perf-tooling.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:be529f34f16b721f66392116d459b6fff0ed0c0661891a19a920bad86a3605af
+  rule_id: RP1
+  file: references/perfection/react-perf-tooling.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:07d007536dc6933b39e1769f2b49cf22e02bf43adea0e1d3dfd2bfdb54def65a
+  rule_id: RP1
+  file: references/perfection/react-perf-tooling.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:8f1caeb4798d462b0322bb1c29119c2fad5586942c79170f127116020788e87f
+  rule_id: RP1
+  file: references/perfection/react-perf-tooling.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:972a91893b9b1d70a1ab53415d7049613e92b04206f181be01831c6db84bd2d3
+  rule_id: AS1
+  file: references/designpowers/EVIDENCE.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:bb4838d84295f4c3a15b8b690063675977b25427adc93607313fdb27a04d555b
+  rule_id: E1
+  file: references/design/lazyweb.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:35a0dd3977cc9f4b2b9c6b86089043064f45bab2b27b7e76a9a0f88f3bfd2af5
+  rule_id: E1
+  file: references/design/lazyweb.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b70ac82a9e3fc2aedfcd7800c222981752522f7b9506fb86ef0c37672e171ed0
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0f333faafda76d39eeadfa8025cd8765f6ec29b9cd086981cf35c51885fce38b
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'

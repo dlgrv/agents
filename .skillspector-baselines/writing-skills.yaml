@@ -1,0 +1,90 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:1e772df4f332d9af77571fdbc1a8b830b4ed40c8427c14c115846e13783ef8d0
+  rule_id: AS3
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c7dd42164d1c9ff1ab77ba4d2e32b70198ce42c85b0ecb9ae40f71d6a55d9b83
+  rule_id: AS1
+  file: examples/CLAUDE_MD_TESTING.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c030dab5c35ef49bcdcd37ae7d6cafd2ec0e37320dd249bd1e9555f1e5e36e77
+  rule_id: AS1
+  file: examples/CLAUDE_MD_TESTING.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:5875b0b5e682bdfae9fcb7635a8c8f9c2b40a0ba7af2eebc850ce74fd7b6470b
+  rule_id: AS1
+  file: examples/CLAUDE_MD_TESTING.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:ce076cec48bf990688aedfd5c474844305ed58562b4a2c9ecea600a510e066ef
+  rule_id: AS3
+  file: examples/CLAUDE_MD_TESTING.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:053dd5ca348ca89483ae42660eb0fe08c8acae38aa16d1437a658b9cb19606a3
+  rule_id: AS3
+  file: examples/CLAUDE_MD_TESTING.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:6880c74a310c3464978cf65e5d6c5f201f8ceaecf7d33d77bf06c342d9efa260
+  rule_id: AS3
+  file: examples/CLAUDE_MD_TESTING.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:779bf2dcc7a094d87771f043680dc8a32e70b43aa7649ca9a4fe4d4a38746fe9
+  rule_id: AS3
+  file: examples/CLAUDE_MD_TESTING.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:1812be553d5ac4b1b357c71bf545e3dab55aa978f71cf28764a0868e810a1531
+  rule_id: RA1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:c0009ba66dcbaab85f9b797416e38a7e90012a50a40a29f272eeaa25aa2ecf01
+  rule_id: RA1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:add9adb3c465661015f6325453df5ee54803b538dafa4aa963ad7059916d2580
+  rule_id: RA1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:f346e8ff41c5ae73e2947ea4efd8e21de98eb265d6ee0261359da89230342bd7
+  rule_id: RA1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:0db27fea723f237c4b09f13529f3c4049620e9857f1cde6fdf926f968dca6c18
+  rule_id: RA1
+  file: anthropic-best-practices.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:632faba295aee74dae73f561c937c16768577b05282161b3d5ce169c5bd3cb5e
+  rule_id: RA1
+  file: testing-skills-with-subagents.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:52b62f1ab7929f3d1724706309513c23c7b656de1ac787bcc730a0bfd346938f
+  rule_id: RA1
+  file: testing-skills-with-subagents.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:3d07c3371e60f970bd43be75d9745e026772a76cb09b8891ea45321f04747b5c
+  rule_id: RA1
+  file: testing-skills-with-subagents.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:695e06fb0548160c355fc04ebfd654b073feac7d3e98d480c5becfe544df1912
+  rule_id: RA1
+  file: testing-skills-with-subagents.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b16d65bc373e304a53b65fc6558a36eb50cf5ed3f56ba01c2751c3380dae9d2f
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:b2d2ffcdfaba63c91aeff191272e14324e809954eec15000aebaeb7a0cbb2705
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:2d57d97b918c52932deb1ecf02a0282b0dcf65181e198b3f1e4d7d353da823a3
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
+- hash: sha256:9d4908aec17c9a0b30773306d59201f91621dd2d3b0d6ed8b46da5448d151a8f
+  rule_id: AE1
+  file: SKILL.md
+  reason: 'Reviewed 2026-10-25: false positives on doc text'
