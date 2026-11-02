@@ -27,6 +27,10 @@ Implemented 2026-10-22, restore-tested 2026-10-23. Human-readable plan:
 
 - NAS: `/srv/nas/backups/{restic/<5 hosts>,etc/nas-backup/nas-backup.sh,logs/,status.json,RESTORE.md}`;
   secrets `/etc/nas-backup/{restic.env,id_ed25519,known_hosts}` 700/600 root (NOT on RAID).
+- SIBLING contour since 2026-11-02: PrimeCloud (Nextcloud AIO) backs up via **borg** to
+  `/srv/nas/backups/borg/borg` (daily 02:00 UTC, AIO-managed) — separate system, governed by
+  the `nas-ops` skill and `docs/backup-nas-plan.md` §5.5; `status.json` covers the FLEET only.
+  Any offsite sync (stage 5) must carry both `restic/` and `borg/`.
 - Servers: `/usr/local/bin/nas-staging.sh` + `/etc/cron.d/nas-staging` (644 root!) +
   `/etc/ssh/sshd_config.d/50-backup-restic.conf` + `/var/backups/nas-staging/`.
 - Staging crons: A 01:30, C 02:00, D/E/F 02:30 (server-local). NAS pull 02:40.
